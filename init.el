@@ -14,7 +14,8 @@
                       starter-kit-bindings
                       clojure-mode
                       clojure-test-mode
-                      rainbow-delimiters)
+                      rainbow-delimiters
+                      zenburn-theme)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -97,5 +98,12 @@
     (set-default-font "-outline-Consolas-normal-r-normal-normal-12-97-96-96-c-*-iso8859-1")))
 
 ;;=============================================================================
+;; Theme
+;;=============================================================================
+(load-theme 'zenburn)
+(enable-theme 'zenburn)
+
+;;=============================================================================
 ;; Todo: powershell, yaml, js, python, zenburn
 ;;=============================================================================
+
