@@ -15,7 +15,8 @@
                       clojure-mode
                       clojure-test-mode
                       rainbow-delimiters
-                      zenburn-theme)
+                      zenburn-theme
+                      python-mode)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -74,6 +75,11 @@
 (display-time)
 
 ;;=============================================================================
+;; Python
+;;=============================================================================
+(require 'python-mode)
+
+;;=============================================================================
 ;; My bindings
 ;;=============================================================================
 (global-set-key "\C-x\C-r" 'revert-buffer)
@@ -85,8 +91,7 @@
 (global-set-key [(control prior)] 'scroll-other-window-down)
 (global-set-key [(f8)] 'toggle-truncate-lines)
 ;; put all kinds of shells on f9...
-;(require 'python-mode)
-;(global-set-key [(f9)] 'py-shell)
+(global-set-key [(f9)] 'py-shell)
 (global-set-key [(shift f9)] 'shell) 
 (global-set-key [(ctrl f9)] 'eshell)
 
@@ -104,6 +109,6 @@
 (enable-theme 'zenburn)
 
 ;;=============================================================================
-;; Todo: powershell, yaml, js, python, zenburn
+;; Todo: powershell, yaml, js, python
 ;;=============================================================================
 
