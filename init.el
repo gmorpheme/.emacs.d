@@ -63,10 +63,12 @@
 (setq ido-auto-merge-work-directories-length -1)
 
 ;;==============================================================================
-;; Horizontal line hightlighting in dired = not programming modes.
+;; Horizontal line hightlighting in dired, not programming modes.
 ;;==============================================================================
 (add-hook 'dired-mode-hook 'esk-turn-on-hl-line-mode)
 (remove-hook 'prog-mode-hook 'esk-turn-on-hl-line-mode)
+
+(add-hook 'prog-mode-hook (lambda () (setq truncate-lines t)))
 
 ;;=============================================================================
 ;; windows reg files are UTF-16 little endian - please read them properly.
@@ -112,4 +114,4 @@
 (load-theme 'zenburn)
 (enable-theme 'zenburn)
 
-;; todo: yaml, n3, psvn?, rst?
+;; todo (if / when needed): yaml, n3, psvn?, rst?
