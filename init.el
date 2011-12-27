@@ -16,7 +16,8 @@
                       clojure-test-mode
                       rainbow-delimiters
                       zenburn-theme
-                      python-mode)
+                      python-mode
+                      powershell)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -109,6 +110,6 @@
 (enable-theme 'zenburn)
 
 ;;=============================================================================
-;; Todo: powershell, yaml, js, python
+;; Todo: yaml, js
 ;;=============================================================================
 
