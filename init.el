@@ -12,12 +12,15 @@
 (defvar my-packages '(starter-kit 
                       starter-kit-lisp
                       starter-kit-bindings
+                      starter-kit-ruby
+                      starter-kit-js
                       clojure-mode
                       clojure-test-mode
                       rainbow-delimiters
-                      zenburn-theme
                       python-mode
-                      powershell)
+                      groovy-mode
+                      powershell
+                      zenburn-theme)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -84,7 +87,6 @@
 ;; My bindings
 ;;=============================================================================
 (global-set-key "\C-x\C-r" 'revert-buffer)
-(global-set-key [?\C->] 'tags-apropos)
 (global-set-key "\C-o" 'replace-string)
 (global-set-key "\C-x\C-n" 'other-window)
 (global-set-key "\C-x\C-p" 'other-window-backward)
@@ -101,7 +103,8 @@
 ;;=============================================================================
 (if (eq system-type 'windows-nt)
   (progn
-    (set-default-font "-outline-Consolas-normal-r-normal-normal-12-97-96-96-c-*-iso8859-1")))
+    (set-default-font "-outline-Consolas-normal-r-normal-normal-12-97-96-96-c-*-iso8859-1")
+    (remove-hook 'text-mode-hook 'turn-on-flyspell)))
 
 ;;=============================================================================
 ;; Theme
@@ -109,7 +112,4 @@
 (load-theme 'zenburn)
 (enable-theme 'zenburn)
 
-;;=============================================================================
-;; Todo: yaml, js
-;;=============================================================================
-
+;; todo: yaml, n3, psvn?, rst?
