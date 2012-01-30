@@ -27,6 +27,16 @@
   (when (not (package-installed-p p))
     (package-install p)))
 
+
+;;=============================================================================
+;; Ensure that lisp-interaction can still evaluate on ctrl-j...
+;;=============================================================================
+(defadvice paredit-newline (around eval-print-last-sexp activate)
+  (if (eq major-mode 'lisp-interaction-mode)
+      (eval-print-last-sexp)
+    (paredit-newline)))
+
+
 ;;=============================================================================
 ;; Keep customize-based settings separate
 ;;=============================================================================
@@ -115,3 +125,5 @@
 (enable-theme 'zenburn)
 
 ;; todo (if / when needed): yaml, n3, psvn?, rst?
+
+
