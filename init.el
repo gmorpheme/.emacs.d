@@ -64,7 +64,7 @@
 (setq inhibit-splash-screen t)
 (auto-compression-mode 1)
 (setq visible-bell t)
-(setq default-major-mode 'text-mode)
+(setq default-major-mode 'org-mode)
 (delete-selection-mode)
 
 ;==============================================================================
