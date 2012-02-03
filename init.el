@@ -65,7 +65,7 @@
 (auto-compression-mode 1)
 (setq visible-bell t)
 (setq default-major-mode 'org-mode)
-(delete-selection-mode)
+(delete-selection-mode 1)
 
 ;==============================================================================
 ;; Ido settings
