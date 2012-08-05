@@ -20,7 +20,8 @@
                       python-mode
                       groovy-mode
                       powershell
-                      zenburn-theme)
+                      zenburn-theme
+                      nrepl)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
