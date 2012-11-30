@@ -21,7 +21,8 @@
                       groovy-mode
                       powershell
                       zenburn-theme
-                      nrepl)
+                      nrepl
+                      nrepl-ritz)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
