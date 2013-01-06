@@ -16,12 +16,14 @@
                       starter-kit-js
                       clojure-mode
                       clojure-test-mode
+                      midje-mode
                       rainbow-delimiters
                       python-mode
                       groovy-mode
                       powershell
                       zenburn-theme
-                      nrepl)
+                      nrepl
+                      nrepl-ritz)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -99,10 +101,7 @@
 ;;=============================================================================
 ;; My bindings
 ;;=============================================================================
-(global-set-key "\C-x\C-r" 'revert-buffer)
 (global-set-key "\C-o" 'replace-string)
-(global-set-key "\C-x\C-n" 'other-window)
-(global-set-key "\C-x\C-p" 'other-window-backward)
 (global-set-key [(control next)] 'scroll-other-window)
 (global-set-key [(control prior)] 'scroll-other-window-down)
 (global-set-key [(f8)] 'toggle-truncate-lines)
