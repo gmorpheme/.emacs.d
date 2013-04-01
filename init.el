@@ -116,6 +116,8 @@
 (if (eq system-type 'windows-nt)
   (progn
     (set-default-font "-outline-Consolas-normal-r-normal-normal-12-97-96-96-c-*-iso8859-1")
+    ; stop hangs?
+    (setq w32-get-true-file-attributes nil)
     (remove-hook 'text-mode-hook 'turn-on-flyspell)))
 
 ;;=============================================================================
