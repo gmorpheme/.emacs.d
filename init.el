@@ -15,14 +15,15 @@
                       starter-kit-ruby
                       starter-kit-js
                       clojure-mode
-                      clojure-test-mode
-                      midje-mode
+                      ;clojure-test-mode
+                      ;midje-mode
                       rainbow-delimiters
                       python-mode
                       groovy-mode
                       powershell
                       zenburn-theme
                       nrepl
+                      ac-nrepl
                       nrepl-ritz)
   "A list of packages to ensure are installed at launch.")
 
@@ -45,6 +46,20 @@
 ;;=============================================================================
 (setq custom-file "~/.emacs.d/.emacs-custom")
 (load custom-file 'no-error)
+
+;;=============================================================================
+;; Org Mode
+;;=============================================================================
+
+(setq org-feed-alist
+      '(("RTM"
+         "http://www.rememberthemilk.com/atom/gmorpheme/25471103/?tok=eJwFwYENQjEIBcCJmvBaKO04UEBN-NGo*8c7rUnHvOIAAUI3zvAB1k7cZS4uzygsPim7k-lJoiplYsGgdrten-c9r2zPx-fXurACNFrqIUyR6bBTGjQs54jp6dpzbOe0CAKOl4nSlhELDNnman39ARvxK1Y"
+         "~/dropbox/notes/notes.org" "Feed: RTM")
+        ("JIRA"
+         "http://jira.iweb.chp.co.uk/sr/jira.issueviews:searchrequest-rss/12990/SearchRequest-12990.xml?tempMax=1000"
+         "~/dropbox/notes/notes.org" "Feed: JIRA (My Issues)")))
+
+
 
 ;;=============================================================================
 ;; Enable disabled features
@@ -126,6 +141,14 @@
 (load-theme 'zenburn)
 (enable-theme 'zenburn)
 
+;;=============================================================================
+;; Global org-mode bindings
+;;=============================================================================
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
+
 ;; todo (if / when needed): yaml, n3, psvn?, rst?
 
 
@@ -153,3 +176,26 @@
               (select 1)
               (truncate 1)
               (update 2))))
+
+(require 'nrepl)
+;(setq nrepl-hide-special-buffers t)
+(setq nrepl-popup-stacktraces-in-repl t)
+
+(require 'nrepl-ritz) ;; after (require 'nrepl)
+ 
+;; Ritz middleware
+(define-key nrepl-interaction-mode-map (kbd "C-c C-j") 'nrepl-javadoc)
+(define-key nrepl-mode-map (kbd "C-c C-j") 'nrepl-javadoc)
+(define-key nrepl-interaction-mode-map (kbd "C-c C-a") 'nrepl-apropos)
+(define-key nrepl-mode-map (kbd "C-c C-a") 'nrepl-apropos)
+
+;; (require 'ac-nrepl)
+;; (add-hook 'nrepl-mode-hook 'ac-nrepl-setup)
+;; (add-hook 'nrepl-interaction-mode-hook 'ac-nrepl-setup)
+;; (eval-after-load "auto-complete"
+;;   '(add-to-list 'ac-modes 'nrepl-mode))
+
+(add-to-list 'load-path "/local/dev/midje-mode")
+(require 'midje-mode)
+(require 'clojure-jump-to-file)
+
