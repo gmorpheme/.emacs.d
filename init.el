@@ -151,7 +151,9 @@
 
 ;; todo (if / when needed): yaml, n3, psvn?, rst?
 
-
+;;=============================================================================
+;; Clojure indentation
+;;=============================================================================
 (add-hook 'clojure-mode-hook
           (lambda ()
             (define-clojure-indent
@@ -163,27 +165,14 @@
               (PUT 2)
               (domonad 1)
               (context 2)
-              (api-test 1)
-              (web-test 1)
-              (database-test 1)
               (defroutes 'defun)
-              ;; SQLingvo
-              (copy 2)
-              (create-table 1)
-              (delete 1)
-              (drop-table 1)
-              (insert 2)
-              (select 1)
-              (truncate 1)
-              (update 2))))
 
 (require 'nrepl)
-;(setq nrepl-hide-special-buffers t)
+(setq nrepl-hide-special-buffers t)
 (setq nrepl-popup-stacktraces-in-repl t)
-
-(require 'nrepl-ritz) ;; after (require 'nrepl)
  
 ;; Ritz middleware
+(require 'nrepl-ritz)
 (define-key nrepl-interaction-mode-map (kbd "C-c C-j") 'nrepl-javadoc)
 (define-key nrepl-mode-map (kbd "C-c C-j") 'nrepl-javadoc)
 (define-key nrepl-interaction-mode-map (kbd "C-c C-a") 'nrepl-apropos)
