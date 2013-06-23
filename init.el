@@ -3,6 +3,10 @@
 ;;=============================================================================
 (require 'package)
 (add-to-list 'package-archives
+             '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(add-to-list 'package-archives
+             '("org" . "http://orgmode.org/elpa/") t)
+(add-to-list 'package-archives
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 (package-initialize)
 
@@ -15,12 +19,14 @@
                       starter-kit-ruby
                       starter-kit-js
                       clojure-mode
+                      clojure-snippets
                       ;clojure-test-mode ;; use midje mode instead
                       ;midje-mode ;; use local dev version
                       rainbow-delimiters
                       python-mode
                       groovy-mode
                       powershell
+                      yasnippet
                       zenburn-theme
                       nrepl
                       ac-nrepl
@@ -31,6 +37,20 @@
   (when (not (package-installed-p p))
     (package-install p)))
 
+(defun package-list-unaccounted-packages ()
+  "Like `package-list-packages', but shows only the packages that
+  are installed and are not in `my-packages'.  Useful for
+  cleaning out unwanted packages."
+  (interactive)
+  (package-show-package-list
+   (remove-if-not (lambda (x) (and (not (memq x my-packages))
+                              (not (package-built-in-p x))
+                              (package-installed-p x)))
+                  (mapcar 'car package-archive-contents))))
+
+
+(yas-global-mode 1)
+(add-to-list 'hippie-expand-try-functions-list 'yas/hippie-try-expand)
 
 ;;=============================================================================
 ;; Ensure that lisp-interaction can still evaluate on ctrl-j...
@@ -59,7 +79,10 @@
          "http://jira.iweb.chp.co.uk/sr/jira.issueviews:searchrequest-rss/12990/SearchRequest-12990.xml?tempMax=1000"
          "~/dropbox/notes/notes.org" "Feed: JIRA (My Issues)")))
 
-
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
 
 ;;=============================================================================
 ;; Enable disabled features
@@ -141,14 +164,6 @@
 (load-theme 'zenburn)
 (enable-theme 'zenburn)
 
-;;=============================================================================
-;; Global org-mode bindings
-;;=============================================================================
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-cc" 'org-capture)
-(global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
-
 ;; todo (if / when needed): yaml, n3, psvn?, rst?
 
 ;;=============================================================================
@@ -165,7 +180,7 @@
               (PUT 2)
               (domonad 1)
               (context 2)
-              (defroutes 'defun)
+              (defroutes 'defun))))
 
 (require 'nrepl)
 (setq nrepl-hide-special-buffers t)
