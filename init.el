@@ -15,8 +15,8 @@
                       starter-kit-ruby
                       starter-kit-js
                       clojure-mode
-                      ;clojure-test-mode
-                      ;midje-mode
+                      ;clojure-test-mode ;; use midje mode instead
+                      ;midje-mode ;; use local dev version
                       rainbow-delimiters
                       python-mode
                       groovy-mode
