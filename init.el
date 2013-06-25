@@ -1,4 +1,4 @@
-;;=============================================================================
+;=============================================================================
 ;; package.el / starter kit based configuration
 ;;=============================================================================
 (require 'package)
@@ -78,6 +78,14 @@
         ("JIRA"
          "http://jira.iweb.chp.co.uk/sr/jira.issueviews:searchrequest-rss/12990/SearchRequest-12990.xml?tempMax=1000"
          "~/dropbox/notes/notes.org" "Feed: JIRA (My Issues)")))
+
+;; don't put full description in:
+(setq org-feed-default-template
+      "
+* %h
+  %U
+  %a
+")
 
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-cc" 'org-capture)
@@ -181,6 +189,7 @@
               (domonad 1)
               (context 2)
               (defroutes 'defun))))
+(add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
 
 (require 'nrepl)
 (setq nrepl-hide-special-buffers t)
