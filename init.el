@@ -71,6 +71,9 @@
 ;; Org Mode
 ;;=============================================================================
 
+(setq org-directory "~/dropbox/notes")
+(setq org-default-notes-file (concat org-directory "/notes.org"))
+
 (setq org-feed-alist
       '(("RTM"
          "http://www.rememberthemilk.com/atom/gmorpheme/25471103/?tok=eJwFwYENQjEIBcCJmvBaKO04UEBN-NGo*8c7rUnHvOIAAUI3zvAB1k7cZS4uzygsPim7k-lJoiplYsGgdrten-c9r2zPx-fXurACNFrqIUyR6bBTGjQs54jp6dpzbOe0CAKOl4nSlhELDNnman39ARvxK1Y"
