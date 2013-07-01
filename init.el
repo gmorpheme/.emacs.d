@@ -77,7 +77,10 @@
 (setq org-feed-alist
       '(("RTM"
          "http://www.rememberthemilk.com/atom/gmorpheme/25471103/?tok=eJwFwYENQjEIBcCJmvBaKO04UEBN-NGo*8c7rUnHvOIAAUI3zvAB1k7cZS4uzygsPim7k-lJoiplYsGgdrten-c9r2zPx-fXurACNFrqIUyR6bBTGjQs54jp6dpzbOe0CAKOl4nSlhELDNnman39ARvxK1Y"
-         "~/dropbox/notes/notes.org" "Feed: RTM")
+         "~/dropbox/notes/notes.org"
+         "Feed: RTM"
+         :parse-feed org-feed-parse-atom-feed
+         :parse-entry org-feed-parse-atom-entry)
         ("JIRA"
          "http://jira.iweb.chp.co.uk/sr/jira.issueviews:searchrequest-rss/12990/SearchRequest-12990.xml?tempMax=1000"
          "~/dropbox/notes/notes.org" "Feed: JIRA (My Issues)")))
