@@ -73,25 +73,54 @@
 
 (setq org-directory "~/dropbox/notes")
 (setq org-default-notes-file (concat org-directory "/notes.org"))
+(setq org-mobile-directory "~/dropbox/MobileOrg")
+(setq org-mobile-inbox-for-pull "~/dropbox/from-mobile.org")
+(setq org-use-speed-commands t)
+
+(setq org-clock-into-drawer t)
+;; Remove zero second clocks
+(setq org-clock-out-remove-zero-time-clocks t)
+;; Include current clocking task in clock reports
+(setq org-clock-report-include-clocking-task t)
+;; Do not prompt to resume an active clock
+(setq org-clock-persist-query-resume nil)
+
+(setq org-drawers '("PROPERTIES" "LOGBOOK" "CLOCK" "RESULTS" "FEEDSTATUS-RTM" "FEEDSTATUS-JIRA"))
 
 (setq org-feed-alist
       '(("RTM"
          "http://www.rememberthemilk.com/atom/gmorpheme/25471103/?tok=eJwFwYENQjEIBcCJmvBaKO04UEBN-NGo*8c7rUnHvOIAAUI3zvAB1k7cZS4uzygsPim7k-lJoiplYsGgdrten-c9r2zPx-fXurACNFrqIUyR6bBTGjQs54jp6dpzbOe0CAKOl4nSlhELDNnman39ARvxK1Y"
          "~/dropbox/notes/notes.org"
-         "Feed: RTM"
+         "Tasks"
+         :drawer "FEEDSTATUS-RTM"
          :parse-feed org-feed-parse-atom-feed
-         :parse-entry org-feed-parse-atom-entry)
-        ("JIRA"
-         "http://jira.iweb.chp.co.uk/sr/jira.issueviews:searchrequest-rss/12990/SearchRequest-12990.xml?tempMax=1000"
-         "~/dropbox/notes/notes.org" "Feed: JIRA (My Issues)")))
-
-;; don't put full description in:
-(setq org-feed-default-template
-      "
-* %h
+         :parse-entry org-feed-parse-atom-entry
+         :template "
+* TODO %h :RTM:
   %U
   %a
 ")
+        ("JIRA"
+         "http://jira.iweb.chp.co.uk/sr/jira.issueviews:searchrequest-rss/12990/SearchRequest-12990.xml?tempMax=1000"
+         "~/dropbox/notes/notes.org"
+         "Tasks"
+         :drawer "FEEDSTATUS-JIRA"
+         :template "
+* TODO %h :JIRA:
+  %U
+  %a
+")))
+
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline org-default-notes-file "Inbox")
+         "* TODO %?\n  %i\n  %a")
+        ("d" "Distraction / called away" entry (file+headline org-default-notes-file "Inbox")
+         "* TODO %?\n %i\n %a\n" :clock-resume t :clock-in t)))
+
+(setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
+
+; Allow refile to create parent tasks with confirmation
+(setq org-refile-allow-creating-parent-nodes (quote confirm))
 
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-cc" 'org-capture)
@@ -125,6 +154,8 @@
 ;==============================================================================
 ;; Ido settings
 ;==============================================================================
+(setq ido-default-file-method 'selected-window)
+(setq ido-default-buffer-method 'selected-window)
 (setq ido-auto-merge-work-directories-length -1)
 
 ;;==============================================================================
