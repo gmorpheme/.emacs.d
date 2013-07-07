@@ -80,6 +80,7 @@
 (defvar gh/org-mobile-sync-timer nil)
 
 (defun gh/org-mobile-sync ()
+  (message "Syncing org-mobile...")
   (org-mobile-pull)
   (org-mobile-push))
 
