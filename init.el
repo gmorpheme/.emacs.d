@@ -75,6 +75,27 @@
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 (setq org-mobile-directory "~/dropbox/MobileOrg")
 (setq org-mobile-inbox-for-pull "~/dropbox/from-mobile.org")
+
+
+(defvar gh/org-mobile-sync-timer nil)
+
+(defun gh/org-mobile-sync ()
+  (org-mobile-pull)
+  (org-mobile-push))
+
+(defun gh/org-mobile-start-sync ()
+  "Start automated `org-mobile-push'"
+  (interactive)
+  (setq gh/org-mobile-sync-timer
+        (run-with-idle-timer (* 60 20) t 'gh/org-mobile-sync)))
+
+(defun gh/org-mobile-stop-sync ()
+  "Stop automated `org-mobile-push'"
+  (interactive)
+  (cancel-timer gh/org-mobile-sync-timer))
+
+(gh/org-mobile-start-sync)
+
 (setq org-use-speed-commands t)
 
 (setq org-clock-into-drawer t)
