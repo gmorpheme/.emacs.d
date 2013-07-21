@@ -30,7 +30,8 @@
                       zenburn-theme
                       nrepl
                       ac-nrepl
-                      nrepl-ritz)
+                      nrepl-ritz
+                      emacs-eclim)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -133,11 +134,13 @@
   %a
 ")))
 
+(setq org-agenda-window-setup 'current-window)
+
 (setq org-capture-templates
       '(("t" "Todo" entry (file+headline org-default-notes-file "Inbox")
          "* TODO %?\n  %i\n  %a")
         ("d" "Distraction / called away" entry (file+headline org-default-notes-file "Inbox")
-         "* TODO %?\n %i\n %a\n" :clock-resume t :clock-in t)))
+         "* %?\n %i\n %a\n" :clock-resume t :clock-in t)))
 
 (setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
 
@@ -271,3 +274,11 @@
 (require 'midje-mode)
 (require 'clojure-jump-to-file)
 
+;;=============================================================================
+;; Eclipse interaction
+;;=============================================================================
+(require 'eclim)
+(global-eclim-mode)
+(custom-set-variables
+ '(eclim-eclipse-dirs '("~/eclipses/Eclipse4.3"))
+ '(eclim-executable (expand-file-name "~/eclipses/Eclipse4.3/eclim.bat")))
