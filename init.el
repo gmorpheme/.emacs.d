@@ -137,7 +137,9 @@
 (setq org-agenda-window-setup 'current-window)
 
 (setq org-capture-templates
-      '(("t" "Todo" entry (file+headline org-default-notes-file "Inbox")
+      '(("s" "Start of day" entry (file org-default-notes-file)
+         "* Day %u :ORGANISE: \n %[template-day.org]" :clock-in t)
+        ("t" "Todo" entry (file+headline org-default-notes-file "Inbox")
          "* TODO %?\n  %i\n  %a")
         ("d" "Distraction / called away" entry (file+headline org-default-notes-file "Inbox")
          "* %?\n %i\n %a\n" :clock-resume t :clock-in t)))
