@@ -28,9 +28,8 @@
                       powershell
                       yasnippet
                       zenburn-theme
-                      nrepl
-                      ac-nrepl
-                      nrepl-ritz
+                      cider
+                      midje-mode
                       emacs-eclim)
   "A list of packages to ensure are installed at launch.")
 
@@ -76,7 +75,8 @@
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 (setq org-mobile-directory "~/dropbox/MobileOrg")
 (setq org-mobile-inbox-for-pull "~/dropbox/from-mobile.org")
-
+(setq org-ditaa-jar-path "~/.emacs.d/deps/ditaa0_9.jar")
+(setq org-plantuml-jar-path "~/.emacs.d/deps/plantuml.jar")
 
 (defvar gh/org-mobile-sync-timer nil)
 
@@ -159,6 +159,15 @@
 ;; Distraction on f12
 (define-key global-map [f12]
   (lambda () (interactive) (org-capture nil "d")))
+
+(org-babel-do-load-languages
+ (quote org-babel-load-languages)
+ (quote ((emacs-lisp . t)
+         (dot . t)
+         (ditaa . t)
+         (plantuml . t))))
+(add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
+(setq org-confirm-babel-evaluate nil)
 
 ;;=============================================================================
 ;; Enable disabled features
@@ -261,24 +270,6 @@
               (defroutes 'defun))))
 (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
 
-(require 'nrepl)
-(setq nrepl-hide-special-buffers t)
-(setq nrepl-popup-stacktraces-in-repl t)
- 
-;; Ritz middleware
-(require 'nrepl-ritz)
-(define-key nrepl-interaction-mode-map (kbd "C-c C-j") 'nrepl-javadoc)
-(define-key nrepl-mode-map (kbd "C-c C-j") 'nrepl-javadoc)
-(define-key nrepl-interaction-mode-map (kbd "C-c C-a") 'nrepl-apropos)
-(define-key nrepl-mode-map (kbd "C-c C-a") 'nrepl-apropos)
-
-;; (require 'ac-nrepl)
-;; (add-hook 'nrepl-mode-hook 'ac-nrepl-setup)
-;; (add-hook 'nrepl-interaction-mode-hook 'ac-nrepl-setup)
-;; (eval-after-load "auto-complete"
-;;   '(add-to-list 'ac-modes 'nrepl-mode))
-
-(add-to-list 'load-path "/local/dev/midje-mode")
 (require 'midje-mode)
 (require 'clojure-jump-to-file)
 
@@ -290,3 +281,7 @@
 (custom-set-variables
  '(eclim-eclipse-dirs '("~/eclipses/Eclipse4.3"))
  '(eclim-executable (expand-file-name "~/eclipses/Eclipse4.3/eclim.bat")))
+
+(require 'tramp)
+(set-default 'tramp-auto-save-directory (expand-file-name "~/temp"))
+(set-default 'tramp-default-method "plinkx")
