@@ -3,9 +3,9 @@
 ;;=============================================================================
 (require 'package)
 (add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/") t)
-(add-to-list 'package-archives
              '("org" . "http://orgmode.org/elpa/") t)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (add-to-list 'package-archives
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 (package-initialize)
@@ -20,8 +20,6 @@
                       starter-kit-js
                       clojure-mode
                       clojure-snippets
-                      ;clojure-test-mode ;; use midje mode instead
-                      ;midje-mode ;; use local dev version
                       rainbow-delimiters
                       python-mode
                       groovy-mode
@@ -30,7 +28,8 @@
                       zenburn-theme
                       cider
                       midje-mode
-                      emacs-eclim)
+                      emacs-eclim
+                      melpa)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -108,7 +107,7 @@
 ;; Do not prompt to resume an active clock
 (setq org-clock-persist-query-resume nil)
 
-(setq org-drawers '("PROPERTIES" "LOGBOOK" "CLOCK" "RESULTS" "FEEDSTATUS-RTM" "FEEDSTATUS-JIRA"))
+(setq org-drawers '("PROPERTIES" "LOGBOOK" "CLOCK" "RESULTS" "FEEDSTATUS-RTM"))
 
 (setq org-feed-alist
       '(("RTM"
@@ -120,16 +119,6 @@
          :parse-entry org-feed-parse-atom-entry
          :template "
 * TODO %h :RTM:
-  %U
-  %a
-")
-        ("JIRA"
-         "http://jira.iweb.chp.co.uk/sr/jira.issueviews:searchrequest-rss/12990/SearchRequest-12990.xml?tempMax=1000"
-         "~/dropbox/notes/notes.org"
-         "Tasks"
-         :drawer "FEEDSTATUS-JIRA"
-         :template "
-* TODO %h :JIRA:
   %U
   %a
 ")))
@@ -265,6 +254,7 @@
               (HEAD 2)
               (POST 2)
               (PUT 2)
+              (with 2)
               (domonad 1)
               (context 2)
               (defroutes 'defun))))
