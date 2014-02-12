@@ -1,4 +1,4 @@
-;=============================================================================
+;;=============================================================================
 ;; package.el / starter kit based configuration
 ;;=============================================================================
 (require 'package)
@@ -34,17 +34,20 @@
 
 (dolist (p my-packages)
   (when (not (package-installed-p p))
-    (package-install p)))
+    (condition-case err
+        (package-install p)
+      (error
+       (message "%s" (error-message-string err))))))
 
 (defun package-list-unaccounted-packages ()
   "Like `package-list-packages', but shows only the packages that
-  are installed and are not in `my-packages'.  Useful for
-  cleaning out unwanted packages."
+   are installed and are not in `my-packages'.  Useful for
+   cleaning out unwanted packages."
   (interactive)
   (package-show-package-list
    (remove-if-not (lambda (x) (and (not (memq x my-packages))
-                              (not (package-built-in-p x))
-                              (package-installed-p x)))
+                                   (not (package-built-in-p x))
+                                   (package-installed-p x)))
                   (mapcar 'car package-archive-contents))))
 
 
@@ -69,7 +72,6 @@
 ;;=============================================================================
 ;; Org Mode
 ;;=============================================================================
-
 (setq org-directory "~/dropbox/notes")
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 (setq org-mobile-directory "~/dropbox/MobileOrg")
@@ -113,17 +115,33 @@
       '(("RTM"
          "http://www.rememberthemilk.com/atom/gmorpheme/25471103/?tok=eJwFwYENQjEIBcCJmvBaKO04UEBN-NGo*8c7rUnHvOIAAUI3zvAB1k7cZS4uzygsPim7k-lJoiplYsGgdrten-c9r2zPx-fXurACNFrqIUyR6bBTGjQs54jp6dpzbOe0CAKOl4nSlhELDNnman39ARvxK1Y"
          "~/dropbox/notes/notes.org"
-         "Tasks"
+         "Inbox"
          :drawer "FEEDSTATUS-RTM"
          :parse-feed org-feed-parse-atom-feed
          :parse-entry org-feed-parse-atom-entry
          :template "
-* TODO %h :RTM:
-  %U
-  %a
-")))
+ * TODO %h :RTM:
+   %U
+   %a
+ ")))
 
 (setq org-agenda-window-setup 'current-window)
+
+(setq org-agenda-compact-blocks t)
+(setq org-agenda-custom-commands
+      '(("y" "Grand Unified Agenda"
+         ((agenda ""
+                  ((org-agenda-ndays 1)
+                   (org-agenda-overriding-header "=== Today")))
+          (tags "REFILE"
+                ((org-agenda-overriding-header "=== To Refile")))
+          (tags-todo "ORGANISE"
+                     ((org-agenda-overriding-header "=== Daily Admin")))
+          (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
+                     ((org-agenda-overriding-header "=== Unscheduled High Priority")))
+          (tags-todo "ONTOLOGY"
+                     ((org-agenda-overriding-header "=== Ontology Preparation (for March)")))))
+        ("3" tags-todo "T3")))
 
 (setq org-capture-templates
       '(("s" "Start of day" entry (file org-default-notes-file)
@@ -135,7 +153,7 @@
 
 (setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
 
-; Allow refile to create parent tasks with confirmation
+                                        ; Allow refile to create parent tasks with confirmation
 (setq org-refile-allow-creating-parent-nodes (quote confirm))
 
 (global-set-key "\C-cl" 'org-store-link)
@@ -166,15 +184,15 @@
 (put 'downcase-region 'disabled nil)
 (put 'eval-expression 'disabled nil)
 
-;==============================================================================
+;;==============================================================================
 ;; Check for modifications to open files.
-;==============================================================================
+;;==============================================================================
 (require 'autorevert)
 (global-auto-revert-mode t)
 
-;==============================================================================
+;;==============================================================================
 ;; Visual settings
-;==============================================================================
+;;==============================================================================
 (tool-bar-mode -1)
 (setq inhibit-splash-screen t)
 (auto-compression-mode 1)
@@ -182,9 +200,9 @@
 (setq default-major-mode 'org-mode)
 (delete-selection-mode 1)
 
-;==============================================================================
+;;==============================================================================
 ;; Ido settings
-;==============================================================================
+;;==============================================================================
 (setq ido-default-file-method 'selected-window)
 (setq ido-default-buffer-method 'selected-window)
 (setq ido-auto-merge-work-directories-length -1)
@@ -228,11 +246,11 @@
 ;; Windows specifics
 ;;=============================================================================
 (if (eq system-type 'windows-nt)
-  (progn
-    (set-default-font "-outline-Consolas-normal-r-normal-normal-12-97-96-96-c-*-iso8859-1")
-    ; stop hangs?
-    (setq w32-get-true-file-attributes nil)
-    (remove-hook 'text-mode-hook 'turn-on-flyspell)))
+    (progn
+      (set-default-font "-outline-Consolas-normal-r-normal-normal-12-97-96-96-c-*-iso8859-1")
+                                        ; stop hangs?
+      (setq w32-get-true-file-attributes nil)
+      (remove-hook 'text-mode-hook 'turn-on-flyspell)))
 
 ;;=============================================================================
 ;; Theme
@@ -268,10 +286,22 @@
 ;;=============================================================================
 (require 'eclim)
 (global-eclim-mode)
-(custom-set-variables
- '(eclim-eclipse-dirs '("~/eclipses/Eclipse4.3"))
- '(eclim-executable (expand-file-name "~/eclipses/Eclipse4.3/eclim.bat")))
 
 (require 'tramp)
 (set-default 'tramp-auto-save-directory (expand-file-name "~/temp"))
 (set-default 'tramp-default-method "plinkx")
+
+;;=============================================================================
+;; Miscellaneous
+;;=============================================================================
+(setq gh/scales '(A Bb B C C^ D Eb E F F^ G Ab
+                    A-hm Bb-hm B-hm C-hm C^-hm D-hm Eb-hm E-hm F-hm F^-hm G-hm Ab-hm
+                    A-mm Bb-mm B-mm C-mm C^-mm D-mm Eb-mm E-mm F-mm F^-mm G-mm Ab-mm))
+
+
+(defun gh/random-scales (n)
+  "Generate n random scales to practice"
+  (let ((s (number-sequence 0 (- n 1))))
+    (mapcar  
+     (lambda (n) (elt gh/scales (random 36)))
+     s)))
