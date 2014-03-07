@@ -137,11 +137,12 @@
                 ((org-agenda-overriding-header "=== To Refile")))
           (tags-todo "ORGANISE"
                      ((org-agenda-overriding-header "=== Daily Admin")))
+          (todo "NEXT"
+                ((org-agenda-overriding-header "=== NEXT")))
           (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
-                     ((org-agenda-overriding-header "=== Unscheduled High Priority")))
-          (tags-todo "ONTOLOGY"
-                     ((org-agenda-overriding-header "=== Ontology Preparation (for March)")))))
-        ("3" tags-todo "T3")))
+                     ((org-agenda-overriding-header "=== Unscheduled High Priority")))))
+        ("3" tags-todo "T3")
+        ("e" tags-todo "ERRAND")))
 
 (setq org-capture-templates
       '(("s" "Start of day" entry (file org-default-notes-file)
