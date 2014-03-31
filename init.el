@@ -137,8 +137,11 @@
                 ((org-agenda-overriding-header "=== To Refile")))
           (tags-todo "ORGANISE"
                      ((org-agenda-overriding-header "=== Daily Admin")))
+          (tags "WAITING"
+                ((org-agenda-overriding-header "=== To Chase")))
           (todo "NEXT"
-                ((org-agenda-overriding-header "=== NEXT")))
+                ((org-agenda-overriding-header "=== Unscheduled NEXT")
+                 (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))))
           (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
                      ((org-agenda-overriding-header "=== Unscheduled High Priority")))))
         ("3" tags-todo "T3")
