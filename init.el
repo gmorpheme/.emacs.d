@@ -39,9 +39,9 @@
       (error
        (message "%s" (error-message-string err))))))
 
-(defun package-list-unaccounted-packages ()
+(defun gh/package-list-unaccounted-packages ()
   "Like `package-list-packages', but shows only the packages that
-   are installed and are not in `my-packages'.  Useful for
+   are installed and are not in `my-packages'.  useful for
    cleaning out unwanted packages."
   (interactive)
   (package-show-package-list
@@ -50,7 +50,17 @@
                                    (package-installed-p x)))
                   (mapcar 'car package-archive-contents))))
 
+(defun gh/package-list-installed-packages ()
 
+  (interactive)
+  (package-show-package-list
+   (remove-if-not
+    'package-installed-p
+    (mapcar 'car package-archive-contents))))
+
+;;=============================================================================
+;; Snippets
+;;=============================================================================
 (yas-global-mode 1)
 (add-to-list 'hippie-expand-try-functions-list 'yas/hippie-try-expand)
 
@@ -61,7 +71,6 @@
   (if (eq major-mode 'lisp-interaction-mode)
       (eval-print-last-sexp)
     (paredit-newline)))
-
 
 ;;=============================================================================
 ;; Keep customize-based settings separate
