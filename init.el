@@ -76,8 +76,22 @@
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 (setq org-mobile-directory "~/dropbox/MobileOrg")
 (setq org-mobile-inbox-for-pull "~/dropbox/from-mobile.org")
+
 (setq org-ditaa-jar-path "~/.emacs.d/deps/ditaa0_9.jar")
 (setq org-plantuml-jar-path "~/.emacs.d/deps/plantuml.jar")
+(setq org-html-head-extra "<link rel=\"stylesheet\" href=\"http://www.gmorpheme.net/theme/css/main.css\">
+<script type=\"text/javascript\">
+WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
+  var wf = document.createElement('script');
+  wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+  '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+  wf.type = 'text/javascript';
+  wf.async = 'true';
+  var s = document.getElementsByTagName('script')[0];
+  s.parentNode.insertBefore(wf, s);
+})();</script>")
+
+(setq org-html-head-include-default-style nil)
 
 (defvar gh/org-mobile-sync-timer nil)
 
@@ -148,10 +162,20 @@
         ("e" tags-todo "ERRAND")))
 
 (setq org-capture-templates
-      '(("s" "Start of day" entry (file org-default-notes-file)
-         "* Day %u :ORGANISE: \n %[template-day.org]" :clock-in t)
+      '(("s" "Start of day" entry (file+datetree org-default-notes-file)
+         (file "template-day.org")
+         :clock-in t)
+        
+        ("w" "Weekly review" entry (file+datetree org-default-notes-file)
+         (file "template-week.org")
+         :clock-in t)
+        
+        ("m" "End of month review" entry (file+datetree org-default-notes-file)
+         (file "template-month.org") :clock-in t)
+        
         ("t" "Todo" entry (file+headline org-default-notes-file "Inbox")
          "* TODO %?\n  %i\n  %a")
+        
         ("d" "Distraction / called away" entry (file+headline org-default-notes-file "Inbox")
          "* %?\n %i\n %a\n" :clock-resume t :clock-in t)))
 
