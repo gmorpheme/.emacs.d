@@ -24,6 +24,7 @@
                       rainbow-delimiters
                       python-mode
                       groovy-mode
+                      puppet-mode
                       powershell
                       yasnippet
                       zenburn-theme
