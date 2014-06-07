@@ -481,6 +481,12 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (require 'clojure-jump-to-file)
 (add-hook 'clojure-mode-hook 'gh/pretty-fn)
 (add-hook 'clojurescript-mode-hook 'gh/pretty-fn)
+(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+(setq cider-repl-popup-stacktraces t)
+(setq cider-auto-select-error-buffer t)
+(setq cider-repl-print-length 200)
+(setq cider-prompt-save-file-on-load nil)
+(setq cider-repl-use-clojure-font-lock t)
 
 ;;
 ;; Remote shells
@@ -501,7 +507,9 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (key-chord-define-global "jj" 'ibuffer)
 (key-chord-define-global "JJ" 'magit-status)
 (key-chord-define-global "jb" 'ido-switch-buffer)
+(key-chord-define-global "JB" 'ido-switch-buffer-other-window)
 (key-chord-define-global "jf" 'ido-find-file)
+(key-chord-define-global "JF" 'ido-find-file-other-window)
 (key-chord-define-global "jg" 'org-agenda)
 (key-chord-define-global "jp" 'projectile-find-file)
 (key-chord-define-global "jt" 'ace-jump-mode)
