@@ -27,6 +27,7 @@
                       python-mode
                       groovy-mode
                       ruby-mode
+                      puppet-mode
                       powershell
                       yasnippet
                       zenburn-theme
@@ -62,7 +63,7 @@
     'package-installed-p
     (mapcar 'car package-archive-contents))))
 
-;;=============================================================================
+;;
 ;; Load other files
 ;;
 (setq gh/system-config (concat user-emacs-directory system-name ".el")
