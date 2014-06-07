@@ -108,10 +108,14 @@
 ; rebind other window to superior ace-window
 (define-key global-map (kbd "C-x o") 'ace-window)
 
+; quick access to occur from interactive search
 (define-key isearch-mode-map (kbd "C-o")
     (lambda () (interactive)
       (let ((case-fold-search isearch-case-fold-search))
         (occur (if isearch-regexp isearch-string (regexp-quote isearch-string))))))
+
+;; company mode wherever - unless it gets slow
+(add-hook 'after-init-hook 'global-company-mode)
 
 ;;
 ;; basic defaults
@@ -177,11 +181,15 @@
    nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"
           1 font-lock-warning-face t))))
 
+(defun gh/truncate-lines ()
+  (setq truncate-lines t))
+
 (add-hook 'prog-mode-hook 'gh/local-column-number-mode)
 (add-hook 'prog-mode-hook 'gh/local-comment-auto-fill)
 (add-hook 'prog-mode-hook 'gh/pretty-lambdas)
 (add-hook 'prog-mode-hook 'gh/add-watchwords)
 (add-hook 'prog-mode-hook 'idle-highlight-mode)
+(add-hook 'prog-mode-hook 'gh/truncate-lines)
 
 (defun gh/prog-mode-hook ()
   (run-hooks 'prog-mode-hook))
@@ -189,18 +197,16 @@
 ;;
 ;; Lisp modes
 ;;
-(add-hook 'emacs-lisp-mode-hook 'gh/prog-mode-hook)
-(add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
-(add-hook 'emacs-lisp-mode-hook 'company-mode)
 
 (define-key lisp-mode-shared-map (kbd "RET") 'reindent-then-newline-and-indent)
 
 (dolist (mode '(scheme emacs-lisp lisp clojure clojurescript))
-  (add-hook (intern (concat (symbol-name mode) "-mode-hook"))
-            'paredit-mode))
+  (let ((hook (intern (concat (symbol-name mode) "-mode-hook"))))
+    (add-hook hook 'gh/prog-mode-hook)
+    (add-hook hook 'paredit-mode)
+    (add-hook hook 'rainbow-delimiters-mode)))
 
-(add-hook 'clojure-mode-hook 'gh/pretty-fn)
-(add-hook 'clojurescript-mode-hook 'gh/pretty-fn)
+(add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
 
 ;;
 ;; Javascript
@@ -226,11 +232,13 @@
 ;; CSS mode
 ;;
 
+(add-hook 'css-mode-hook 'gh/prog-mode-hook)
 (add-hook 'css-mode-hook 'rainbow-mode)
 
 ;;
 ;; Lots of files are really ruby these days
 ;;
+(add-hook 'ruby-mode-hook 'gh/prog-mode-hook)
 (add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
 (add-to-list 'auto-mode-alist '("\\.thor$" . ruby-mode))
 (add-to-list 'auto-mode-alist '("\\.gemspec$" . ruby-mode))
@@ -393,8 +401,6 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   (add-hook (intern (concat (symbol-name mode) "-mode-hook"))
             'gh/turn-on-hl-line-mode))
 
-(add-hook 'prog-mode-hook (lambda () (setq truncate-lines t)))
-
 ;;
 ;; windows reg files are UTF-16 little endian - please read them properly.
 ;;
@@ -409,6 +415,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;; Python
 ;;
 (require 'python-mode)
+(add-hook 'python-mode-hook 'gh/prog-mode-hook)
 
 ;;
 ;; My bindings
@@ -454,10 +461,11 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
               (domonad 1)
               (context 2)
               (defroutes 'defun))))
-(add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
 
 (require 'midje-mode)
 (require 'clojure-jump-to-file)
+(add-hook 'clojure-mode-hook 'gh/pretty-fn)
+(add-hook 'clojurescript-mode-hook 'gh/pretty-fn)
 
 ;;
 ;; Remote shells
