@@ -314,21 +314,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;; Do not prompt to resume an active clock
 (setq org-clock-persist-query-resume nil)
 
-(setq org-drawers '("PROPERTIES" "LOGBOOK" "CLOCK" "RESULTS" "FEEDSTATUS-RTM"))
-
-(setq org-feed-alist
-      '(("RTM"
-         "http://www.rememberthemilk.com/atom/gmorpheme/25471103/?tok=eJwFwYENQjEIBcCJmvBaKO04UEBN-NGo*8c7rUnHvOIAAUI3zvAB1k7cZS4uzygsPim7k-lJoiplYsGgdrten-c9r2zPx-fXurACNFrqIUyR6bBTGjQs54jp6dpzbOe0CAKOl4nSlhELDNnman39ARvxK1Y"
-         "~/dropbox/notes/notes.org"
-         "Inbox"
-         :drawer "FEEDSTATUS-RTM"
-         :parse-feed org-feed-parse-atom-feed
-         :parse-entry org-feed-parse-atom-entry
-         :template "
- * TODO %h :RTM:
-   %U
-   %a
- ")))
+(setq org-drawers '("PROPERTIES" "LOGBOOK" "CLOCK" "RESULTS"))
 
 (setq org-agenda-window-setup 'current-window)
 
@@ -392,16 +378,19 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
 (setq org-confirm-babel-evaluate nil)
 
-;;=
+;;
 ;; Check for modifications to open files.
-;;=
+;;
 (require 'autorevert)
 (global-auto-revert-mode t)
 
-;;=
-;; Horizontal line hightlighting in dired, not programming modes.
-;;=
-(add-hook 'dired-mode-hook 'gh/turn-on-hl-line-mode)
+;;
+;; Horizontal line hightlighting in list modes
+;;
+(dolist (mode '(dired ibuffer package-menu process-menu))
+  (add-hook (intern (concat (symbol-name mode) "-mode-hook"))
+            'gh/turn-on-hl-line-mode))
+
 (add-hook 'prog-mode-hook (lambda () (setq truncate-lines t)))
 
 ;;
