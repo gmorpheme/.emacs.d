@@ -1,34 +1,36 @@
-;;=============================================================================
-;; package.el / starter kit based configuration
-;;=============================================================================
+;;; init.el
+;;
+;; Much of this is stolen from elsehwere, in particular Phil
+;; Hagelberg's emacs-starter-kit, while it existed.
+;;
+
 (require 'package)
 (add-to-list 'package-archives
              '("org" . "http://orgmode.org/elpa/") t)
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.milkbox.net/packages/") t)
-(add-to-list 'package-archives
-             '("marmalade" . "http://marmalade-repo.org/packages/") t)
 (package-initialize)
 
 (when (not package-archive-contents)
   (package-refresh-contents))
 
-(defvar my-packages '(starter-kit 
-                      starter-kit-lisp
-                      starter-kit-bindings
-                      starter-kit-ruby
-                      starter-kit-js
+(defvar my-packages '(better-defaults
+                      smex
+                      ace-jump-mode
+                      ace-window
                       clojure-mode
+                      clojure-test-mode
+                      clojurescript-mode
                       clojure-snippets
                       rainbow-delimiters
                       python-mode
                       groovy-mode
+                      ruby-mode
                       powershell
                       yasnippet
                       zenburn-theme
                       cider
                       midje-mode
-                      emacs-eclim
                       melpa)
   "A list of packages to ensure are installed at launch.")
 
@@ -59,6 +61,178 @@
     (mapcar 'car package-archive-contents))))
 
 ;;=============================================================================
+;; Load other files
+;;=============================================================================
+(setq gh/system-config (concat user-emacs-directory system-name ".el")
+      gh/user-config (concat user-emacs-directory user-login-name ".el")
+      gh/user-dir (concat user-emacs-directory user-login-name))
+
+(defun gh/eval-after-init (form)
+    "Add `(lambda () FORM)' to `after-init-hook'.
+
+    If Emacs has already finished initialization, also eval FORM immediately."
+    (let ((func (list 'lambda nil form)))
+      (add-hook 'after-init-hook func)
+      (when after-init-time
+        (eval form))))
+
+(gh/eval-after-init 
+ '(progn
+    (when (file-exists-p gh/system-config) (load gh/system-config))
+    (when (file-exists-p gh/user-config) (load gh/user-config))
+    (when (file-exists-p gh/user-dir)
+      (mapc 'load (directory-files gh/user-dir t "^[^#].*el$")))))
+
+;;=============================================================================
+;; ido / smex / completion / jump / switching
+;;=============================================================================
+(setq smex-save-file (concat user-emacs-directory ".smex-items"))
+(smex-initialize)
+(global-set-key (kbd "M-x") 'smex)
+
+(ido-ubiquitous t)
+; ido with flex-matching already turned on in better-defaults.el
+(setq ido-enable-prefix nil
+      ido-auto-merge-work-directories-length nil
+      ido-create-new-buffer 'always
+      ido-use-filename-at-point 'guess
+      ido-use-virtual-buffers t
+      ido-handle-duplicate-virtual-buffers 2
+      ido-max-prospects 10
+      ido-default-file-method 'selected-window
+      ido-default-buffer-method 'selected-window)
+
+(define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
+; rebind other window to superior ace-window
+(define-key global-map (kbd "C-x o") 'ace-window)
+
+(define-key isearch-mode-map (kbd "C-o")
+    (lambda () (interactive)
+      (let ((case-fold-search isearch-case-fold-search))
+        (occur (if isearch-regexp isearch-string (regexp-quote isearch-string))))))
+
+;;=============================================================================
+;; basic defaults
+;;=============================================================================
+(set-default 'indicate-empty-lines t)
+(set-default 'imenu-auto-rescan t)
+
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+(add-hook 'text-mode-hook 'turn-on-flyspell)
+
+(defalias 'yes-or-no-p 'y-or-n-p)
+(defalias 'auto-tail-revert-mode 'tail-mode)
+
+(define-key global-map (kbd "C-+") 'text-scale-increase)
+(define-key global-map (kbd "C--") 'text-scale-decrease)
+
+(put 'narrow-to-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
+(put 'eval-expression 'disabled nil)
+
+(setq inhibit-splash-screen t)
+(auto-compression-mode 1)
+(setq visible-bell t)
+(delete-selection-mode 1)
+
+;;=============================================================================
+;; Magit
+;;=============================================================================
+(global-set-key (kbd "C-c g") 'magit-status)
+
+;;=============================================================================
+;; lambdas and todos
+;;=============================================================================
+(defun gh/local-column-number-mode ()
+  (make-local-variable 'column-number-mode)
+  (column-number-mode t))
+
+(defun gh/local-comment-auto-fill ()
+  (set (make-local-variable 'comment-auto-fill-only-comments) t)
+  (auto-fill-mode t))
+
+(defun gh/turn-on-hl-line-mode ()
+  (when (> (display-color-cells) 8)
+    (hl-line-mode t)))
+
+(defun gh/pretty-lambdas ()
+  (font-lock-add-keywords
+   nil `(("(?\\(lambda\\>\\)"
+          (0 (progn (compose-region (match-beginning 1) (match-end 1)
+                                    ,(make-char 'greek-iso8859-7 107))
+                    nil))))))
+
+(defun gh/pretty-fn ()
+  (font-lock-add-keywords nil `(("(\\(\\<fn\\>\\)"
+                                 (0 (progn (compose-region (match-beginning 1)
+                                                           (match-end 1)
+                                                           "\u0192"
+                                                           'decompose-region)))))))
+
+(defun gh/add-watchwords ()
+  (font-lock-add-keywords
+   nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"
+          1 font-lock-warning-face t))))
+
+(add-hook 'prog-mode-hook 'gh/local-column-number-mode)
+(add-hook 'prog-mode-hook 'gh/local-comment-auto-fill)
+(add-hook 'prog-mode-hook 'gh/pretty-lambdas)
+(add-hook 'prog-mode-hook 'gh/add-watchwords)
+(add-hook 'prog-mode-hook 'idle-highlight-mode)
+
+(defun gh/prog-mode-hook ()
+  (run-hooks 'prog-mode-hook))
+
+;;=============================================================================
+;; Lisp modes
+;;=============================================================================
+(add-hook 'emacs-lisp-mode-hook 'gh/prog-mode-hook)
+(add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+
+(define-key lisp-mode-shared-map (kbd "RET") 'reindent-then-newline-and-indent)
+
+(dolist (mode '(scheme emacs-lisp lisp clojure clojurescript))
+  (add-hook (intern (concat (symbol-name mode) "-mode-hook"))
+            'paredit-mode))
+
+(add-hook 'clojure-mode-hook 'gh/pretty-fn)
+(add-hook 'clojurescript-mode-hook 'gh/pretty-fn)
+
+;;=============================================================================
+;; Javascript
+;;=============================================================================
+;;;###autoload
+(add-to-list 'auto-mode-alist '("\\.json$" . js-mode))
+
+;;;###autoload
+(eval-after-load 'js
+  '(progn (define-key js-mode-map "{" 'paredit-open-curly)
+          (define-key js-mode-map "}" 'paredit-close-curly-and-newline)
+          (add-hook 'js-mode-hook 'gh/paredit-nonlisp)
+          (setq js-indent-level 2)
+          ;; fixes problem with pretty function font-lock
+          (define-key js-mode-map (kbd ",") 'self-insert-command)
+          (font-lock-add-keywords
+           'js-mode `(("\\(function *\\)("
+                       (0 (progn (compose-region (match-beginning 1)
+                                                 (match-end 1) "\u0192")
+                                 nil)))))))
+
+;;=============================================================================
+;; Lots of files are really ruby these days
+;;=============================================================================
+(add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.thor$" . ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.gemspec$" . ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.ru$" . ruby-mode))
+(add-to-list 'auto-mode-alist '("Rakefile$" . ruby-mode))
+(add-to-list 'auto-mode-alist '("Thorfile$" . ruby-mode))
+(add-to-list 'auto-mode-alist '("Gemfile$" . ruby-mode))
+(add-to-list 'auto-mode-alist '("Capfile$" . ruby-mode))
+(add-to-list 'auto-mode-alist '("Vagrantfile$" . ruby-mode))
+
+;;=============================================================================
 ;; Snippets
 ;;=============================================================================
 (yas-global-mode 1)
@@ -81,6 +255,7 @@
 ;;=============================================================================
 ;; Org Mode
 ;;=============================================================================
+(setq default-major-mode 'org-mode)
 (setq org-directory "~/dropbox/notes")
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 (setq org-mobile-directory "~/dropbox/MobileOrg")
@@ -189,14 +364,11 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
          "* %?\n %i\n %a\n" :clock-resume t :clock-in t)))
 
 (setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
-
-                                        ; Allow refile to create parent tasks with confirmation
 (setq org-refile-allow-creating-parent-nodes (quote confirm))
 
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
-
 (global-set-key "\C-cc" 'org-capture)
 (global-set-key [f12] 'org-capture)
 
@@ -213,14 +385,6 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
 (setq org-confirm-babel-evaluate nil)
 
-;;=============================================================================
-;; Enable disabled features
-;;=============================================================================
-(put 'narrow-to-region 'disabled nil)
-(put 'upcase-region 'disabled nil)
-(put 'downcase-region 'disabled nil)
-(put 'eval-expression 'disabled nil)
-
 ;;==============================================================================
 ;; Check for modifications to open files.
 ;;==============================================================================
@@ -228,28 +392,9 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (global-auto-revert-mode t)
 
 ;;==============================================================================
-;; Visual settings
-;;==============================================================================
-(tool-bar-mode -1)
-(setq inhibit-splash-screen t)
-(auto-compression-mode 1)
-(setq visible-bell t)
-(setq default-major-mode 'org-mode)
-(delete-selection-mode 1)
-
-;;==============================================================================
-;; Ido settings
-;;==============================================================================
-(setq ido-default-file-method 'selected-window)
-(setq ido-default-buffer-method 'selected-window)
-(setq ido-auto-merge-work-directories-length -1)
-
-;;==============================================================================
 ;; Horizontal line hightlighting in dired, not programming modes.
 ;;==============================================================================
-(add-hook 'dired-mode-hook 'esk-turn-on-hl-line-mode)
-(remove-hook 'prog-mode-hook 'esk-turn-on-hl-line-mode)
-
+(add-hook 'dired-mode-hook 'gh/turn-on-hl-line-mode)
 (add-hook 'prog-mode-hook (lambda () (setq truncate-lines t)))
 
 ;;=============================================================================
@@ -270,7 +415,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;=============================================================================
 ;; My bindings
 ;;=============================================================================
-(global-set-key "\C-o" 'replace-string)
+(global-set-key "\C-o" 'query-replace)
 (global-set-key [(control next)] 'scroll-other-window)
 (global-set-key [(control prior)] 'scroll-other-window-down)
 (global-set-key [(f8)] 'toggle-truncate-lines)
@@ -319,11 +464,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (require 'clojure-jump-to-file)
 
 ;;=============================================================================
-;; Eclipse interaction
+;; Remote shells
 ;;=============================================================================
-(require 'eclim)
-(global-eclim-mode)
-
 (require 'tramp)
 (set-default 'tramp-auto-save-directory (expand-file-name "~/temp"))
 (set-default 'tramp-default-method "plinkx")
@@ -332,18 +474,3 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;; Octave
 ;;=============================================================================
 (add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
-
-;;=============================================================================
-;; Miscellaneous
-;;=============================================================================
-(setq gh/scales '(A Bb B C C^ D Eb E F F^ G Ab
-                    A-hm Bb-hm B-hm C-hm C^-hm D-hm Eb-hm E-hm F-hm F^-hm G-hm Ab-hm
-                    A-mm Bb-mm B-mm C-mm C^-mm D-mm Eb-mm E-mm F-mm F^-mm G-mm Ab-mm))
-
-
-(defun gh/random-scales (n)
-  "Generate n random scales to practice"
-  (let ((s (number-sequence 0 (- n 1))))
-    (mapcar  
-     (lambda (n) (elt gh/scales (random 36)))
-     s)))
