@@ -18,6 +18,7 @@
                       smex
                       ace-jump-mode
                       ace-window
+                      magit
                       company
                       projectile
                       key-chord
