@@ -19,6 +19,8 @@
                       ace-jump-mode
                       ace-window
                       company
+                      projectile
+                      key-chord
                       clojure-mode
                       clojure-test-mode
                       clojurescript-mode
@@ -118,6 +120,10 @@
 ;; company mode wherever - unless it gets slow
 (add-hook 'after-init-hook 'global-company-mode)
 
+(defun gh/kill-current-buffer ()
+  (interactive)
+  (kill-buffer nil))
+
 ;;
 ;; basic defaults
 ;;
@@ -147,6 +153,7 @@
 ;; Magit
 ;;
 (global-set-key (kbd "C-c g") 'magit-status)
+(setq magit-status-buffer-switch-function 'switch-to-buffer)
 
 ;;
 ;; lambdas and todos
@@ -479,3 +486,16 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;; Octave
 ;;
 (add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
+
+;;
+;; keychords to combat emacs-pinkie
+;;
+
+(key-chord-define-global "jj" 'ibuffer)
+(key-chord-define-global "JJ" 'magit-status)
+(key-chord-define-global "jb" 'ido-switch-buffer)
+(key-chord-define-global "jg" 'org-agenda)
+(key-chord-define-global "jt" 'ace-jump-mode)
+(key-chord-define-global "jw" 'ace-window)
+(key-chord-define-global "kk" 'gh/kill-current-buffer)
+(key-chord-mode 1)
