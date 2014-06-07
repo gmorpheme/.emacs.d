@@ -437,10 +437,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;=============================================================================
 ;; Theme
 ;;=============================================================================
-(load-theme 'zenburn)
-(enable-theme 'zenburn)
-
-;; todo (if / when needed): yaml, n3, psvn?, rst?
+(load-theme 'zenburn t)
 
 ;;=============================================================================
 ;; Clojure indentation
