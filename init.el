@@ -121,13 +121,12 @@
 ;; company mode wherever - unless it gets slow
 (add-hook 'after-init-hook 'global-company-mode)
 
+;; projectile mode everywhere
+(projectile-global-mode)
+
 (defun gh/kill-current-buffer ()
   (interactive)
   (kill-buffer nil))
-
-;; prefer side-by-side window splits if the window is wide
-(setq split-height-threshold nil)
-(setq split-width-threshold 160)
 
 
 ;;
@@ -154,6 +153,10 @@
 (auto-compression-mode 1)
 (setq visible-bell t)
 (delete-selection-mode 1)
+
+;; prefer side-by-side window splits if the window is wide
+(setq split-height-threshold nil)
+(setq split-width-threshold 160)
 
 ;;
 ;; Magit
@@ -498,7 +501,9 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (key-chord-define-global "jj" 'ibuffer)
 (key-chord-define-global "JJ" 'magit-status)
 (key-chord-define-global "jb" 'ido-switch-buffer)
+(key-chord-define-global "jf" 'ido-find-file)
 (key-chord-define-global "jg" 'org-agenda)
+(key-chord-define-global "jp" 'projectile-find-file)
 (key-chord-define-global "jt" 'ace-jump-mode)
 (key-chord-define-global "jw" 'ace-window)
 (key-chord-define-global "kk" 'gh/kill-current-buffer)
