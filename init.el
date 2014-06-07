@@ -18,6 +18,7 @@
                       smex
                       ace-jump-mode
                       ace-window
+                      company
                       clojure-mode
                       clojure-test-mode
                       clojurescript-mode
@@ -190,6 +191,7 @@
 ;;
 (add-hook 'emacs-lisp-mode-hook 'gh/prog-mode-hook)
 (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+(add-hook 'emacs-lisp-mode-hook 'company-mode)
 
 (define-key lisp-mode-shared-map (kbd "RET") 'reindent-then-newline-and-indent)
 
@@ -387,7 +389,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 ;; Horizontal line hightlighting in list modes
 ;;
-(dolist (mode '(dired ibuffer package-menu process-menu))
+(dolist (mode '(dired ibuffer package-menu process-menu org-agenda))
   (add-hook (intern (concat (symbol-name mode) "-mode-hook"))
             'gh/turn-on-hl-line-mode))
 
@@ -434,7 +436,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;; Theme
 ;;
 (load-theme 'zenburn t)
-(load-theme 'solarized-light t t) ; don't enable
+;;(load-theme 'solarized-light t t) ; don't enable
 
 ;;
 ;; Clojure indentation
