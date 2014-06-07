@@ -29,6 +29,7 @@
                       powershell
                       yasnippet
                       zenburn-theme
+                      rainbow-mode
                       cider
                       midje-mode
                       melpa)
@@ -62,7 +63,7 @@
 
 ;;=============================================================================
 ;; Load other files
-;;=============================================================================
+;;
 (setq gh/system-config (concat user-emacs-directory system-name ".el")
       gh/user-config (concat user-emacs-directory user-login-name ".el")
       gh/user-dir (concat user-emacs-directory user-login-name))
@@ -83,9 +84,9 @@
     (when (file-exists-p gh/user-dir)
       (mapc 'load (directory-files gh/user-dir t "^[^#].*el$")))))
 
-;;=============================================================================
+;;
 ;; ido / smex / completion / jump / switching
-;;=============================================================================
+;;
 (setq smex-save-file (concat user-emacs-directory ".smex-items"))
 (smex-initialize)
 (global-set-key (kbd "M-x") 'smex)
@@ -111,9 +112,9 @@
       (let ((case-fold-search isearch-case-fold-search))
         (occur (if isearch-regexp isearch-string (regexp-quote isearch-string))))))
 
-;;=============================================================================
+;;
 ;; basic defaults
-;;=============================================================================
+;;
 (set-default 'indicate-empty-lines t)
 (set-default 'imenu-auto-rescan t)
 
@@ -136,14 +137,14 @@
 (setq visible-bell t)
 (delete-selection-mode 1)
 
-;;=============================================================================
+;;
 ;; Magit
-;;=============================================================================
+;;
 (global-set-key (kbd "C-c g") 'magit-status)
 
-;;=============================================================================
+;;
 ;; lambdas and todos
-;;=============================================================================
+;;
 (defun gh/local-column-number-mode ()
   (make-local-variable 'column-number-mode)
   (column-number-mode t))
@@ -184,9 +185,9 @@
 (defun gh/prog-mode-hook ()
   (run-hooks 'prog-mode-hook))
 
-;;=============================================================================
+;;
 ;; Lisp modes
-;;=============================================================================
+;;
 (add-hook 'emacs-lisp-mode-hook 'gh/prog-mode-hook)
 (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
 
@@ -199,9 +200,9 @@
 (add-hook 'clojure-mode-hook 'gh/pretty-fn)
 (add-hook 'clojurescript-mode-hook 'gh/pretty-fn)
 
-;;=============================================================================
+;;
 ;; Javascript
-;;=============================================================================
+;;
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.json$" . js-mode))
 
@@ -219,9 +220,15 @@
                                                  (match-end 1) "\u0192")
                                  nil)))))))
 
-;;=============================================================================
+;;
+;; CSS mode
+;;
+
+(add-hook 'css-mode-hook 'rainbow-mode)
+
+;;
 ;; Lots of files are really ruby these days
-;;=============================================================================
+;;
 (add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
 (add-to-list 'auto-mode-alist '("\\.thor$" . ruby-mode))
 (add-to-list 'auto-mode-alist '("\\.gemspec$" . ruby-mode))
@@ -232,29 +239,29 @@
 (add-to-list 'auto-mode-alist '("Capfile$" . ruby-mode))
 (add-to-list 'auto-mode-alist '("Vagrantfile$" . ruby-mode))
 
-;;=============================================================================
+;;
 ;; Snippets
-;;=============================================================================
+;;
 (yas-global-mode 1)
 (add-to-list 'hippie-expand-try-functions-list 'yas/hippie-try-expand)
 
-;;=============================================================================
+;;
 ;; Ensure that lisp-interaction can still evaluate on ctrl-j...
-;;=============================================================================
+;;
 (defadvice paredit-newline (around eval-print-last-sexp activate)
   (if (eq major-mode 'lisp-interaction-mode)
       (eval-print-last-sexp)
     (paredit-newline)))
 
-;;=============================================================================
+;;
 ;; Keep customize-based settings separate
-;;=============================================================================
+;;
 (setq custom-file "~/.emacs.d/.emacs-custom")
 (load custom-file 'no-error)
 
-;;=============================================================================
+;;
 ;; Org Mode
-;;=============================================================================
+;;
 (setq default-major-mode 'org-mode)
 (setq org-directory "~/dropbox/notes")
 (setq org-default-notes-file (concat org-directory "/notes.org"))
@@ -385,36 +392,36 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
 (setq org-confirm-babel-evaluate nil)
 
-;;==============================================================================
+;;=
 ;; Check for modifications to open files.
-;;==============================================================================
+;;=
 (require 'autorevert)
 (global-auto-revert-mode t)
 
-;;==============================================================================
+;;=
 ;; Horizontal line hightlighting in dired, not programming modes.
-;;==============================================================================
+;;=
 (add-hook 'dired-mode-hook 'gh/turn-on-hl-line-mode)
 (add-hook 'prog-mode-hook (lambda () (setq truncate-lines t)))
 
-;;=============================================================================
+;;
 ;; windows reg files are UTF-16 little endian - please read them properly.
-;;=============================================================================
+;;
 (modify-coding-system-alist 'file "\\.reg\\'" 'utf-16-le)
 
-;;=============================================================================
+;;
 ;; modeline stuff
-;;=============================================================================
+;;
 (display-time)
 
-;;=============================================================================
+;;
 ;; Python
-;;=============================================================================
+;;
 (require 'python-mode)
 
-;;=============================================================================
+;;
 ;; My bindings
-;;=============================================================================
+;;
 (global-set-key "\C-o" 'query-replace)
 (global-set-key [(control next)] 'scroll-other-window)
 (global-set-key [(control prior)] 'scroll-other-window-down)
@@ -424,9 +431,9 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (global-set-key [(shift f9)] 'shell) 
 (global-set-key [(ctrl f9)] 'eshell)
 
-;;=============================================================================
+;;
 ;; Windows specifics
-;;=============================================================================
+;;
 (if (eq system-type 'windows-nt)
     (progn
       (set-default-font "-outline-Consolas-normal-r-normal-normal-12-97-96-96-c-*-iso8859-1")
@@ -434,14 +441,15 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
       (setq w32-get-true-file-attributes nil)
       (remove-hook 'text-mode-hook 'turn-on-flyspell)))
 
-;;=============================================================================
+;;
 ;; Theme
-;;=============================================================================
+;;
 (load-theme 'zenburn t)
+(load-theme 'solarized-light t t) ; don't enable
 
-;;=============================================================================
+;;
 ;; Clojure indentation
-;;=============================================================================
+;;
 (add-hook 'clojure-mode-hook
           (lambda ()
             (define-clojure-indent
@@ -460,14 +468,14 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (require 'midje-mode)
 (require 'clojure-jump-to-file)
 
-;;=============================================================================
+;;
 ;; Remote shells
-;;=============================================================================
+;;
 (require 'tramp)
 (set-default 'tramp-auto-save-directory (expand-file-name "~/temp"))
 (set-default 'tramp-default-method "plinkx")
 
-;;=============================================================================
+;;
 ;; Octave
-;;=============================================================================
+;;
 (add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
