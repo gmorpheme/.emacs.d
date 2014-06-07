@@ -204,6 +204,7 @@
 (add-hook 'prog-mode-hook 'gh/add-watchwords)
 (add-hook 'prog-mode-hook 'idle-highlight-mode)
 (add-hook 'prog-mode-hook 'gh/truncate-lines)
+(add-hook 'prog-mode-hook 'electric-indent-mode)
 
 (defun gh/prog-mode-hook ()
   (run-hooks 'prog-mode-hook))
@@ -211,9 +212,6 @@
 ;;
 ;; Lisp modes
 ;;
-
-(define-key lisp-mode-shared-map (kbd "RET") 'reindent-then-newline-and-indent)
-
 (dolist (mode '(scheme emacs-lisp lisp clojure clojurescript))
   (let ((hook (intern (concat (symbol-name mode) "-mode-hook"))))
     (add-hook hook 'gh/prog-mode-hook)
