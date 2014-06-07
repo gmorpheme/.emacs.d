@@ -124,6 +124,11 @@
   (interactive)
   (kill-buffer nil))
 
+;; prefer side-by-side window splits if the window is wide
+(setq split-height-threshold nil)
+(setq split-width-threshold 160)
+
+
 ;;
 ;; basic defaults
 ;;
