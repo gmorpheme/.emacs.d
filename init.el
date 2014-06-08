@@ -493,7 +493,6 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 (require 'tramp)
 (set-default 'tramp-auto-save-directory (expand-file-name "~/temp"))
-(set-default 'tramp-default-method "plinkx")
 
 ;;
 ;; Octave
@@ -506,8 +505,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 
 (key-chord-define-global "jj" 'ibuffer)
 (key-chord-define-global "JJ" 'magit-status)
-(key-chord-define-global "jb" 'ido-switch-buffer)
-(key-chord-define-global "JB" 'ido-switch-buffer-other-window)
+(key-chord-define-global ",," 'ido-switch-buffer)
+(key-chord-define-global ";;" 'ido-switch-buffer-other-window)
 (key-chord-define-global "jf" 'ido-find-file)
 (key-chord-define-global "JF" 'ido-find-file-other-window)
 (key-chord-define-global "jg" 'org-agenda)
