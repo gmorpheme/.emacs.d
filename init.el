@@ -34,6 +34,8 @@
                       powershell
                       yasnippet
                       zenburn-theme
+                      color-theme-solarized
+                      color-theme-sanityinc-tomorrow
                       rainbow-mode
                       cider
                       midje-mode
@@ -157,6 +159,11 @@
 ;; prefer side-by-side window splits if the window is wide
 (setq split-height-threshold nil)
 (setq split-width-threshold 160)
+
+;;
+;; backups already in .emacs.d/backups -
+;; further setings:
+(setq version-control t)
 
 ;;
 ;; Magit
@@ -506,7 +513,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (key-chord-define-global "jj" 'ibuffer)
 (key-chord-define-global "JJ" 'magit-status)
 (key-chord-define-global ",," 'ido-switch-buffer)
-(key-chord-define-global ";;" 'ido-switch-buffer-other-window)
+(key-chord-define-global "hh" 'ido-switch-buffer-other-window)
 (key-chord-define-global "jf" 'ido-find-file)
 (key-chord-define-global "JF" 'ido-find-file-other-window)
 (key-chord-define-global "jg" 'org-agenda)
