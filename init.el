@@ -14,7 +14,8 @@
 (when (not package-archive-contents)
   (package-refresh-contents))
 
-(defvar my-packages '(better-defaults
+(defvar my-packages '(use-package
+                      better-defaults
                       smex
                       ace-jump-mode
                       ace-window
