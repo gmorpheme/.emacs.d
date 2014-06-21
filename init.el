@@ -134,6 +134,7 @@
 ;;
 ;; basic defaults
 ;;
+(prefer-coding-system 'utf-8)
 (set-default 'indicate-empty-lines t)
 (set-default 'imenu-auto-rescan t)
 
@@ -410,6 +411,23 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
 (setq org-confirm-babel-evaluate nil)
 
+;; jump to agenda when idle
+
+(defun gh/default-agenda ()
+  (interactive)
+  (org-agenda nil "y"))
+
+(defun gh/jump-to-org-agenda ()
+  (interactive)
+  (let ((buf (get-buffer "*Org Agenda*")))
+    (if buf
+        (with-selected-window (or (get-buffer-window buf)
+                                  (display-buffer buf (called-interactively-p)))
+          (org-fit-window-to-buffer))
+      (call-interactively 'gh/default-agenda))))
+
+(run-with-idle-timer 300 t 'gh/jump-to-org-agenda)
+
 ;;
 ;; Check for modifications to open files.
 ;;
@@ -507,7 +525,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
 
 ;;
-;; keychords to combat emacs-pinkie
+;; keychords to combat emacs-pinky
 ;;
 
 (key-chord-define-global "jj" 'ibuffer)
