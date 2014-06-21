@@ -92,28 +92,40 @@
     (when (file-exists-p gh/user-dir)
       (mapc 'load (directory-files gh/user-dir t "^[^#].*el$")))))
 
+;; use package
+(require 'use-package)
+
 ;;
 ;; ido / smex / completion / jump / switching
 ;;
-(setq smex-save-file (concat user-emacs-directory ".smex-items"))
-(smex-initialize)
-(global-set-key (kbd "M-x") 'smex)
+(use-package smex
+  :config
+  (setq smex-save-file (concat user-emacs-directory ".smex-items"))
+  :init
+  (smex-initialize)
+  :bind
+  ("M-x" . smex))
 
-(ido-ubiquitous t)
-; ido with flex-matching already turned on in better-defaults.el
-(setq ido-enable-prefix nil
-      ido-auto-merge-work-directories-length nil
-      ido-create-new-buffer 'always
-      ido-use-filename-at-point 'guess
-      ido-use-virtual-buffers t
-      ido-handle-duplicate-virtual-buffers 2
-      ido-max-prospects 10
-      ido-default-file-method 'selected-window
-      ido-default-buffer-method 'selected-window)
+(use-package ido
+  :init
+  ;; ido with flex-matching already turned on in better-defaults.el
+  (setq ido-enable-prefix nil
+        ido-auto-merge-work-directories-length nil
+        ido-create-new-buffer 'always
+        ido-use-filename-at-point 'guess
+        ido-use-virtual-buffers t
+        ido-handle-duplicate-virtual-buffers 2
+        ido-max-prospects 10
+        ido-default-file-method 'selected-window
+        ido-default-buffer-method 'selected-window)
+  :config
+  (ido-ubiquitous t))
 
-(define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
-; rebind other window to superior ace-window
-(define-key global-map (kbd "C-x o") 'ace-window)
+(use-package ace-jump-mode
+  :bind ("C-c SPC" . ace-jump-mode))
+
+(use-package ace-window
+  :bind ("C-x o" . ace-window))
 
 ; quick access to occur from interactive search
 (define-key isearch-mode-map (kbd "C-o")
@@ -122,10 +134,22 @@
         (occur (if isearch-regexp isearch-string (regexp-quote isearch-string))))))
 
 ;; company mode wherever - unless it gets slow
-(add-hook 'after-init-hook 'global-company-mode)
+(use-package company
+  :diminish company-mode
+  :init
+  (add-hook 'after-init-hook 'global-company-mode))
+
+;; snippets
+(use-package yasnippet
+  :diminish yas-minor-mode
+  :commands yas/hippie-try-expand
+  :init (add-to-list 'hippie-expand-try-functions-list 'yas/hippie-try-expand)
+  :config (yas-global-mode 1))
 
 ;; projectile mode everywhere
-(projectile-global-mode)
+(use-package projectile
+  :config
+  (projectile-global-mode))
 
 (defun gh/kill-current-buffer ()
   (interactive)
@@ -165,6 +189,12 @@
 (setq split-width-threshold 160)
 
 ;;
+;; Keep customize-based settings separate
+;;
+(setq custom-file "~/.emacs.d/.emacs-custom")
+(load custom-file 'no-error)
+
+;;
 ;; backups already in .emacs.d/backups -
 ;; further setings:
 (setq version-control t)
@@ -172,8 +202,11 @@
 ;;
 ;; Magit
 ;;
-(global-set-key (kbd "C-c g") 'magit-status)
-(setq magit-status-buffer-switch-function 'switch-to-buffer)
+(use-package magit
+  :bind (("C-c g" . magit-status)
+         ("C-c G" . magit-status-with-prefix))
+  :init
+  (setq magit-status-buffer-switch-function 'switch-to-buffer))
 
 ;;
 ;; lambdas and todos
@@ -237,49 +270,45 @@
 ;;
 ;; Javascript
 ;;
-;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.json$" . js-mode))
-
-;;;###autoload
-(eval-after-load 'js
-  '(progn (define-key js-mode-map "{" 'paredit-open-curly)
-          (define-key js-mode-map "}" 'paredit-close-curly-and-newline)
-          (add-hook 'js-mode-hook 'gh/paredit-nonlisp)
-          (setq js-indent-level 2)
-          ;; fixes problem with pretty function font-lock
-          (define-key js-mode-map (kbd ",") 'self-insert-command)
-          (font-lock-add-keywords
-           'js-mode `(("\\(function *\\)("
-                       (0 (progn (compose-region (match-beginning 1)
-                                                 (match-end 1) "\u0192")
-                                 nil)))))))
+(use-package js
+  :mode ("\\.json$" . js-mode)
+  :init
+  (setq js-indent-level 2)
+  :config
+  (progn
+    (font-lock-add-keywords
+     'js-mode `(("\\(function *\\)("
+                 (0 (progn (compose-region (match-beginning 1)
+                                           (match-end 1) "\u0192")
+                           nil)))))
+    (bind-key "{" 'paredit-open-curly js-mode-map)
+    (bind-key "}" 'paredit-close-curly js-mode-map)))
 
 ;;
 ;; CSS mode
 ;;
-
-(add-hook 'css-mode-hook 'gh/prog-mode-hook)
-(add-hook 'css-mode-hook 'rainbow-mode)
+(use-package css-mode
+  :init
+  (progn
+    (add-hook 'css-mode-hook 'gh/prog-mode-hook)
+    (add-hook 'css-mode-hook 'rainbow-mode)))
 
 ;;
 ;; Lots of files are really ruby these days
 ;;
-(add-hook 'ruby-mode-hook 'gh/prog-mode-hook)
-(add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("\\.thor$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("\\.gemspec$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("\\.ru$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("Rakefile$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("Thorfile$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("Gemfile$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("Capfile$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("Vagrantfile$" . ruby-mode))
-
-;;
-;; Snippets
-;;
-(yas-global-mode 1)
-(add-to-list 'hippie-expand-try-functions-list 'yas/hippie-try-expand)
+(use-package ruby-mode
+  :disabled nil
+  :init
+  (add-hook 'ruby-mode-hook 'gh/prog-mode-hook)
+  :mode (("\\.rake$" . ruby-mode)
+         ("\\.thor$" . ruby-mode)
+         ("\\.gemspec$" . ruby-mode)
+         ("\\.ru$" . ruby-mode)
+         ("Rakefile$" . ruby-mode)
+         ("Thorfile$" . ruby-mode)
+         ("Gemfile$" . ruby-mode)
+         ("Capfile$" . ruby-mode)
+         ("Vagrantfile$" . ruby-mode)))
 
 ;;
 ;; Ensure that lisp-interaction can still evaluate on ctrl-j...
@@ -288,12 +317,6 @@
   (if (eq major-mode 'lisp-interaction-mode)
       (eval-print-last-sexp)
     (paredit-newline)))
-
-;;
-;; Keep customize-based settings separate
-;;
-(setq custom-file "~/.emacs.d/.emacs-custom")
-(load custom-file 'no-error)
 
 ;;
 ;; Org Mode
@@ -453,27 +476,11 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (modify-coding-system-alist 'file "\\.reg\\'" 'utf-16-le)
 
 ;;
-;; modeline stuff
-;;
-(display-time)
-
-;;
 ;; Python
 ;;
-(require 'python-mode)
-(add-hook 'python-mode-hook 'gh/prog-mode-hook)
-
-;;
-;; My bindings
-;;
-(global-set-key "\C-o" 'query-replace)
-(global-set-key [(control next)] 'scroll-other-window)
-(global-set-key [(control prior)] 'scroll-other-window-down)
-(global-set-key [(f8)] 'toggle-truncate-lines)
-;; put all kinds of shells on f9...
-(global-set-key [(f9)] 'py-shell)
-(global-set-key [(shift f9)] 'shell) 
-(global-set-key [(ctrl f9)] 'eshell)
+(use-package python-mode
+  :init
+  (add-hook 'python-mode-hook 'gh/prog-mode-hook))
 
 ;;
 ;; Windows specifics
@@ -488,53 +495,72 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 ;; Theme
 ;;
-(load-theme 'zenburn t)
-;;(load-theme 'solarized-light t t) ; don't enable
+(load-theme 'sanityinc-tomorrow-blue t)
+(load-theme 'zenburn t t)
 
 ;;
-;; Clojure indentation
+;; CIDER / Clojure / ClojureScript
 ;;
-(add-hook 'clojure-mode-hook
-          (lambda ()
-            (define-clojure-indent
-              (ANY 2)
-              (DELETE 2)
-              (GET 2)
-              (HEAD 2)
-              (POST 2)
-              (PUT 2)
-              (with 2)
-              (domonad 1)
-              (context 2)
-              (defroutes 'defun))))
-
-(require 'midje-mode)
-(require 'clojure-jump-to-file)
-(add-hook 'clojure-mode-hook 'gh/pretty-fn)
-(add-hook 'clojurescript-mode-hook 'gh/pretty-fn)
-(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
-(setq cider-repl-popup-stacktraces t)
-(setq cider-auto-select-error-buffer t)
-(setq cider-repl-print-length 200)
-(setq cider-prompt-save-file-on-load nil)
-(setq cider-repl-use-clojure-font-lock t)
+(use-package cider
+  :init
+  (progn
+    (setq cider-repl-popup-stacktraces t
+          cider-auto-select-error-buffer t
+          cider-repl-print-length 200
+          cider-prompt-save-file-on-load nil
+          cider-repl-use-clojure-font-lock t)
+    (add-hook 'clojure-mode-hook
+              (lambda ()
+                (define-clojure-indent
+                  (ANY 2)
+                  (DELETE 2)
+                  (GET 2)
+                  (HEAD 2)
+                  (POST 2)
+                  (PUT 2)
+                  (with 2)
+                  (domonad 1)
+                  (context 2)
+                  (defroutes 'defun))))
+    (add-hook 'clojure-mode-hook 'gh/pretty-fn)
+    (add-hook 'clojurescript-mode-hook 'gh/pretty-fn)
+    (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode))
+  :config
+  (progn
+    (use-package midje-mode)
+    (use-package clojure-jump-to-file)))
 
 ;;
 ;; Remote shells
 ;;
-(require 'tramp)
-(set-default 'tramp-auto-save-directory (expand-file-name "~/temp"))
+(use-package tramp
+  :init
+  (set-default 'tramp-auto-save-directory (expand-file-name "~/temp")))
 
 ;;
 ;; Octave
 ;;
-(add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
+(use-package octave-mode
+  :mode ("\\.m\\'" . octave-mode))
+
+;;
+;; My bindings
+;;
+(global-set-key "\C-o" 'query-replace)
+(global-set-key [(control next)] 'scroll-other-window)
+(global-set-key [(control prior)] 'scroll-other-window-down)
+(global-set-key [(f8)] 'toggle-truncate-lines)
+;; put all kinds of shells on f9...
+(global-set-key [(f9)] 'py-shell)
+(global-set-key [(shift f9)] 'shell) 
+(global-set-key [(ctrl f9)] 'eshell)
 
 ;;
 ;; keychords to combat emacs-pinky
 ;;
 
 (key-chord-define-global "jj" 'ibuffer)
+(key-chord-define-global "j1" 'delete-other-windows)
 (key-chord-define-global "JJ" 'magit-status)
 (key-chord-define-global ",," 'ido-switch-buffer)
 (key-chord-define-global "hh" 'ido-switch-buffer-other-window)
