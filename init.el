@@ -362,17 +362,17 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
          ((agenda ""
                   ((org-agenda-ndays 1)
                    (org-agenda-overriding-header "=== Today")))
-          (tags "REFILE"
-                ((org-agenda-overriding-header "=== To Refile")))
           (tags-todo "ORGANISE"
                      ((org-agenda-overriding-header "=== Daily Admin")))
+          (tags "REFILE|TIDY"
+                ((org-agenda-overriding-header "=== To Refile / Tidy")))
           (tags "WAITING"
                 ((org-agenda-overriding-header "=== To Chase")))
+          (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
+                     ((org-agenda-overriding-header "=== Unscheduled High Priority")))
           (todo "NEXT"
                 ((org-agenda-overriding-header "=== Unscheduled NEXT")
-                 (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))))
-          (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
-                     ((org-agenda-overriding-header "=== Unscheduled High Priority")))))
+                 (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))))))
         ("3" tags-todo "T3")
         ("e" tags-todo "ERRAND")))
 
