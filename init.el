@@ -130,6 +130,8 @@
   (interactive)
   (kill-buffer nil))
 
+;; undo for window config C-c <- and C-c ->
+(winner-mode 1)
 
 ;;
 ;; basic defaults
