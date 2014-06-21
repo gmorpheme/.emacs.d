@@ -351,6 +351,9 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 
 (setq org-drawers '("PROPERTIES" "LOGBOOK" "CLOCK" "RESULTS"))
 
+;; exclude certain tags from inheritance
+(setq org-tags-exclude-from-inheritance '("PROJECT"))
+
 (setq org-agenda-window-setup 'current-window)
 
 (setq org-agenda-compact-blocks t)
