@@ -156,7 +156,9 @@
   (kill-buffer nil))
 
 ;; undo for window config C-c <- and C-c ->
-(winner-mode 1)
+(use-package winner
+  :init
+  (winner-mode 1))
 
 ;;
 ;; basic defaults
@@ -558,17 +560,19 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 ;; keychords to combat emacs-pinky
 ;;
-
-(key-chord-define-global "jj" 'ibuffer)
-(key-chord-define-global "j1" 'delete-other-windows)
-(key-chord-define-global "JJ" 'magit-status)
-(key-chord-define-global ",," 'ido-switch-buffer)
-(key-chord-define-global "hh" 'ido-switch-buffer-other-window)
-(key-chord-define-global "jf" 'ido-find-file)
-(key-chord-define-global "JF" 'ido-find-file-other-window)
-(key-chord-define-global "jg" 'org-agenda)
-(key-chord-define-global "jp" 'projectile-find-file)
-(key-chord-define-global "jt" 'ace-jump-mode)
-(key-chord-define-global "jw" 'ace-window)
-(key-chord-define-global "kk" 'gh/kill-current-buffer)
-(key-chord-mode 1)
+(use-package key-chord
+  :config
+  (progn
+    (key-chord-define-global "jj" 'ibuffer)
+    (key-chord-define-global "j1" 'delete-other-windows)
+    (key-chord-define-global "JJ" 'magit-status)
+    (key-chord-define-global ",," 'ido-switch-buffer)
+    (key-chord-define-global "hh" 'ido-switch-buffer-other-window)
+    (key-chord-define-global "jf" 'ido-find-file)
+    (key-chord-define-global "JF" 'ido-find-file-other-window)
+    (key-chord-define-global "jg" 'org-agenda)
+    (key-chord-define-global "jp" 'projectile-find-file)
+    (key-chord-define-global "jt" 'ace-jump-mode)
+    (key-chord-define-global "jw" 'ace-window)
+    (key-chord-define-global "kk" 'gh/kill-current-buffer)
+    (key-chord-mode 1)))
