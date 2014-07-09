@@ -16,15 +16,16 @@
 
 (defvar my-packages '(use-package
                       better-defaults
+                      ido-ubiquitous
                       smex
                       ace-jump-mode
                       ace-window
+                      idle-highlight-mode
                       magit
                       company
                       projectile
                       key-chord
                       clojure-mode
-                      clojure-test-mode
                       clojurescript-mode
                       clojure-snippets
                       rainbow-delimiters
