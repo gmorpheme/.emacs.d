@@ -201,6 +201,10 @@
 (setq visible-bell t)
 (delete-selection-mode 1)
 
+;; make mouse and gesture scroll work sanely
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
+(setq mouse-wheel-progressive-speed nil)
+
 ;; prefer side-by-side window splits if the window is wide
 (setq split-height-threshold nil)
 (setq split-width-threshold 160)
