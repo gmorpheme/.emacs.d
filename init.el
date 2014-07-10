@@ -18,6 +18,7 @@
                       better-defaults
                       ido-ubiquitous
                       smex
+                      exec-path-from-shell
                       ace-jump-mode
                       ace-window
                       idle-highlight-mode
@@ -25,6 +26,7 @@
                       company
                       projectile
                       key-chord
+                      paredit
                       clojure-mode
                       clojurescript-mode
                       clojure-snippets
@@ -70,12 +72,23 @@
     'package-installed-p
     (mapcar 'car package-archive-contents))))
 
+(defmacro gcr/on-osx (statement &rest statements)
+  "Evaluate the enclosed body only when run on OSX."
+  `(when (eq system-type 'darwin)
+     ,statement
+     ,@statements))
+
+(gcr/on-osx
+    (exec-path-from-shell-initialize))
+
 ;;
 ;; Load other files
 ;;
 (setq gh/system-config (concat user-emacs-directory system-name ".el")
       gh/user-config (concat user-emacs-directory user-login-name ".el")
       gh/user-dir (concat user-emacs-directory user-login-name))
+
+
 
 (defun gh/eval-after-init (form)
     "Add `(lambda () FORM)' to `after-init-hook'.
@@ -183,6 +196,7 @@
 (put 'eval-expression 'disabled nil)
 
 (setq inhibit-splash-screen t)
+(blink-cursor-mode 0)
 (auto-compression-mode 1)
 (setq visible-bell t)
 (delete-selection-mode 1)
