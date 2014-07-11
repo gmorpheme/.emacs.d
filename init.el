@@ -79,7 +79,9 @@
      ,@statements))
 
 (gcr/on-osx
-    (exec-path-from-shell-initialize))
+ (exec-path-from-shell-initialize)
+ ;; typing hash on a UK mac in emacs is tricky
+ (global-set-key (kbd "s-3") '(lambda () (interactive) (insert "#"))))
 
 ;;
 ;; Load other files
