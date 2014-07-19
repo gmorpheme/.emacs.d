@@ -34,6 +34,7 @@
                       python-mode
                       groovy-mode
                       ruby-mode
+                      haskell-mode
                       puppet-mode
                       powershell
                       yasnippet
@@ -89,7 +90,6 @@
 (setq gh/system-config (concat user-emacs-directory system-name ".el")
       gh/user-config (concat user-emacs-directory user-login-name ".el")
       gh/user-dir (concat user-emacs-directory user-login-name))
-
 
 
 (defun gh/eval-after-init (form)
@@ -290,6 +290,13 @@
     (add-hook hook 'rainbow-delimiters-mode)))
 
 (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+
+;;
+;; Haskell mode
+;;
+(use-package haskell-mode
+  :init
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation))
 
 ;;
 ;; Javascript
