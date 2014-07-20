@@ -471,23 +471,6 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
 (setq org-confirm-babel-evaluate nil)
 
-;; jump to agenda when idle
-
-(defun gh/default-agenda ()
-  (interactive)
-  (org-agenda nil "y"))
-
-(defun gh/jump-to-org-agenda ()
-  (interactive)
-  (let ((buf (get-buffer "*Org Agenda*")))
-    (if buf
-        (with-selected-window (or (get-buffer-window buf)
-                                  (display-buffer buf (called-interactively-p)))
-          (org-fit-window-to-buffer))
-      (call-interactively 'gh/default-agenda))))
-
-(run-with-idle-timer 300 t 'gh/jump-to-org-agenda)
-
 ;;
 ;; Check for modifications to open files.
 ;;
