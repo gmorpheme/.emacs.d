@@ -80,9 +80,13 @@
      ,@statements))
 
 (gcr/on-osx
+ ;; try and get appropriate path by looking at what shell does
  (exec-path-from-shell-initialize)
  ;; typing hash on a UK mac in emacs is tricky
- (global-set-key (kbd "s-3") '(lambda () (interactive) (insert "#"))))
+ (global-set-key (kbd "s-3") '(lambda () (interactive) (insert "#")))
+ ;; work around "empty or unsupported pasteboard type" bug
+ ;; should be fixed in 24.4 so can remove at that point
+ (setq save-interprogram-paste-before-kill nil))
 
 ;;
 ;; Load other files
