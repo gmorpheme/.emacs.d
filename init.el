@@ -225,7 +225,7 @@
 ;; backups already in .emacs.d/backups -
 ;; keep several old versions but delete excess without prompting
 (setq version-control t)
-(setq delete-old-version t)
+(setq delete-old-versions t)
 
 ;;
 ;; Magit
