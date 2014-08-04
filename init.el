@@ -37,6 +37,7 @@
                       ruby-mode
                       haskell-mode
                       puppet-mode
+                      markdown-mode
                       powershell
                       yasnippet
                       zenburn-theme
