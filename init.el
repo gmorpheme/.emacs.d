@@ -33,6 +33,7 @@
                       rainbow-delimiters
                       python-mode
                       groovy-mode
+                      scala-mode
                       ruby-mode
                       haskell-mode
                       puppet-mode
