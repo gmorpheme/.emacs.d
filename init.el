@@ -29,7 +29,6 @@
                       paredit
                       clojure-mode
                       clojurescript-mode
-                      clojure-snippets
                       rainbow-delimiters
                       python-mode
                       groovy-mode
@@ -39,7 +38,6 @@
                       puppet-mode
                       markdown-mode
                       powershell
-                      yasnippet
                       zenburn-theme
                       color-theme-solarized
                       color-theme-sanityinc-tomorrow
@@ -547,8 +545,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
     (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode))
   :config
   (progn
-    (use-package midje-mode)
-    (use-package clojure-jump-to-file)))
+    (use-package midje-mode)))
 
 ;;
 ;; Remote shells
