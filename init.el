@@ -44,7 +44,8 @@
                       rainbow-mode
                       cider
                       midje-mode
-                      melpa)
+                      melpa
+                      restclient)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -111,6 +112,12 @@
     (when (file-exists-p gh/user-config) (load gh/user-config))
     (when (file-exists-p gh/user-dir)
       (mapc 'load (directory-files gh/user-dir t "^[^#].*el$")))))
+
+;;
+;; Not package-managed yet...
+;;
+(add-to-list 'load-path user-emacs-directory)
+(require 'julia-mode)
 
 ;; use package
 (require 'use-package)
@@ -557,8 +564,15 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 ;; Octave
 ;;
+;; for some reason this is in octave-mod on my mac 
+(autoload 'octave-mode "octave-mod" nil t)
 (use-package octave-mode
   :mode ("\\.m\\'" . octave-mode))
+
+;;
+;; Julia
+;;
+(use-package julia-mode)
 
 ;;
 ;; My bindings
