@@ -211,7 +211,8 @@
 (setq inhibit-splash-screen t)
 (blink-cursor-mode 0)
 (auto-compression-mode 1)
-(setq visible-bell t)
+(setq visible-bell nil)
+(setq ring-bell-function nil)
 (delete-selection-mode 1)
 
 ;; make mouse and gesture scroll work sanely
