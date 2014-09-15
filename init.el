@@ -37,6 +37,7 @@
                       haskell-mode
                       puppet-mode
                       markdown-mode
+                      ess
                       powershell
                       zenburn-theme
                       color-theme-solarized
