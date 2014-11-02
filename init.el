@@ -35,6 +35,7 @@
                       scala-mode
                       ruby-mode
                       haskell-mode
+                      lua-mode
                       puppet-mode
                       markdown-mode
                       ess
@@ -117,7 +118,7 @@
 ;;
 ;; Not package-managed yet...
 ;;
-(add-to-list 'load-path user-emacs-directory)
+(add-to-list 'load-path (concat user-emacs-directory "julia-mode"))
 (require 'julia-mode)
 
 ;; use package
