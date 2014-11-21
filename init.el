@@ -33,6 +33,7 @@
                       python-mode
                       js2-mode
                       ac-js2
+                      js-comint
                       groovy-mode
                       scala-mode
                       ruby-mode
@@ -321,10 +322,13 @@
   :mode ("\\.json$" . js-mode)
   :init
   (progn
-    (setq js-indent-level 2)
     (add-hook 'js-mode-hook 'js2-minor-mode)
     (add-hook 'js2-mode-hook 'ac-js2-mode)
-    (setq js2-highlight-level 3))
+    (add-hook 'inferior-js-mode-hook 'ansi-color-for-comint-mode-on)
+    (setenv "NODE_NO_READLINE" "1")
+    (setq js-indent-level 2)
+    (setq js2-highlight-level 3)
+    (setq inferior-js-program-command "node --interactive"))
   :config
   (progn
     (font-lock-add-keywords
