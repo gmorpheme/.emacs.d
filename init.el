@@ -31,6 +31,8 @@
                       clojurescript-mode
                       rainbow-delimiters
                       python-mode
+                      js2-mode
+                      ac-js2
                       groovy-mode
                       scala-mode
                       ruby-mode
@@ -318,7 +320,11 @@
 (use-package js
   :mode ("\\.json$" . js-mode)
   :init
-  (setq js-indent-level 2)
+  (progn
+    (setq js-indent-level 2)
+    (add-hook 'js-mode-hook 'js2-minor-mode)
+    (add-hook 'js2-mode-hook 'ac-js2-mode)
+    (setq js2-highlight-level 3))
   :config
   (progn
     (font-lock-add-keywords
