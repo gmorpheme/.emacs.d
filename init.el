@@ -23,6 +23,7 @@
                       ace-window
                       idle-highlight-mode
                       magit
+                      git-timemachine
                       company
                       projectile
                       key-chord
@@ -33,6 +34,7 @@
                       python-mode
                       js2-mode
                       ac-js2
+                      skewer-mode
                       js-comint
                       groovy-mode
                       scala-mode
@@ -323,6 +325,7 @@
   :init
   (progn
     (add-hook 'js-mode-hook 'js2-minor-mode)
+    (add-hook 'js-mode-hook 'skewer-mode)
     (add-hook 'js2-mode-hook 'ac-js2-mode)
     (add-hook 'inferior-js-mode-hook 'ansi-color-for-comint-mode-on)
     (setenv "NODE_NO_READLINE" "1")
@@ -346,7 +349,15 @@
   :init
   (progn
     (add-hook 'css-mode-hook 'gh/prog-mode-hook)
-    (add-hook 'css-mode-hook 'rainbow-mode)))
+    (add-hook 'css-mode-hook 'rainbow-mode)
+    (add-hook 'css-mode-hook 'skewer-css-mode)))
+
+;;
+;; HTML
+;;
+(use-package html-mode
+  :init
+  (add-hook 'html-mode-hook 'skewer-mode))
 
 ;;
 ;; Lots of files are really ruby these days
