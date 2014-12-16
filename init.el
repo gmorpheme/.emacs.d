@@ -90,6 +90,8 @@
 (gcr/on-osx
  ;; try and get appropriate path by looking at what shell does
  (exec-path-from-shell-initialize)
+ ;; and make sure we have a few other auth settings
+ (exec-path-from-shell-copy-envs '("AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY"))
  ;; typing hash on a UK mac in emacs is tricky
  (global-set-key (kbd "s-3") '(lambda () (interactive) (insert "#")))
  ;; work around "empty or unsupported pasteboard type" bug
@@ -487,6 +489,10 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
 (setq org-refile-allow-creating-parent-nodes (quote confirm))
 
+;; Archival
+(setq org-archive-location "$s_archive::datetree/")
+
+;; Key bindings
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
@@ -577,6 +583,17 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   :config
   (progn
     (use-package midje-mode)))
+
+;;
+;; EShell
+;;
+(use-package eshell
+  :init
+  (progn
+    (use-package em-smart)
+    (setq eshell-where-to-jump 'begin)
+    (setq eshell-review-quick-commands nil)
+    (setq eshell-smart-space-goes-to-end t)))
 
 ;;
 ;; Remote shells
