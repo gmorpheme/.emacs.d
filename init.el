@@ -52,7 +52,9 @@
                       cider
                       midje-mode
                       melpa
-                      restclient)
+                      restclient
+                      hydra
+                      bookmark+)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -490,7 +492,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (setq org-refile-allow-creating-parent-nodes (quote confirm))
 
 ;; Archival
-(setq org-archive-location "$s_archive::datetree/")
+(setq org-archive-location "%s_archive::datetree/")
 
 ;; Key bindings
 (global-set-key "\C-cl" 'org-store-link)
@@ -533,9 +535,9 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 ;; Python
 ;;
-(use-package python-mode
-  :init
-  (add-hook 'python-mode-hook 'gh/prog-mode-hook))
+;; (use-package python-mode
+;;   :init
+;;   (add-hook 'python-mode-hook 'gh/prog-mode-hook))
 
 ;;
 ;; Windows specifics
@@ -550,7 +552,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 ;; Theme
 ;;
-(load-theme 'sanityinc-tomorrow-blue t)
+(load-theme 'sanityinc-tomorrow-bright t)
 (load-theme 'zenburn t t)
 
 ;;
@@ -646,3 +648,35 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
     (key-chord-define-global "jw" 'ace-window)
     (key-chord-define-global "kk" 'gh/kill-current-buffer)
     (key-chord-mode 1)))
+
+(use-package hydra)
+
+(global-set-key
+ (kbd "C-M-o")
+ (defhydra hydra-window (:color amaranth)
+   "window"
+   ("h" windmove-left)
+   ("j" windmove-down)
+   ("k" windmove-up)
+   ("l" windmove-right)
+   ("v" (lambda ()
+          (interactive)
+          (split-window-right)
+          (windmove-right))
+        "vert")
+   ("x" (lambda ()
+          (interactive)
+          (split-window-below)
+          (windmove-down))
+        "horz")
+   ("t" transpose-frame "'")
+   ("o" delete-other-windows "one" :color blue)
+   ("a" ace-window "ace")
+   ("s" ace-swap-window "swap")
+   ("d" ace-delete-window "del")
+   ("i" ace-maximize-window "ace-one" :color blue)
+   ("b" ido-switch-buffer "buf")
+   ("m" headlong-bookmark-jump "bmk")
+   ("q" nil "cancel")))
+
+(use-package "bookmark+")
