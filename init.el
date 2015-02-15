@@ -17,29 +17,12 @@
 (defvar my-packages '(use-package
                       better-defaults
                       ido-ubiquitous
-                      smex
                       exec-path-from-shell
-                      ace-jump-mode
-                      ace-window
                       idle-highlight-mode
-                      magit
-                      git-timemachine
-                      company
-                      projectile
-                      key-chord
                       paredit
-                      clojure-mode
-                      clojurescript-mode
                       rainbow-delimiters
-                      python-mode
-                      js2-mode
-                      ac-js2
-                      skewer-mode
-                      js-comint
                       groovy-mode
                       scala-mode
-                      ruby-mode
-                      haskell-mode
                       lua-mode
                       puppet-mode
                       markdown-mode
@@ -48,13 +31,8 @@
                       zenburn-theme
                       color-theme-solarized
                       color-theme-sanityinc-tomorrow
-                      rainbow-mode
-                      cider
-                      midje-mode
                       melpa
-                      restclient
-                      hydra
-                      bookmark+)
+                      restclient)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -137,6 +115,7 @@
 ;; ido / smex / completion / jump / switching
 ;;
 (use-package smex
+  :ensure t
   :config
   (setq smex-save-file (concat user-emacs-directory ".smex-items"))
   :init
@@ -163,6 +142,7 @@
   :bind ("C-c SPC" . ace-jump-mode))
 
 (use-package ace-window
+  :ensure t
   :bind ("C-x o" . ace-window))
 
 ; quick access to occur from interactive search
@@ -173,19 +153,21 @@
 
 ;; company mode wherever - unless it gets slow
 (use-package company
+  :ensure t
   :diminish company-mode
-  :init
-  (add-hook 'after-init-hook 'global-company-mode))
+  :idle (global-company-mode))
 
 ;; snippets
 (use-package yasnippet
+  :ensure t
   :diminish yas-minor-mode
   :commands yas/hippie-try-expand
   :init (add-to-list 'hippie-expand-try-functions-list 'yas/hippie-try-expand)
-  :config (yas-global-mode 1))
+  :idle (yas-global-mode 1))
 
 ;; projectile mode everywhere
 (use-package projectile
+  :ensure t
   :config
   (projectile-global-mode))
 
@@ -250,6 +232,8 @@
 ;; Magit
 ;;
 (use-package magit
+  :ensure t
+  :ensure git-timemachine
   :bind (("C-c g" . magit-status)
          ("C-c G" . magit-status-with-prefix))
   :init
@@ -318,6 +302,7 @@
 ;; Haskell mode
 ;;
 (use-package haskell-mode
+  :ensure t
   :init
   (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation))
 
@@ -325,6 +310,10 @@
 ;; Javascript
 ;;
 (use-package js
+  :ensure js2-mode
+  :ensure ac-js2
+  :ensure skewer-mode
+  :ensure js-comint
   :mode ("\\.json$" . js-mode)
   :init
   (progn
@@ -350,6 +339,7 @@
 ;; CSS mode
 ;;
 (use-package css-mode
+  :ensure rainbow-mode
   :init
   (progn
     (add-hook 'css-mode-hook 'gh/prog-mode-hook)
@@ -367,6 +357,7 @@
 ;; Lots of files are really ruby these days
 ;;
 (use-package ruby-mode
+  :ensure t
   :disabled nil
   :init
   (add-hook 'ruby-mode-hook 'gh/prog-mode-hook)
@@ -535,9 +526,10 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 ;; Python
 ;;
-;; (use-package python-mode
-;;   :init
-;;   (add-hook 'python-mode-hook 'gh/prog-mode-hook))
+(use-package python-mode
+  :ensure t
+  :init
+  (add-hook 'python-mode-hook 'gh/prog-mode-hook))
 
 ;;
 ;; Windows specifics
@@ -559,6 +551,9 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;; CIDER / Clojure / ClojureScript
 ;;
 (use-package cider
+  :ensure clojure-mode
+  :ensure clojure-script-mode
+  :ensure t
   :init
   (progn
     (setq cider-repl-popup-stacktraces t
@@ -633,6 +628,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;; keychords to combat emacs-pinky
 ;;
 (use-package key-chord
+  :ensure t
   :config
   (progn
     (key-chord-define-global "jj" 'ibuffer)
@@ -649,7 +645,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
     (key-chord-define-global "kk" 'gh/kill-current-buffer)
     (key-chord-mode 1)))
 
-(use-package hydra)
+(use-package hydra
+  :ensure t)
 
 (global-set-key
  (kbd "C-M-o")
