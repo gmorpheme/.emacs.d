@@ -322,6 +322,7 @@
     (add-hook 'js2-mode-hook 'ac-js2-mode)
     (add-hook 'inferior-js-mode-hook 'ansi-color-for-comint-mode-on)
     (setenv "NODE_NO_READLINE" "1")
+    (setq tab-width 2)
     (setq js-indent-level 2)
     (setq js2-highlight-level 3)
     (setq inferior-js-program-command "node --interactive"))
@@ -544,7 +545,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 ;; Theme
 ;;
-(load-theme 'sanityinc-tomorrow-bright t)
+;; (load-theme 'sanityinc-tomorrow-bright t)
 (load-theme 'zenburn t t)
 
 ;;
@@ -605,7 +606,14 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;; for some reason this is in octave-mod on my mac 
 (autoload 'octave-mode "octave-mod" nil t)
 (use-package octave-mode
-  :mode ("\\.m\\'" . octave-mode))
+  :mode ("\\.m$" . octave-mode))
+
+;;
+;; YAML mode
+(use-package yaml-mode
+  :ensure t
+  :mode (("\\.yml$" . yaml-mode)
+         ("\\.yaml$" . yaml-mode)))
 
 ;;
 ;; Julia
