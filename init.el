@@ -112,16 +112,24 @@
 (require 'use-package)
 
 ;;
-;; ido / smex / completion / jump / switching
+;; helm / ido / smex / completion / jump / switching
 ;;
-(use-package smex
-  :ensure t
+
+(use-package helm-config
+  :bind (("M-x" . helm-M-x)
+         ("C-x f" . helm-multi-files)
+         ("C-x b" . helm-mini)
+         ("C-h a" . helm-apropos))
   :config
-  (setq smex-save-file (concat user-emacs-directory ".smex-items"))
-  :init
-  (smex-initialize)
-  :bind
-  ("M-x" . smex))
+
+  (use-package helm
+    :diminish helm-mode
+    :init (helm-mode 1))
+  
+  (when (executable-find "curl")
+    (setq helm-google-suggest-use-curl-p t)))
+
+(use-package helm-swoop :ensure t)
 
 (use-package ido
   :init
@@ -154,21 +162,28 @@
 ;; company mode wherever - unless it gets slow
 (use-package company
   :ensure t
+  :defer 10
   :diminish company-mode
-  :idle (global-company-mode))
+  :config (global-company-mode))
 
 ;; snippets
 (use-package yasnippet
   :ensure t
+  :defer 30
   :diminish yas-minor-mode
   :commands yas/hippie-try-expand
-  :init (add-to-list 'hippie-expand-try-functions-list 'yas/hippie-try-expand)
-  :idle (yas-global-mode 1))
+  :init (progn
+          (add-to-list 'hippie-expand-try-functions-list 'yas/hippie-try-expand)
+          (yas-global-mode 1)))
 
 ;; projectile mode everywhere
 (use-package projectile
   :ensure t
   :config
+  (use-package helm-projectile
+    :config
+    (setq projectile-completion-system 'helm)
+    (helm-projectile-on))
   (projectile-global-mode))
 
 (defun gh/kill-current-buffer ()
@@ -237,7 +252,8 @@
   :bind (("C-c g" . magit-status)
          ("C-c G" . magit-status-with-prefix))
   :init
-  (setq magit-status-buffer-switch-function 'switch-to-buffer))
+  (setq magit-status-buffer-switch-function 'switch-to-buffer)
+  (setq magit-last-seen-setup-instructions "1.4.0"))
 
 ;;
 ;; lambdas and todos
@@ -290,7 +306,7 @@
 ;;
 ;; Lisp modes
 ;;
-(dolist (mode '(scheme emacs-lisp lisp clojure clojurescript))
+(dolist (mode '(scheme emacs-lisp lisp clojure))
   (let ((hook (intern (concat (symbol-name mode) "-mode-hook"))))
     (add-hook hook 'gh/prog-mode-hook)
     (add-hook hook 'paredit-mode)
@@ -545,16 +561,16 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 ;; Theme
 ;;
-;; (load-theme 'sanityinc-tomorrow-bright t)
-(load-theme 'zenburn t t)
+(load-theme 'zenburn t)
 
 ;;
 ;; CIDER / Clojure / ClojureScript
 ;;
 (use-package cider
   :ensure clojure-mode
-  :ensure clojure-script-mode
   :ensure t
+  :mode (("\\.clj\\[scx\\]?$" . clojure-mode)
+         ("\\.boot$" . clojure-mode))
   :init
   (progn
     (setq cider-repl-popup-stacktraces t
@@ -576,7 +592,6 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                   (context 2)
                   (defroutes 'defun))))
     (add-hook 'clojure-mode-hook 'gh/pretty-fn)
-    (add-hook 'clojurescript-mode-hook 'gh/pretty-fn)
     (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode))
   :config
   (progn
@@ -642,10 +657,9 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
     (key-chord-define-global "jj" 'ibuffer)
     (key-chord-define-global "j1" 'delete-other-windows)
     (key-chord-define-global "JJ" 'magit-status)
-    (key-chord-define-global ",," 'ido-switch-buffer)
+    (key-chord-define-global ",," 'helm-mini)
     (key-chord-define-global "hh" 'ido-switch-buffer-other-window)
-    (key-chord-define-global "jf" 'ido-find-file)
-    (key-chord-define-global "JF" 'ido-find-file-other-window)
+    (key-chord-define-global "jf" 'helm-multi-files)
     (key-chord-define-global "jg" 'org-agenda)
     (key-chord-define-global "jp" 'projectile-find-file)
     (key-chord-define-global "jt" 'ace-jump-mode)
