@@ -179,8 +179,11 @@
 ;; projectile mode everywhere
 (use-package projectile
   :ensure t
+  :diminish projectile-mode
+  :defer 5
   :config
   (use-package helm-projectile
+    :ensure t
     :config
     (setq projectile-completion-system 'helm)
     (helm-projectile-on))
@@ -577,7 +580,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
           cider-auto-select-error-buffer t
           cider-repl-print-length 200
           cider-prompt-save-file-on-load nil
-          cider-repl-use-clojure-font-lock t)
+          cider-repl-use-clojure-font-lock t
+          nrepl-hide-special-buffers t)
     (add-hook 'clojure-mode-hook
               (lambda ()
                 (define-clojure-indent
@@ -592,10 +596,16 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                   (context 2)
                   (defroutes 'defun))))
     (add-hook 'clojure-mode-hook 'gh/pretty-fn)
-    (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode))
+    (add-hook 'cider-repl-mode-hook #'subword-mode)
+    (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+    (add-hook 'cider-repl-mode-hook #'subword-mode)
+    (add-hook 'cider-repl-mode-hook #'paredit-mode))
   :config
-  (progn
-    (use-package midje-mode)))
+  (use-package midje-mode)
+  (use-package eval-sexp-fu
+    :ensure t)
+  (use-package cider-eval-sexp-fu
+    :ensure t))
 
 ;;
 ;; EShell
@@ -648,8 +658,15 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (global-set-key [(ctrl f9)] 'eshell)
 
 ;;
-;; keychords to combat emacs-pinky
+;; keychords and hydras to combat emacs-pinky
 ;;
+
+(use-package hydra
+  :ensure t)
+
+(use-package transpose-frame
+  :ensure t)
+
 (use-package key-chord
   :ensure t
   :config
@@ -659,16 +676,14 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
     (key-chord-define-global "JJ" 'magit-status)
     (key-chord-define-global ",," 'helm-mini)
     (key-chord-define-global "hh" 'ido-switch-buffer-other-window)
-    (key-chord-define-global "jf" 'helm-multi-files)
+    (key-chord-define-global "jk" 'transpose-frame)
+    (key-chord-define-global "jf" 'ido-find-file)
     (key-chord-define-global "jg" 'org-agenda)
     (key-chord-define-global "jp" 'projectile-find-file)
     (key-chord-define-global "jt" 'ace-jump-mode)
     (key-chord-define-global "jw" 'ace-window)
     (key-chord-define-global "kk" 'gh/kill-current-buffer)
     (key-chord-mode 1)))
-
-(use-package hydra
-  :ensure t)
 
 (global-set-key
  (kbd "C-M-o")
@@ -688,7 +703,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
           (split-window-below)
           (windmove-down))
         "horz")
-   ("t" transpose-frame "'")
+   ("t" transpose-frame "'" :color blue)
    ("o" delete-other-windows "one" :color blue)
    ("a" ace-window "ace")
    ("s" ace-swap-window "swap")
