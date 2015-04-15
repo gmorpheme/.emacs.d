@@ -474,10 +474,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
           (tags "WAITING"
                 ((org-agenda-overriding-header "=== To Chase")))
           (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
-                     ((org-agenda-overriding-header "=== Unscheduled High Priority")))
-          (todo "NEXT"
-                ((org-agenda-overriding-header "=== Unscheduled NEXT")
-                 (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))))))
+                     ((org-agenda-overriding-header "=== Unscheduled High Priority")))))
         ("3" tags-todo "T3")
         ("e" tags-todo "ERRAND")))
 
@@ -606,6 +603,25 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
     :ensure t)
   (use-package cider-eval-sexp-fu
     :ensure t))
+
+;;
+;; Ruby
+;;
+(use-package enh-ruby-mode
+  :ensure t
+  :mode ("\\.rb$"
+         "\\.rake$"
+         "\\.gemspec$"
+         "\\.ru$"
+         "\\.thor$"
+         "Rakefile$"
+         "Gemfile$"
+         "Gapfile$"
+         "Vagrantfile$")
+  :interpreter "ruby"
+  :config
+  (setq enh-ruby-bounce-deep-indent t)
+  (setq enh-ruby-hanging-brace-indent-level 2))
 
 ;;
 ;; EShell
