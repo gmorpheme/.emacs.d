@@ -356,6 +356,12 @@
     (bind-key "}" 'paredit-close-curly js-mode-map)))
 
 ;;
+;; TypeScript mode
+;;
+(use-package typescript-mode
+  :ensure t)
+
+;;
 ;; CSS mode
 ;;
 (use-package css-mode
