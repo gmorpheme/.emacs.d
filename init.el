@@ -102,12 +102,6 @@
     (when (file-exists-p gh/user-dir)
       (mapc 'load (directory-files gh/user-dir t "^[^#].*el$")))))
 
-;;
-;; Not package-managed yet...
-;;
-(add-to-list 'load-path (concat user-emacs-directory "julia-mode"))
-(require 'julia-mode)
-
 ;; use package
 (require 'use-package)
 
@@ -668,7 +662,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 ;; Julia
 ;;
-(use-package julia-mode)
+(use-package julia-mode
+  :ensure t)
 
 ;;
 ;; My bindings
