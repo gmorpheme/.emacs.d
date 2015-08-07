@@ -374,24 +374,6 @@
   (add-hook 'html-mode-hook 'skewer-mode))
 
 ;;
-;; Lots of files are really ruby these days
-;;
-(use-package ruby-mode
-  :ensure t
-  :disabled nil
-  :init
-  (add-hook 'ruby-mode-hook 'gh/prog-mode-hook)
-  :mode (("\\.rake$" . ruby-mode)
-         ("\\.thor$" . ruby-mode)
-         ("\\.gemspec$" . ruby-mode)
-         ("\\.ru$" . ruby-mode)
-         ("Rakefile$" . ruby-mode)
-         ("Thorfile$" . ruby-mode)
-         ("Gemfile$" . ruby-mode)
-         ("Capfile$" . ruby-mode)
-         ("Vagrantfile$" . ruby-mode)))
-
-;;
 ;; Ensure that lisp-interaction can still evaluate on ctrl-j...
 ;;
 (defadvice paredit-newline (around eval-print-last-sexp activate)
@@ -615,6 +597,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
          "\\.ru$"
          "\\.thor$"
          "Rakefile$"
+         "Thorfile$"
          "Gemfile$"
          "Gapfile$"
          "Vagrantfile$")
