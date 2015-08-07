@@ -1,10 +1,2 @@
-Moving to emacs 24 is an opportunity to clear out my .emacs.d files that
-have been evolving over ten years.
-
-Loads of stuff just I just don't use anymore (c++, ldif...). Some
-things are now in emacs itself or can be pulled in using the new package.el
-package management. Much of the code is commented out anyway.
-
-So this is my new emacs configuration based partly on starting from
-scratch with package.el / emacs starter kit and partly on merging in
-the remnants I still use from my my old configuration.
+My emacs config. Not intended for anyone other than me, but no big
+secrets.
