@@ -623,6 +623,9 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   (setq enh-ruby-bounce-deep-indent t)
   (setq enh-ruby-hanging-brace-indent-level 2))
 
+(use-package terraform-mode
+  :ensure t)
+
 ;;
 ;; EShell
 ;;
