@@ -546,10 +546,11 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (load-theme 'zenburn t)
 
 ;;
-;; CIDER / Clojure / ClojureScript
+;; CIDER / Clojure / ClojureScript / clj-refactor
 ;;
 (use-package cider
   :ensure clojure-mode
+  :ensure clj-refactor
   :ensure t
   :mode (("\\.clj\\[scx\\]?$" . clojure-mode)
          ("\\.boot$" . clojure-mode))
@@ -571,9 +572,13 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                   (POST 2)
                   (PUT 2)
                   (with 2)
+                  (match 1)
                   (domonad 1)
                   (context 2)
                   (defroutes 'defun))))
+    (add-hook 'clojure-mode-hook (lambda ()
+                                   (clj-refactor-mode 1)
+                                   (cljr-add-keybindings-with-prefix "C-c C-m")))
     (add-hook 'clojure-mode-hook 'gh/pretty-fn)
     (add-hook 'cider-repl-mode-hook #'subword-mode)
     (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
