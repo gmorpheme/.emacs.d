@@ -306,7 +306,7 @@
 ;;
 ;; Lisp modes
 ;;
-(dolist (mode '(scheme emacs-lisp lisp clojure))
+(dolist (mode '(scheme emacs-lisp lisp clojure racket))
   (let ((hook (intern (concat (symbol-name mode) "-mode-hook"))))
     (add-hook hook 'gh/prog-mode-hook)
     (add-hook hook 'paredit-mode)
@@ -663,11 +663,18 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 
 ;;
 ;; Erlang
+;;
 (use-package erlang
   :ensure t
   :ensure edts
   :config
   (require 'edts-start))
+
+;;
+;; Racket
+;;
+(use-package racket-mode
+  :ensure t)
 
 ;;
 ;; Terraform
