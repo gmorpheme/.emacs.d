@@ -29,8 +29,11 @@
                       ess
                       powershell
                       zenburn-theme
+                      soft-stone-theme
+                      soft-morning-theme
                       color-theme-solarized
                       color-theme-sanityinc-tomorrow
+                      base16-theme
                       melpa
                       restclient)
   "A list of packages to ensure are installed at launch.")
@@ -543,7 +546,48 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 ;; Theme
 ;;
-(load-theme 'zenburn t)
+(defun gh/clear-themes ()
+  (interactive)
+  (mapcar 'disable-theme custom-enabled-themes))
+
+(defun gh/enable-theme (theme)
+  (progn
+    (gh/clear-themes)
+    (message (format "Switched to theme: %s" theme))
+    (load-theme theme)))
+
+(setq gh/dark-themes '(zenburn
+                       sanityinc-tomorrow-blue
+                       sanityinc-tomorrow-bright
+                       sanityinc-tomorrow-eighties
+                       base16-monokai-dark
+                       base16-mocha-dark
+                       base16-ocean-dark))
+
+(setq gh/light-themes '(soft-morning
+                        soft-stone
+                        solarized
+                        base16-embers-light))
+
+(defun gh/cycle-themes (themes)
+  (let* ((current-theme (car custom-enabled-themes))
+         (tail (member current-theme themes))
+         (next-theme (if (or (null tail)
+                             (null (cdr tail)))
+                         (car themes)
+                       (cadr tail))))
+    (gh/enable-theme next-theme)))
+
+(defun gh/cycle-dark-themes ()
+  (interactive)
+  (gh/cycle-themes gh/dark-themes))
+
+(defun gh/cycle-light-themes ()
+  (interactive)
+  (gh/cycle-themes gh/light-themes))
+
+(global-set-key [(f6)] 'gh/cycle-dark-themes)
+(global-set-key [(shift f6)] 'gh/cycle-light-themes)
 
 ;;
 ;; CIDER / Clojure / ClojureScript / clj-refactor
@@ -596,6 +640,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 (use-package enh-ruby-mode
   :ensure t
+  :ensure rvm
+  :ensure robe
   :mode ("\\.rb$"
          "\\.rake$"
          "\\.gemspec$"
@@ -607,6 +653,12 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
          "Gapfile$"
          "Vagrantfile$")
   :interpreter "ruby"
+  :init
+  (progn
+    (defadvice inf-ruby-console-auto
+        (before activate-rvm-for-robe activate)
+      (rvm-activate-corresponding-ruby))
+    (add-hook 'enh-ruby-mode-hook 'robe-mode))
   :config
   (setq enh-ruby-bounce-deep-indent t)
   (setq enh-ruby-hanging-brace-indent-level 2))
