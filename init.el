@@ -490,9 +490,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;; Key bindings
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
 (global-set-key "\C-cc" 'org-capture)
-(global-set-key [f12] 'org-capture)
 
 ;; Distraction on f12
 (define-key global-map [f12]
@@ -663,6 +661,17 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   (setq enh-ruby-bounce-deep-indent t)
   (setq enh-ruby-hanging-brace-indent-level 2))
 
+;;
+;; Erlang
+(use-package erlang
+  :ensure t
+  :ensure edts
+  :config
+  (require 'edts-start))
+
+;;
+;; Terraform
+;;
 (use-package terraform-mode
   :ensure t)
 
