@@ -25,7 +25,6 @@
                       scala-mode
                       lua-mode
                       puppet-mode
-                      markdown-mode
                       ess
                       powershell
                       zenburn-theme
@@ -107,6 +106,14 @@
 
 ;; use package
 (require 'use-package)
+
+;;
+;; Markdown
+;;
+(use-package markdown-mode
+  :ensure t
+  :mode ("\\.md$"
+         "\\.apib$"))
 
 ;;
 ;; helm / ido / smex / completion / jump / switching
