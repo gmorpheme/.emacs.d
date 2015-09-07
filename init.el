@@ -223,6 +223,7 @@
 (put 'downcase-region 'disabled nil)
 (put 'eval-expression 'disabled nil)
 
+(setq require-final-newline t)
 (setq inhibit-splash-screen t)
 (blink-cursor-mode 0)
 (auto-compression-mode 1)
@@ -334,10 +335,10 @@
 ;;
 (use-package js
   :ensure js2-mode
+  :ensure json-mode
   :ensure ac-js2
   :ensure skewer-mode
   :ensure js-comint
-  :mode ("\\.json$" . js-mode)
   :init
   (progn
     (add-hook 'js-mode-hook 'js2-minor-mode)
