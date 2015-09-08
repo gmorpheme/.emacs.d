@@ -33,8 +33,7 @@
                       color-theme-solarized
                       color-theme-sanityinc-tomorrow
                       base16-theme
-                      melpa
-                      restclient)
+                      melpa)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -640,6 +639,14 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
     :ensure t)
   (use-package cider-eval-sexp-fu
     :ensure t))
+
+;;
+;; REST client
+;;
+(use-package restclient
+  :ensure t
+  :init (add-hook 'restclient-mode-hook
+                  (lambda () (setq tab-width 2))))
 
 ;;
 ;; Ruby
