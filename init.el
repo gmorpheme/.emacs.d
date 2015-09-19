@@ -330,6 +330,14 @@
   (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation))
 
 ;;
+;; OCaml
+;;
+(use-package tuareg
+  :ensure t
+  :mode (("\\.ml[ily]?$" . tuareg-mode)
+         ("\\.topml$" . tuareg-mode)))
+
+;;
 ;; Javascript
 ;;
 (use-package js
