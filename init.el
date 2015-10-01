@@ -809,7 +809,4 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
    ("d" ace-delete-window "del")
    ("i" ace-maximize-window "ace-one" :color blue)
    ("b" ido-switch-buffer "buf")
-   ("m" headlong-bookmark-jump "bmk")
    ("q" nil "cancel")))
-
-(use-package "bookmark+")
