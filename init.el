@@ -261,7 +261,7 @@
   :init
   (progn
     (setq magit-restore-window-configuration t)
-    (setq magit-log-maybe-show-more-commits t)
+    (setq magit-log-auto-more t)
     (setq magit-status-buffer-switch-function 'switch-to-buffer)))
 
 ;;
