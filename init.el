@@ -259,8 +259,10 @@
   :bind (("C-c g" . magit-status)
          ("C-c G" . magit-status-with-prefix))
   :init
-  (setq magit-status-buffer-switch-function 'switch-to-buffer)
-  (setq magit-last-seen-setup-instructions "1.4.0"))
+  (progn
+    (setq magit-restore-window-configuration t)
+    (setq magit-status-buffer-switch-function 'switch-to-buffer)
+    (setq magit-last-seen-setup-instructions "1.4.0")))
 
 ;;
 ;; lambdas and todos
