@@ -261,8 +261,8 @@
   :init
   (progn
     (setq magit-restore-window-configuration t)
-    (setq magit-status-buffer-switch-function 'switch-to-buffer)
-    (setq magit-last-seen-setup-instructions "1.4.0")))
+    (setq magit-log-maybe-show-more-commits t)
+    (setq magit-status-buffer-switch-function 'switch-to-buffer)))
 
 ;;
 ;; lambdas and todos
@@ -776,6 +776,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
     (key-chord-define-global "jj" 'ibuffer)
     (key-chord-define-global "j1" 'delete-other-windows)
     (key-chord-define-global "JJ" 'magit-status)
+    (key-chord-define-global "jz" 'magit-dispatch-popup)
     (key-chord-define-global ",," 'helm-mini)
     (key-chord-define-global "hh" 'ido-switch-buffer-other-window)
     (key-chord-define-global "jk" 'transpose-frame)
