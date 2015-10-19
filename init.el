@@ -328,6 +328,8 @@
 ;;
 (use-package haskell-mode
   :ensure t
+  :mode (("\\.hs" . haskell-mode)
+         ("\\.fr" . haskell-mode))
   :init
   (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation))
 
@@ -516,6 +518,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (org-babel-do-load-languages
  (quote org-babel-load-languages)
  (quote ((emacs-lisp . t)
+         (python . t)
+         (sh . t)
          (dot . t)
          (ditaa . t)
          (plantuml . t))))
