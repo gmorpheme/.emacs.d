@@ -409,9 +409,10 @@
 (setq default-major-mode 'org-mode)
 (setq org-directory "~/dropbox/notes")
 (setq org-default-notes-file (concat org-directory "/notes.org"))
-(setq org-mobile-directory "~/dropbox/MobileOrg")
-(setq org-mobile-inbox-for-pull "~/dropbox/from-mobile.org")
+(setq org-adapt-indentation nil)
+(setq org-list-description-max-indent 5)
 
+;; Export settings
 (setq org-ditaa-jar-path "~/.emacs.d/deps/ditaa0_9.jar")
 (setq org-plantuml-jar-path "~/.emacs.d/deps/plantuml.jar")
 (setq org-html-head-extra "<link rel=\"stylesheet\" href=\"http://www.gmorpheme.net/theme/css/main.css\">
@@ -427,6 +428,10 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 })();</script>")
 
 (setq org-html-head-include-default-style nil)
+
+;; Mobile settings
+(setq org-mobile-directory "~/dropbox/MobileOrg")
+(setq org-mobile-inbox-for-pull "~/dropbox/from-mobile.org")
 
 (defvar gh/org-mobile-sync-timer nil)
 
@@ -450,6 +455,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 
 (setq org-use-speed-commands t)
 
+;; Clock settings
+
 (setq org-clock-into-drawer t)
 ;; Remove zero second clocks
 (setq org-clock-out-remove-zero-time-clocks t)
@@ -462,6 +469,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 
 ;; exclude certain tags from inheritance
 (setq org-tags-exclude-from-inheritance '("PROJECT"))
+
+;; Agenda settings
 
 (setq org-agenda-window-setup 'current-window)
 
@@ -481,6 +490,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                      ((org-agenda-overriding-header "=== Unscheduled High Priority")))))
         ("3" tags-todo "T3")
         ("e" tags-todo "ERRAND")))
+
+;; Capture and refile settings
 
 (setq org-capture-templates
       '(("s" "Start of day" entry (file+datetree org-default-notes-file)
@@ -515,6 +526,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (define-key global-map [f12]
   (lambda () (interactive) (org-capture nil "d")))
 
+;; Org babel
 (org-babel-do-load-languages
  (quote org-babel-load-languages)
  (quote ((emacs-lisp . t)
