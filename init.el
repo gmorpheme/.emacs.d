@@ -758,8 +758,7 @@ directory to make multiple eshell windows easier."
     (eshell-send-input)))
 
 (defun eshell/x ()
-  (insert "exit")
-  (eshell-send-input)
+  (kill-buffer)
   (delete-window))
 
 ;;
