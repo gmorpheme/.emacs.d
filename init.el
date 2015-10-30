@@ -371,6 +371,10 @@
     (bind-key "{" 'paredit-open-curly js-mode-map)
     (bind-key "}" 'paredit-close-curly js-mode-map)))
 
+(use-package web-mode
+  :ensure t
+  :mode (("\\.jsx$" . web-mode)))
+
 ;;
 ;; TypeScript mode
 ;;
