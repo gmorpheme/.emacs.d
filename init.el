@@ -738,6 +738,30 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
     (setq eshell-review-quick-commands nil)
     (setq eshell-smart-space-goes-to-end t)))
 
+;; From howardism.org
+(defun eshell-here ()
+  "Opens up a new shell in the directory associated with the
+current buffer's file. The eshell is renamed to match that
+directory to make multiple eshell windows easier."
+  (interactive)
+  (let* ((parent (if (buffer-file-name)
+                     (file-name-directory (buffer-file-name))
+                   default-directory))
+         (height (/ (window-total-height) 3))
+         (name   (car (last (split-string parent "/" t)))))
+    (split-window-vertically (- height))
+    (other-window 1)
+    (eshell "new")
+    (rename-buffer (concat "*eshell: " name "*"))
+
+    (insert (concat "ls"))
+    (eshell-send-input)))
+
+(defun eshell/x ()
+  (insert "exit")
+  (eshell-send-input)
+  (delete-window))
+
 ;;
 ;; Remote shells
 ;;
@@ -777,7 +801,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;; put all kinds of shells on f9...
 (global-set-key [(f9)] 'py-shell)
 (global-set-key [(shift f9)] 'shell) 
-(global-set-key [(ctrl f9)] 'eshell)
+(global-set-key [(ctrl f9)] 'eshell-here)
 
 ;;
 ;; keychords and hydras to combat emacs-pinky
