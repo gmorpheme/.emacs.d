@@ -761,6 +761,11 @@ directory to make multiple eshell windows easier."
   (kill-buffer)
   (delete-window))
 
+(defalias 'd 'dired)
+(defalias 'ff 'find-file)
+(defalias 'g 'magit-status)
+
+
 ;;
 ;; Remote shells
 ;;
