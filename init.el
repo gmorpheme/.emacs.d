@@ -654,6 +654,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                   (match 1)
                   (domonad 1)
                   (context 2)
+                  (defui '(1 nil nil (1)))
                   (defroutes 'defun))))
     (add-hook 'clojure-mode-hook (lambda ()
                                    (clj-refactor-mode 1)
