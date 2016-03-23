@@ -27,3 +27,7 @@
 /.emacs.desktop.lock
 /desktop
 /url/
+/.emacs.desktop
+/abbrev_defs
+/ac-comphist.dat
+/persp-confs
