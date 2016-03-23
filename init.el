@@ -313,6 +313,13 @@
   (run-hooks 'prog-mode-hook))
 
 ;;
+;; Shell mode
+;;
+(use-package shell-script-mode
+  :init
+  (add-hook 'shell-script-mode-hook 'prog-mode-hook))
+
+;;
 ;; Lisp modes
 ;;
 (dolist (mode '(scheme emacs-lisp lisp clojure racket))
