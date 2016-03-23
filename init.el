@@ -257,7 +257,8 @@
   :ensure t
   :ensure git-timemachine
   :bind (("C-c g" . magit-status)
-         ("C-c G" . magit-status-with-prefix))
+         ("C-c b" . magit-blame)
+         ("C-c t" . git-timemachine))
   :init
   (progn
     (setq magit-restore-window-configuration t)
@@ -311,6 +312,14 @@
 
 (defun gh/prog-mode-hook ()
   (run-hooks 'prog-mode-hook))
+
+;;
+;; An actually usable imenu thing
+;;
+(use-package popup-imenu
+  :ensure t
+  :commands popup-imenu
+  :bind ("M-i" . popup-imenu))
 
 ;;
 ;; Shell mode
