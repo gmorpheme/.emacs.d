@@ -27,11 +27,11 @@
                       puppet-mode
                       ess
                       powershell
-                      zenburn-theme
                       soft-stone-theme
                       soft-morning-theme
                       color-theme-solarized
                       color-theme-sanityinc-tomorrow
+                      zenburn-theme
                       base16-theme
                       melpa)
   "A list of packages to ensure are installed at launch.")
@@ -162,11 +162,15 @@
       (let ((case-fold-search isearch-case-fold-search))
         (occur (if isearch-regexp isearch-string (regexp-quote isearch-string))))))
 
-;; company mode wherever - unless it gets slow
+;; company mode wherever - unless and until it gets slow
 (use-package company
   :ensure t
   :defer 10
   :diminish company-mode
+  :init
+  (setq
+   company-idle-delay 0.05
+   company-dabbrev-downcase nil)
   :config (global-company-mode))
 
 ;; snippets
@@ -206,7 +210,6 @@
 ;;
 (prefer-coding-system 'utf-8)
 (set-default 'indicate-empty-lines t)
-(set-default 'imenu-auto-rescan t)
 
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 (add-hook 'text-mode-hook 'turn-on-flyspell)
@@ -280,23 +283,12 @@
   (when (> (display-color-cells) 8)
     (hl-line-mode t)))
 
-(defun gh/pretty-lambdas ()
-  (font-lock-add-keywords
-   nil `(("(?\\(lambda\\>\\)"
-          (0 (progn (compose-region (match-beginning 1) (match-end 1)
-                                    ,(make-char 'greek-iso8859-7 107))
-                    nil))))))
-
-(defun gh/pretty-fn ()
-  (font-lock-add-keywords nil `(("(\\(\\<fn\\>\\)"
-                                 (0 (progn (compose-region (match-beginning 1)
-                                                           (match-end 1)
-                                                           "\u0192"
-                                                           'decompose-region)))))))
+(defun gh/add-prettify-symbols ()
+  (push '("fn" . "\u0192") prettify-symbols-alist))
 
 (defun gh/add-watchwords ()
   (font-lock-add-keywords
-   nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"
+   nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|HACK\\)"
           1 font-lock-warning-face t))))
 
 (defun gh/truncate-lines ()
@@ -304,7 +296,8 @@
 
 (add-hook 'prog-mode-hook 'gh/local-column-number-mode)
 (add-hook 'prog-mode-hook 'gh/local-comment-auto-fill)
-(add-hook 'prog-mode-hook 'gh/pretty-lambdas)
+(add-hook 'prog-mode-hook 'gh/add-prettify-symbols)
+(add-hook 'prog-mode-hook 'prettify-symbols-mode)
 (add-hook 'prog-mode-hook 'gh/add-watchwords)
 (add-hook 'prog-mode-hook 'idle-highlight-mode)
 (add-hook 'prog-mode-hook 'gh/truncate-lines)
@@ -316,6 +309,7 @@
 ;;
 ;; An actually usable imenu thing
 ;;
+(set-default 'imenu-auto-rescan t)
 (use-package popup-imenu
   :ensure t
   :commands popup-imenu
@@ -426,32 +420,6 @@
 ;;
 ;; Org Mode
 ;;
-(setq default-major-mode 'org-mode)
-(setq org-directory "~/dropbox/notes")
-(setq org-default-notes-file (concat org-directory "/notes.org"))
-(setq org-adapt-indentation nil)
-(setq org-list-description-max-indent 5)
-
-;; Export settings
-(setq org-ditaa-jar-path "~/.emacs.d/deps/ditaa0_9.jar")
-(setq org-plantuml-jar-path "~/.emacs.d/deps/plantuml.jar")
-(setq org-html-head-extra "<link rel=\"stylesheet\" href=\"http://www.gmorpheme.net/theme/css/main.css\">
-<script type=\"text/javascript\">
-WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
-  var wf = document.createElement('script');
-  wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
-  '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
-  wf.type = 'text/javascript';
-  wf.async = 'true';
-  var s = document.getElementsByTagName('script')[0];
-  s.parentNode.insertBefore(wf, s);
-})();</script>")
-
-(setq org-html-head-include-default-style nil)
-
-;; Mobile settings
-(setq org-mobile-directory "~/dropbox/MobileOrg")
-(setq org-mobile-inbox-for-pull "~/dropbox/from-mobile.org")
 
 (defvar gh/org-mobile-sync-timer nil)
 
@@ -471,97 +439,109 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   (interactive)
   (cancel-timer gh/org-mobile-sync-timer))
 
-(gh/org-mobile-start-sync)
+(use-package org
+  :init
+  (setq default-major-mode 'org-mode)
+  (setq org-directory "~/dropbox/notes")
+  (setq org-default-notes-file (concat org-directory "/notes.org"))
+  (setq org-adapt-indentation nil)
+  (setq org-list-description-max-indent 5)
+  (setq org-html-head-extra "<link rel=\"stylesheet\" href=\"http://www.gmorpheme.net/theme/css/main.css\">
+<script type=\"text/javascript\">
+WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
+  var wf = document.createElement('script');
+  wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+  '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+  wf.type = 'text/javascript';
+  wf.async = 'true';
+  var s = document.getElementsByTagName('script')[0];
+  s.parentNode.insertBefore(wf, s);
+})();</script>")
 
-(setq org-use-speed-commands t)
+  (setq org-html-head-include-default-style nil)
 
-;; Clock settings
+  ;; Mobile settings
+  (setq org-mobile-directory "~/dropbox/MobileOrg")
+  (setq org-mobile-inbox-for-pull "~/dropbox/from-mobile.org")
 
-(setq org-clock-into-drawer t)
-;; Remove zero second clocks
-(setq org-clock-out-remove-zero-time-clocks t)
-;; Include current clocking task in clock reports
-(setq org-clock-report-include-clocking-task t)
-;; Do not prompt to resume an active clock
-(setq org-clock-persist-query-resume nil)
+  (gh/org-mobile-start-sync)
 
-(setq org-drawers '("PROPERTIES" "LOGBOOK" "CLOCK" "RESULTS"))
+  (setq org-use-speed-commands t)
 
-;; exclude certain tags from inheritance
-(setq org-tags-exclude-from-inheritance '("PROJECT"))
+  ;; Clock settings
 
-;; Agenda settings
+  (setq org-clock-into-drawer t)          ; Remove zero second clocks
+  (setq org-clock-out-remove-zero-time-clocks t) ; Include current clocking task in clock reports
+  (setq org-clock-report-include-clocking-task t) ; Do not prompt to resume an active clock
+  (setq org-clock-persist-query-resume nil)
 
-(setq org-agenda-window-setup 'current-window)
+  (setq org-drawers '("PROPERTIES" "LOGBOOK" "CLOCK" "RESULTS"))
 
-(setq org-agenda-compact-blocks t)
-(setq org-agenda-custom-commands
-      '(("y" "Grand Unified Agenda"
-         ((agenda ""
-                  ((org-agenda-ndays 1)
-                   (org-agenda-overriding-header "=== Today")))
-          (tags-todo "ORGANISE"
-                     ((org-agenda-overriding-header "=== Daily Admin")))
-          (tags "REFILE|TIDY"
-                ((org-agenda-overriding-header "=== To Refile / Tidy")))
-          (tags "WAITING"
-                ((org-agenda-overriding-header "=== To Chase")))
-          (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
-                     ((org-agenda-overriding-header "=== Unscheduled High Priority")))))
-        ("3" tags-todo "T3")
-        ("e" tags-todo "ERRAND")))
+  ;; exclude certain tags from inheritance
+  (setq org-tags-exclude-from-inheritance '("PROJECT"))
 
-;; Capture and refile settings
+  ;; Agenda settings
+  (setq org-agenda-window-setup 'current-window)
+  (setq org-agenda-compact-blocks t)
+  (setq org-agenda-custom-commands
+        '(("y" "Grand Unified Agenda"
+           ((agenda ""
+                    ((org-agenda-ndays 1)
+                     (org-agenda-overriding-header "=== Today")))
+            (tags-todo "ORGANISE"
+                       ((org-agenda-overriding-header "=== Daily Admin")))
+            (tags "REFILE|TIDY"
+                  ((org-agenda-overriding-header "=== To Refile / Tidy")))
+            (tags "WAITING"
+                  ((org-agenda-overriding-header "=== To Chase")))
+            (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
+                       ((org-agenda-overriding-header "=== Unscheduled High Priority")))))
+          ("3" tags-todo "T3")
+          ("e" tags-todo "ERRAND")))
 
-(setq org-capture-templates
-      '(("s" "Start of day" entry (file+datetree org-default-notes-file)
-         (file "template-day.org")
-         :clock-in t)
-        
-        ("w" "Weekly review" entry (file+datetree org-default-notes-file)
-         (file "template-week.org")
-         :clock-in t)
-        
-        ("m" "End of month review" entry (file+datetree org-default-notes-file)
-         (file "template-month.org") :clock-in t)
-        
-        ("t" "Todo" entry (file+headline org-default-notes-file "Inbox")
-         "* TODO %?\n  %i\n  %a")
-        
-        ("d" "Distraction / called away" entry (file+headline org-default-notes-file "Inbox")
-         "* %?\n %i\n %a\n" :clock-resume t :clock-in t)))
+  ;; Capture and refile settings
+  (setq org-capture-templates
+        '(("s" "Start of day" entry (file+datetree org-default-notes-file)
+           (file "template-day.org")
+           :clock-in t)
+          
+          ("w" "Weekly review" entry (file+datetree org-default-notes-file)
+           (file "template-week.org")
+           :clock-in t)
+          
+          ("m" "End of month review" entry (file+datetree org-default-notes-file)
+           (file "template-month.org") :clock-in t)
+          
+          ("t" "Todo" entry (file+headline org-default-notes-file "Inbox")
+           "* TODO %?\n  %i\n  %a")
+          
+          ("d" "Distraction / called away" entry (file+headline org-default-notes-file "Inbox")
+           "* %?\n %i\n %a\n" :clock-resume t :clock-in t)))
 
-(setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
-(setq org-refile-allow-creating-parent-nodes (quote confirm))
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
+  (setq org-refile-allow-creating-parent-nodes (quote confirm))
 
-;; Archival
-(setq org-archive-location "%s_archive::datetree/")
+  ;; Archival
+  (setq org-archive-location "%s_archive::datetree/")
+
+  ;; Org babel
+  (org-babel-do-load-languages
+   (quote org-babel-load-languages)
+   (quote ((emacs-lisp . t)
+           (js . t)
+           (clojure . t)
+           (ruby . t)
+           (python . t)
+           (sh . t)
+           (dot . t))))
+  (setq org-confirm-babel-evaluate nil
+        org-src-fontify-natively t
+        org-src-tab-acts-natively t))
 
 ;; Key bindings
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cc" 'org-capture)
-
-;; Distraction on f12
-(define-key global-map [f12]
-  (lambda () (interactive) (org-capture nil "d")))
-
-;; Org babel
-(org-babel-do-load-languages
- (quote org-babel-load-languages)
- (quote ((emacs-lisp . t)
-         (js . t)
-         (clojure . t)
-         (ruby . t)
-         (python . t)
-         (sh . t)
-         (dot . t)
-         (ditaa . t)
-         (plantuml . t))))
-(add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
-(setq org-confirm-babel-evaluate nil
-      org-src-fontify-natively t
-      org-src-tab-acts-natively t)
 
 ;;
 ;; Check for modifications to open files.
@@ -613,11 +593,10 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
     (load-theme theme)))
 
 (setq gh/dark-themes '(zenburn
-                       sanityinc-tomorrow-blue
                        sanityinc-tomorrow-bright
                        sanityinc-tomorrow-eighties
+                       sanityinc-tomorrow-blue
                        base16-monokai-dark
-                       base16-mocha-dark
                        base16-ocean-dark))
 
 (setq gh/light-themes '(soft-morning
@@ -644,6 +623,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 
 (global-set-key [(f6)] 'gh/cycle-dark-themes)
 (global-set-key [(shift f6)] 'gh/cycle-light-themes)
+
+(gh/enable-theme 'base16-monokai-dark)
 
 ;;
 ;; CIDER / Clojure / ClojureScript / clj-refactor
@@ -727,6 +708,17 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   :config
   (setq enh-ruby-bounce-deep-indent t)
   (setq enh-ruby-hanging-brace-indent-level 2))
+
+;;
+;; Java mode
+;;
+(use-package java-mode
+  :mode "\\.java$"
+  :init
+  (add-hook 'java-mode-hook 'gh/prog-mode-hook)
+  (add-hook 'java-mode-hook (lambda ()
+                              (setq tab-width 2)
+                              (subword-mode t))))
 
 ;;
 ;; Erlang
