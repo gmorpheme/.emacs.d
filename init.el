@@ -534,13 +534,18 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (org-babel-do-load-languages
  (quote org-babel-load-languages)
  (quote ((emacs-lisp . t)
+         (js . t)
+         (clojure . t)
+         (ruby . t)
          (python . t)
          (sh . t)
          (dot . t)
          (ditaa . t)
          (plantuml . t))))
 (add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
-(setq org-confirm-babel-evaluate nil)
+(setq org-confirm-babel-evaluate nil
+      org-src-fontify-natively t
+      org-src-tab-acts-natively t)
 
 ;;
 ;; Check for modifications to open files.
@@ -658,7 +663,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                   (defroutes 'defun))))
     (add-hook 'clojure-mode-hook (lambda ()
                                    (clj-refactor-mode 1)
-                                   (cljr-add-keybindings-with-prefix "C-c C-m")))
+                                   (cljr-add-keybindings-with-prefix "C-c r")))
     (add-hook 'clojure-mode-hook 'gh/pretty-fn)
     (add-hook 'cider-repl-mode-hook #'subword-mode)
     (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
@@ -715,6 +720,15 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   :ensure edts
   :config
   (require 'edts-start))
+
+;;
+;; Elixir
+;;
+(use-package elixir-mode
+  :ensure t)
+
+(use-package alchemist
+  :ensure t)
 
 ;;
 ;; Racket
@@ -863,3 +877,4 @@ directory to make multiple eshell windows easier."
    ("i" ace-maximize-window "ace-one" :color blue)
    ("b" ido-switch-buffer "buf")
    ("q" nil "cancel")))
+(put 'set-goal-column 'disabled nil)
