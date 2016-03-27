@@ -341,6 +341,7 @@
   :mode (("\\.hs" . haskell-mode)
          ("\\.fr" . haskell-mode))
   :init
+  (add-hook 'haskell-mode-hook 'gh/prog-mode-hook)
   (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation))
 
 ;;
@@ -596,13 +597,11 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                        sanityinc-tomorrow-bright
                        sanityinc-tomorrow-eighties
                        sanityinc-tomorrow-blue
-                       base16-monokai-dark
-                       base16-ocean-dark))
+                       base16-monokai-dark))
 
 (setq gh/light-themes '(soft-morning
                         soft-stone
-                        solarized
-                        base16-embers-light))
+                        solarized))
 
 (defun gh/cycle-themes (themes)
   (let* ((current-theme (car custom-enabled-themes))
@@ -661,7 +660,6 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
     (add-hook 'clojure-mode-hook (lambda ()
                                    (clj-refactor-mode 1)
                                    (cljr-add-keybindings-with-prefix "C-c r")))
-    (add-hook 'clojure-mode-hook 'gh/pretty-fn)
     (add-hook 'cider-repl-mode-hook #'subword-mode)
     (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
     (add-hook 'cider-repl-mode-hook #'subword-mode)
@@ -720,6 +718,16 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                               (setq tab-width 2)
                               (subword-mode t))))
 
+(use-package log4j-mode
+  :ensure t
+  :mode "\\.log$"
+  :init
+  (add-hook 'log4j-mode-hook 'gh/prog-mode-hook)
+  (add-hook 'log4j-mode-hook 'gh/turn-on-hl-line-mode)
+  (add-hook 'log4j-mode-hook (lambda ()
+                               (read-only-mode t)
+                               (view-mode t))))
+
 ;;
 ;; Erlang
 ;;
@@ -757,9 +765,9 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   :init
   (progn
     (use-package em-smart)
-    (setq eshell-where-to-jump 'begin)
-    (setq eshell-review-quick-commands nil)
-    (setq eshell-smart-space-goes-to-end t)))
+    (setq eshell-where-to-jump 'begin
+          eshell-review-quick-commands nil
+          eshell-smart-space-goes-to-end t)))
 
 ;; From howardism.org
 (defun eshell-here ()
