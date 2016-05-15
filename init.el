@@ -344,6 +344,9 @@
   (add-hook 'haskell-mode-hook 'gh/prog-mode-hook)
   (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation))
 
+(use-package elm-mode
+  :ensure t)
+
 ;;
 ;; OCaml
 ;;
@@ -745,6 +748,14 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 
 (use-package alchemist
   :ensure t)
+
+;;
+;; Golang
+;;
+(use-package go-mode
+  :ensure t
+  :ensure go-autocomplete
+  :ensure go-projectile)
 
 ;;
 ;; Racket
