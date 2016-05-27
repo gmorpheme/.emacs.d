@@ -664,7 +664,6 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                                    (clj-refactor-mode 1)
                                    (cljr-add-keybindings-with-prefix "C-c r")))
     (add-hook 'cider-repl-mode-hook #'subword-mode)
-    (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
     (add-hook 'cider-repl-mode-hook #'subword-mode)
     (add-hook 'cider-repl-mode-hook #'paredit-mode))
   :config
@@ -768,6 +767,13 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 (use-package terraform-mode
   :ensure t)
+
+;;
+;; Docker
+;;
+(use-package docker
+  :ensure t
+  :ensure dockerfile-mode)
 
 ;;
 ;; EShell
