@@ -448,6 +448,7 @@
   (setq default-major-mode 'org-mode)
   (setq org-directory "~/dropbox/notes")
   (setq org-default-notes-file (concat org-directory "/notes.org"))
+  (setq gh/refile-file (concat org-directory "/refile.org"))
   (setq org-adapt-indentation nil)
   (setq org-list-description-max-indent 5)
   (setq org-html-head-extra "<link rel=\"stylesheet\" href=\"http://www.gmorpheme.net/theme/css/main.css\">
@@ -470,14 +471,24 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 
   (gh/org-mobile-start-sync)
 
+  (setq org-startup-indented t)
+  (setq org-insert-heading-respect-content nil)
+  (setq org-return-follows-link t)
+  
   (setq org-use-speed-commands t)
+  (setq org-todo-keywords
+        (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+                (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING"))))
 
   ;; Clock settings
 
-  (setq org-clock-into-drawer t)          ; Remove zero second clocks
-  (setq org-clock-out-remove-zero-time-clocks t) ; Include current clocking task in clock reports
-  (setq org-clock-report-include-clocking-task t) ; Do not prompt to resume an active clock
-  (setq org-clock-persist-query-resume nil)
+  (setq org-clock-into-drawer t)
+  (setq org-clock-out-remove-zero-time-clocks t) ; Remove zero second clocks
+  (setq org-clock-report-include-clocking-task t) ; Include current clocking task in clock reports
+  (setq org-clock-in-resume t)
+  (setq org-clock-persist t)
+  (setq org-clock-auto-clock-resolution 'when-no-clock-is-running)
+  (setq org-clock-persist-query-resume nil) ; Do not prompt to resume an active clock
 
   (setq org-drawers '("PROPERTIES" "LOGBOOK" "CLOCK" "RESULTS"))
 
@@ -485,44 +496,57 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   (setq org-tags-exclude-from-inheritance '("PROJECT"))
 
   ;; Agenda settings
-  (setq org-agenda-window-setup 'current-window)
+
+  ;; Modal effect, full window but restore windows on q
+  (setq org-agenda-window-setup 'only-window)
+  (setq org-agenda-restore-windows-after-quit t)
+  
   (setq org-agenda-compact-blocks t)
   (setq org-agenda-custom-commands
-        '(("y" "Grand Unified Agenda"
+        '((" " "Grand Unified Agenda"
            ((agenda ""
                     ((org-agenda-ndays 1)
                      (org-agenda-overriding-header "=== Today")))
-            (tags-todo "ORGANISE"
-                       ((org-agenda-overriding-header "=== Daily Admin")))
+            (tags "FLAGGED"
+                  ((org-agenda-overriding-header "=== Flagged")
+                   (org-show-context-detail 'lineage)))
             (tags "REFILE|TIDY"
                   ((org-agenda-overriding-header "=== To Refile / Tidy")))
-            (tags "WAITING"
-                  ((org-agenda-overriding-header "=== To Chase")))
             (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
-                       ((org-agenda-overriding-header "=== Unscheduled High Priority")))))
-          ("3" tags-todo "T3")
-          ("e" tags-todo "ERRAND")))
+                       ((org-agenda-overriding-header "=== Unscheduled High Priority")))))))
 
   ;; Capture and refile settings
   (setq org-capture-templates
-        '(("s" "Start of day" entry (file+datetree org-default-notes-file)
+        '(("s" "start day" entry (file+datetree org-default-notes-file)
            (file "template-day.org")
            :clock-in t)
           
-          ("w" "Weekly review" entry (file+datetree org-default-notes-file)
+          ("w" "weekly review" entry (file+datetree org-default-notes-file)
            (file "template-week.org")
            :clock-in t)
           
-          ("m" "End of month review" entry (file+datetree org-default-notes-file)
+          ("M" "monthly review" entry (file+datetree org-default-notes-file)
            (file "template-month.org") :clock-in t)
           
-          ("t" "Todo" entry (file+headline org-default-notes-file "Inbox")
+          ("t" "todo" entry (file gh/refile-file)
            "* TODO %?\n  %i\n  %a")
           
-          ("d" "Distraction / called away" entry (file+headline org-default-notes-file "Inbox")
-           "* %?\n %i\n %a\n" :clock-resume t :clock-in t)))
+          ("r" "respond" entry (file gh/refile-file)
+           "* NEXT Respond to %? \nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+          
+          ("n" "note" entry (file gh/refile-file)
+           "* %? :NOTE:\n%U\n\n" :clock-in t :clock-resume t)
+          
+          ("i" "interruption" entry (file gh/refile-file)
+           "* %U :INTERRUPTION:\n\n%?\n" :clock-resume t :clock-in t)
 
-  (setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
+          ("m" "meeting" entry (file gh/refile-file)
+           "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+          
+          ("p" "phone call" entry (file gh/refile-file)
+           "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)))
+
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 7)))
   (setq org-refile-allow-creating-parent-nodes (quote confirm))
 
   ;; Archival
@@ -542,9 +566,17 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
         org-src-fontify-natively t
         org-src-tab-acts-natively t))
 
-;; Key bindings
+(defun gh/clock-in-from-history ()
+  (interactive)
+  (org-clock-in '(4)))
+
+;; Global key bindings for org stuff
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
+(global-set-key (kbd "<f12>") 'org-agenda)
+(global-set-key [(shift f12)] 'org-capture) 
+(global-set-key (kbd "<f11>") 'org-clock-goto)
+(global-set-key [(shift f11)] 'gh/clock-in-from-history) 
 (global-set-key "\C-cc" 'org-capture)
 
 ;;
@@ -658,12 +690,13 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                   (match 1)
                   (domonad 1)
                   (context 2)
+                  (for-all 1)
                   (defui '(1 nil nil (1)))
                   (defroutes 'defun))))
     (add-hook 'clojure-mode-hook (lambda ()
+                                   (eldoc-mode 1)
                                    (clj-refactor-mode 1)
                                    (cljr-add-keybindings-with-prefix "C-c r")))
-    (add-hook 'cider-repl-mode-hook #'subword-mode)
     (add-hook 'cider-repl-mode-hook #'subword-mode)
     (add-hook 'cider-repl-mode-hook #'paredit-mode))
   :config
