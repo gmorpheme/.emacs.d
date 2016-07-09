@@ -538,10 +538,10 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
            "* %? :NOTE:\n%U\n\n" :clock-in t :clock-resume t)
           
           ("i" "interruption" entry (file gh/refile-file)
-           "* %U :INTERRUPTION:\n\n%?\n" :clock-resume t :clock-in t)
+           "* %? :INTERRUPTION:\n\n\n" :clock-resume t :clock-in t)
 
           ("m" "meeting" entry (file gh/refile-file)
-           "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+           "* MEETING %? :MEETING:\n%U" :clock-in t :clock-resume t)
           
           ("p" "phone call" entry (file gh/refile-file)
            "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)))
