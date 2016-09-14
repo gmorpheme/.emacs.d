@@ -189,6 +189,7 @@
   :diminish projectile-mode
   :defer 5
   :config
+  (setq projectile-switch-project-action #'projectile-commander)
   (use-package helm-projectile
     :ensure t
     :config
@@ -338,11 +339,14 @@
 ;;
 (use-package haskell-mode
   :ensure t
+  :ensure intero
   :mode (("\\.hs" . haskell-mode)
          ("\\.fr" . haskell-mode))
   :init
+  (setq haskell-compile-cabal-build-command "stack build")
   (add-hook 'haskell-mode-hook 'gh/prog-mode-hook)
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation))
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+  (add-hook 'haskell-mode-hook 'intero-mode))
 
 (use-package elm-mode
   :ensure t)
@@ -763,6 +767,12 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                                (read-only-mode t)
                                (view-mode t))))
 
+;;;
+;;; C++
+;;; 
+(use-package cmake-mode
+  :ensure t)
+
 ;;
 ;; Erlang
 ;;
@@ -884,9 +894,9 @@ directory to make multiple eshell windows easier."
 (global-set-key [(f8)] 'toggle-truncate-lines)
 (global-set-key [(shift f8)] 'linum-mode)
 ;; put all kinds of shells on f9...
-(global-set-key [(f9)] 'py-shell)
+(global-set-key [(ctrl f9)] 'py-shell)
 (global-set-key [(shift f9)] 'shell) 
-(global-set-key [(ctrl f9)] 'eshell-here)
+(global-set-key [(f9)] 'eshell-here)
 
 ;;
 ;; keychords and hydras to combat emacs-pinky
@@ -944,3 +954,4 @@ directory to make multiple eshell windows easier."
    ("b" ido-switch-buffer "buf")
    ("q" nil "cancel")))
 (put 'set-goal-column 'disabled nil)
+
