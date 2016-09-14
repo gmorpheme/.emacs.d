@@ -115,24 +115,29 @@
          "\\.apib$"))
 
 ;;
-;; helm / ido / smex / completion / jump / switching
+;; ivy 
 ;;
 
-(use-package helm-config
-  :bind (("M-x" . helm-M-x)
-         ("C-x f" . helm-multi-files)
-         ("C-x b" . helm-mini)
-         ("C-h a" . helm-apropos))
-  :config
-
-  (use-package helm
-    :diminish helm-mode
-    :init (helm-mode 1))
-  
-  (when (executable-find "curl")
-    (setq helm-google-suggest-use-curl-p t)))
-
 (use-package helm-swoop :ensure t)
+
+(use-package ivy
+  :ensure t
+  :ensure flx
+  :ensure smex
+  :ensure ivy-hydra
+  :ensure counsel
+  :ensure counsel-projectile
+  :diminish (ivy-mode . "")
+  :bind (("M-x" . counsel-M-x)
+         ("C-x f" . counsel-find-file)
+         ("C-x b" . ivy-switch-buffer)
+         ("C-s" . swiper))
+  :config
+  (ivy-mode 1)
+  (setq ivy-count-format ""
+        ivy-display-style nil
+        ivy-minibuffer-faces nil
+        ivy-use-virtual-buffers t))
 
 (use-package ido
   :init
@@ -190,11 +195,7 @@
   :defer 5
   :config
   (setq projectile-switch-project-action #'projectile-commander)
-  (use-package helm-projectile
-    :ensure t
-    :config
-    (setq projectile-completion-system 'helm)
-    (helm-projectile-on))
+  (setq projectile-completion-system 'ivy)
   (projectile-global-mode))
 
 (defun gh/kill-current-buffer ()
@@ -777,10 +778,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;; Erlang
 ;;
 (use-package erlang
-  :ensure t
-  :ensure edts
-  :config
-  (require 'edts-start))
+  :ensure t)
 
 ;;
 ;; Elixir
@@ -916,15 +914,16 @@ directory to make multiple eshell windows easier."
     (key-chord-define-global "j1" 'delete-other-windows)
     (key-chord-define-global "JJ" 'magit-status)
     (key-chord-define-global "jz" 'magit-dispatch-popup)
-    (key-chord-define-global ",," 'helm-mini)
-    (key-chord-define-global "hh" 'ido-switch-buffer-other-window)
+    (key-chord-define-global ",," 'ivy-switch-buffer)
+    (key-chord-define-global "hh" 'ivy-switch-buffer-other-window)
     (key-chord-define-global "jk" 'transpose-frame)
-    (key-chord-define-global "jf" 'ido-find-file)
+    (key-chord-define-global "jf" 'counsel-find-file)
     (key-chord-define-global "jg" 'org-agenda)
     (key-chord-define-global "jp" 'projectile-find-file)
     (key-chord-define-global "jt" 'ace-jump-mode)
     (key-chord-define-global "jw" 'ace-window)
     (key-chord-define-global "kk" 'gh/kill-current-buffer)
+    (key-chord-define-global "YY" 'counsel-yank-pop)
     (key-chord-mode 1)))
 
 (global-set-key
