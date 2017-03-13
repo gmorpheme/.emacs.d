@@ -605,7 +605,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 ;; Python
 ;;
-(use-package python-mode
+(use-package python
   :ensure t
   :init
   (add-hook 'python-mode-hook 'gh/prog-mode-hook))
@@ -637,7 +637,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                        sanityinc-tomorrow-bright
                        sanityinc-tomorrow-eighties
                        sanityinc-tomorrow-blue
-                       base16-monokai-dark))
+                       base16-monokai))
 
 (setq gh/light-themes '(soft-morning
                         soft-stone
@@ -663,7 +663,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (global-set-key [(f6)] 'gh/cycle-dark-themes)
 (global-set-key [(shift f6)] 'gh/cycle-light-themes)
 
-(gh/enable-theme 'base16-monokai-dark)
+(gh/enable-theme 'base16-monokai)
 
 ;;
 ;; CIDER / Clojure / ClojureScript / clj-refactor
