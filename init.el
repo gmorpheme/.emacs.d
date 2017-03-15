@@ -1,4 +1,4 @@
-;;; init.el
+; init.el
 ;;
 ;; Much of this is stolen from elsehwere, in particular Phil
 ;; Hagelberg's emacs-starter-kit, while it existed.
@@ -118,8 +118,6 @@
 ;; ivy 
 ;;
 
-(use-package helm-swoop :ensure t)
-
 (use-package ivy
   :ensure t
   :ensure flx
@@ -128,10 +126,10 @@
   :ensure counsel
   :ensure counsel-projectile
   :diminish (ivy-mode . "")
-  :bind (("M-x" . counsel-M-x)
+  :bind (("C-'" . ivy-avy)
+         ("M-x" . counsel-M-x)
          ("C-x f" . counsel-find-file)
-         ("C-x b" . ivy-switch-buffer)
-         ("C-s" . swiper))
+         ("C-x b" . ivy-switch-buffer))
   :config
   (ivy-mode 1)
   (setq ivy-count-format ""
@@ -194,7 +192,6 @@
   :diminish projectile-mode
   :defer 5
   :config
-  (setq projectile-switch-project-action #'projectile-commander)
   (setq projectile-completion-system 'ivy)
   (projectile-global-mode))
 
@@ -318,13 +315,6 @@
   :bind ("M-i" . popup-imenu))
 
 ;;
-;; Shell mode
-;;
-(use-package shell-script-mode
-  :init
-  (add-hook 'shell-script-mode-hook 'prog-mode-hook))
-
-;;
 ;; Lisp modes
 ;;
 (dolist (mode '(scheme emacs-lisp lisp clojure racket))
@@ -367,7 +357,6 @@
   :ensure js2-mode
   :ensure json-mode
   :ensure ac-js2
-  :ensure skewer-mode
   :ensure js-comint
   :init
   (progn
@@ -410,13 +399,6 @@
     (add-hook 'css-mode-hook 'gh/prog-mode-hook)
     (add-hook 'css-mode-hook 'rainbow-mode)
     (add-hook 'css-mode-hook 'skewer-css-mode)))
-
-;;
-;; HTML
-;;
-(use-package html-mode
-  :init
-  (add-hook 'html-mode-hook 'skewer-mode))
 
 ;;
 ;; Ensure that lisp-interaction can still evaluate on ctrl-j...
@@ -503,7 +485,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   ;; Agenda settings
 
   ;; Modal effect, full window but restore windows on q
-  (setq org-agenda-window-setup 'only-window)
+  (setq org-agenda-window-setup 'reorganize-frame)
   (setq org-agenda-restore-windows-after-quit t)
   
   (setq org-agenda-compact-blocks t)
@@ -922,6 +904,7 @@ directory to make multiple eshell windows easier."
     (key-chord-define-global "jf" 'counsel-find-file)
     (key-chord-define-global "jg" 'org-agenda)
     (key-chord-define-global "jp" 'projectile-find-file)
+    (key-chord-define-global "jP" 'projectile-switch-project)
     (key-chord-define-global "jt" 'ace-jump-mode)
     (key-chord-define-global "jw" 'ace-window)
     (key-chord-define-global "kk" 'gh/kill-current-buffer)
