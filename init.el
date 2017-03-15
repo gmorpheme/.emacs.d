@@ -886,13 +886,15 @@ directory to make multiple eshell windows easier."
 ;;
 ;; My bindings
 ;;
+(define-key shell-mode-map (kbd "SPC") 'comint-magic-space)
+
 (global-set-key "\C-o" 'query-replace)
 (global-set-key [(control next)] 'scroll-other-window)
 (global-set-key [(control prior)] 'scroll-other-window-down)
 (global-set-key [(f8)] 'toggle-truncate-lines)
 (global-set-key [(shift f8)] 'linum-mode)
 ;; put all kinds of shells on f9...
-(global-set-key [(ctrl f9)] 'py-shell)
+(global-set-key [(ctrl f9)] 'run-python)
 (global-set-key [(shift f9)] 'shell) 
 (global-set-key [(f9)] 'eshell-here)
 
