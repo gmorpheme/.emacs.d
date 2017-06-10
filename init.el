@@ -229,7 +229,7 @@
 (blink-cursor-mode 0)
 (auto-compression-mode 1)
 (setq visible-bell nil)
-(setq ring-bell-function nil)
+(setq ring-bell-function 'ignore)
 (delete-selection-mode 1)
 
 ;; make mouse and gesture scroll work sanely
