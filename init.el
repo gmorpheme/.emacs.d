@@ -16,17 +16,12 @@
 
 (defvar my-packages '(use-package
                       better-defaults
-                      ido-ubiquitous
                       exec-path-from-shell
                       idle-highlight-mode
                       paredit
                       rainbow-delimiters
-                      groovy-mode
                       scala-mode
-                      lua-mode
-                      puppet-mode
                       ess
-                      powershell
                       soft-stone-theme
                       soft-morning-theme
                       color-theme-solarized
@@ -35,6 +30,8 @@
                       base16-theme
                       melpa)
   "A list of packages to ensure are installed at launch.")
+
+(setq use-package-verbose t)
 
 (dolist (p my-packages)
   (when (not (package-installed-p p))
@@ -137,20 +134,21 @@
         ivy-minibuffer-faces nil
         ivy-use-virtual-buffers t))
 
-(use-package ido
-  :init
-  ;; ido with flex-matching already turned on in better-defaults.el
-  (setq ido-enable-prefix nil
-        ido-auto-merge-work-directories-length nil
-        ido-create-new-buffer 'always
-        ido-use-filename-at-point 'guess
-        ido-use-virtual-buffers t
-        ido-handle-duplicate-virtual-buffers 2
-        ido-max-prospects 10
-        ido-default-file-method 'selected-window
-        ido-default-buffer-method 'selected-window)
-  :config
-  (ido-ubiquitous t))
+;; (use-package ido
+;;   :ensure ido-ubiquitous
+;;   :init
+;;   ;; ido with flex-matching already turned on in better-defaults.el
+;;   (setq ido-enable-prefix nil
+;;         ido-auto-merge-work-directories-length nil
+;;         ido-create-new-buffer 'always
+;;         ido-use-filename-at-point 'guess
+;;         ido-use-virtual-buffers t
+;;         ido-handle-duplicate-virtual-buffers 2
+;;         ido-max-prospects 10
+;;         ido-default-file-method 'selected-window
+;;         ido-default-buffer-method 'selected-window)
+;;   :config
+;;   (ido-ubiquitous t))
 
 (use-package ace-jump-mode
   :bind ("C-c SPC" . ace-jump-mode))
@@ -253,7 +251,7 @@
 (setq delete-old-versions t)
 
 ;;
-;; Magit
+;; Git
 ;;
 (use-package magit
   :ensure t
@@ -266,6 +264,11 @@
     (setq magit-restore-window-configuration t)
     (setq magit-log-auto-more t)
     (setq magit-status-buffer-switch-function 'switch-to-buffer)))
+
+;; (use-package magithub
+;;   :ensure t
+;;   :after magit
+;;   :config (magithub-feature-autoinject t))
 
 ;;
 ;; lambdas and todos
@@ -339,8 +342,12 @@
   (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
   (add-hook 'haskell-mode-hook 'intero-mode))
 
+;;;
+;;; Elm mode
+;;; 
 (use-package elm-mode
-  :ensure t)
+  :ensure t
+  :mode "\\.elm")
 
 ;;
 ;; OCaml
@@ -358,6 +365,7 @@
   :ensure json-mode
   :ensure ac-js2
   :ensure js-comint
+  :mode "\\.js$"
   :init
   (progn
     (add-hook 'js-mode-hook 'js2-minor-mode)
@@ -387,13 +395,15 @@
 ;; TypeScript mode
 ;;
 (use-package typescript-mode
-  :ensure t)
+  :ensure t
+  :mode "\\.ts$")
 
 ;;
 ;; CSS mode
 ;;
 (use-package css-mode
   :ensure rainbow-mode
+  :mode "\\.css"
   :init
   (progn
     (add-hook 'css-mode-hook 'gh/prog-mode-hook)
@@ -589,6 +599,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 (use-package python
   :ensure t
+  :commands (run-python)
+  :mode "\\.py$"
   :init
   (add-hook 'python-mode-hook 'gh/prog-mode-hook))
 
@@ -698,6 +710,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;
 (use-package restclient
   :ensure t
+  :commands (restclient-mode)
+  :mode "\\.http"
   :init (add-hook 'restclient-mode-hook
                   (lambda () (setq tab-width 2))))
 
@@ -754,22 +768,26 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;;; C++
 ;;; 
 (use-package cmake-mode
-  :ensure t)
+  :ensure t
+  :mode "CMakeLists.txt")
 
 ;;
 ;; Erlang
 ;;
 (use-package erlang
-  :ensure t)
+  :ensure t
+  :mode "\\.erl$")
 
 ;;
 ;; Elixir
 ;;
 (use-package elixir-mode
-  :ensure t)
+  :ensure t
+  :defer t)
 
 (use-package alchemist
-  :ensure t)
+  :ensure t
+  :defer t)
 
 ;;
 ;; Golang
@@ -777,37 +795,36 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (use-package go-mode
   :ensure t
   :ensure go-autocomplete
-  :ensure go-projectile)
+  :ensure go-projectile
+  :mode "\\.go")
 
 ;;
 ;; Racket
 ;;
 (use-package racket-mode
-  :ensure t)
+  :ensure t
+  :defer t)
 
 ;;
 ;; Terraform
 ;;
 (use-package terraform-mode
-  :ensure t)
+  :ensure t
+  :defer t)
 
 ;;
 ;; Docker
 ;;
 (use-package docker
   :ensure t
-  :ensure dockerfile-mode)
+  :ensure dockerfile-mode
+  :defer t)
 
 ;;
 ;; EShell
 ;;
 (use-package eshell
-  :init
-  (progn
-    (use-package em-smart)
-    (setq eshell-where-to-jump 'begin
-          eshell-review-quick-commands nil
-          eshell-smart-space-goes-to-end t)))
+  :commands (eshell))
 
 ;; From howardism.org
 (defun eshell-here ()
@@ -861,7 +878,8 @@ directory to make multiple eshell windows easier."
 ;; Julia
 ;;
 (use-package julia-mode
-  :ensure t)
+  :ensure t
+  :mode "\\.jl$")
 
 ;;
 ;; My bindings
@@ -886,7 +904,8 @@ directory to make multiple eshell windows easier."
   :ensure t)
 
 (use-package transpose-frame
-  :ensure t)
+  :ensure t
+  :commands (transpose-frame))
 
 (use-package key-chord
   :ensure t
