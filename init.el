@@ -20,7 +20,6 @@
                       idle-highlight-mode
                       paredit
                       rainbow-delimiters
-                      scala-mode
                       ess
                       soft-stone-theme
                       soft-morning-theme
@@ -58,6 +57,18 @@
    (remove-if-not
     'package-installed-p
     (mapcar 'car package-archive-contents))))
+
+;;
+;; Keep customize-based settings separate
+;;
+(setq custom-file "~/.emacs.d/.emacs-custom")
+(load custom-file 'no-error)
+
+;;; 
+;;; Load a secrets file if present too
+;;;
+
+(load "~/.emacs.secrets" t)
 
 (defmacro gcr/on-osx (statement &rest statements)
   "Evaluate the enclosed body only when run on OSX."
@@ -99,6 +110,12 @@
     (when (file-exists-p gh/user-config) (load gh/user-config))
     (when (file-exists-p gh/user-dir)
       (mapc 'load (directory-files gh/user-dir t "^[^#].*el$")))))
+
+
+;;;
+;;; Other small customisations
+;;;
+(setq sentence-end-double-space nil)
 
 ;; use package
 (require 'use-package)
@@ -199,8 +216,8 @@
 
 ;; undo for window config C-c <- and C-c ->
 (use-package winner
-  :init
-  (winner-mode 1))
+  :defer t
+  :init (winner-mode 1))
 
 ;;
 ;; basic defaults
@@ -237,12 +254,6 @@
 ;; prefer side-by-side window splits if the window is wide
 (setq split-height-threshold nil)
 (setq split-width-threshold 160)
-
-;;
-;; Keep customize-based settings separate
-;;
-(setq custom-file "~/.emacs.d/.emacs-custom")
-(load custom-file 'no-error)
 
 ;;
 ;; backups already in .emacs.d/backups -
@@ -657,7 +668,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (global-set-key [(f6)] 'gh/cycle-dark-themes)
 (global-set-key [(shift f6)] 'gh/cycle-light-themes)
 
-(gh/enable-theme 'base16-monokai)
+(gh/enable-theme 'sanityinc-tomorrow-bright)
 
 ;;
 ;; CIDER / Clojure / ClojureScript / clj-refactor
@@ -880,6 +891,13 @@ directory to make multiple eshell windows easier."
 (use-package julia-mode
   :ensure t
   :mode "\\.jl$")
+
+;;;
+;;; Scala mode
+;;;
+(use-package scala-mode
+  :ensure t
+  :mode "\\.scala$")
 
 ;;
 ;; My bindings
