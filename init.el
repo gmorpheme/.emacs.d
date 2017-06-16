@@ -554,7 +554,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
           ("p" "phone call" entry (file gh/refile-file)
            "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)))
 
-  (setq org-refile-targets '((org-agenda-files :maxlevel . 7)))
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
   (setq org-refile-allow-creating-parent-nodes (quote confirm))
 
   ;; Archival
