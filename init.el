@@ -64,11 +64,17 @@
 (setq custom-file "~/.emacs.d/.emacs-custom")
 (load custom-file 'no-error)
 
-;;; 
+;;;
 ;;; Load a secrets file if present too
 ;;;
 
 (load "~/.emacs.secrets" t)
+
+(require 'bind-key)
+
+;;;
+;;; mac specifics
+;;;
 
 (defmacro gcr/on-osx (statement &rest statements)
   "Evaluate the enclosed body only when run on OSX."
@@ -82,7 +88,7 @@
  ;; and make sure we have a few other auth settings
  (exec-path-from-shell-copy-envs '("AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY"))
  ;; typing hash on a UK mac in emacs is tricky
- (global-set-key (kbd "s-3") '(lambda () (interactive) (insert "#")))
+ (bind-key "s-3" '(lambda () (interactive) (insert "#")))
  ;; work around "empty or unsupported pasteboard type" bug
  ;; should be fixed in 24.4 so can remove at that point
  (setq save-interprogram-paste-before-kill nil))
@@ -104,7 +110,7 @@
       (when after-init-time
         (eval form))))
 
-(gh/eval-after-init 
+(gh/eval-after-init
  '(progn
     (when (file-exists-p gh/system-config) (load gh/system-config))
     (when (file-exists-p gh/user-config) (load gh/user-config))
@@ -120,6 +126,14 @@
 ;; use package
 (require 'use-package)
 
+;;;
+;;; Whitespace cleanup mode -
+;;;
+(use-package whitespace-cleanup-mode
+  :ensure t
+  :diminish whitespace-cleanup-mode
+  :init (global-whitespace-cleanup-mode))
+
 ;;
 ;; Markdown
 ;;
@@ -129,7 +143,7 @@
          "\\.apib$"))
 
 ;;
-;; ivy 
+;; ivy
 ;;
 
 (use-package ivy
@@ -355,7 +369,7 @@
 
 ;;;
 ;;; Elm mode
-;;; 
+;;;
 (use-package elm-mode
   :ensure t
   :mode "\\.elm")
@@ -482,7 +496,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   (setq org-startup-indented t)
   (setq org-insert-heading-respect-content nil)
   (setq org-return-follows-link t)
-  
+
   (setq org-use-speed-commands t)
   (setq org-todo-keywords
         (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
@@ -508,7 +522,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   ;; Modal effect, full window but restore windows on q
   (setq org-agenda-window-setup 'reorganize-frame)
   (setq org-agenda-restore-windows-after-quit t)
-  
+
   (setq org-agenda-compact-blocks t)
   (setq org-agenda-custom-commands
         '((" " "Grand Unified Agenda"
@@ -528,29 +542,29 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
         '(("s" "start day" entry (file+datetree org-default-notes-file)
            (file "template-day.org")
            :clock-in t)
-          
+
           ("w" "weekly review" entry (file+datetree org-default-notes-file)
            (file "template-week.org")
            :clock-in t)
-          
+
           ("M" "monthly review" entry (file+datetree org-default-notes-file)
            (file "template-month.org") :clock-in t)
-          
+
           ("t" "todo" entry (file gh/refile-file)
            "* TODO %?\n  %i\n  %a")
-          
+
           ("r" "respond" entry (file gh/refile-file)
            "* NEXT Respond to %? \nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
-          
+
           ("n" "note" entry (file gh/refile-file)
            "* %? :NOTE:\n%U\n\n" :clock-in t :clock-resume t)
-          
+
           ("i" "interruption" entry (file gh/refile-file)
            "* %? :INTERRUPTION:\n\n\n" :clock-resume t :clock-in t)
 
           ("m" "meeting" entry (file gh/refile-file)
            "* MEETING %? :MEETING:\n%U" :clock-in t :clock-resume t)
-          
+
           ("p" "phone call" entry (file gh/refile-file)
            "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)))
 
@@ -579,13 +593,10 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   (org-clock-in '(4)))
 
 ;; Global key bindings for org stuff
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-ca" 'org-agenda)
-(global-set-key (kbd "<f12>") 'org-agenda)
-(global-set-key [(shift f12)] 'org-capture) 
-(global-set-key (kbd "<f11>") 'org-clock-goto)
-(global-set-key [(shift f11)] 'gh/clock-in-from-history) 
-(global-set-key "\C-cc" 'org-capture)
+(bind-key "\C-cl" 'org-store-link)
+(bind-key "\C-ca" 'org-agenda)
+(bind-key "<f12>" 'org-agenda)
+(bind-key "\C-cc" 'org-capture)
 
 ;;
 ;; Check for modifications to open files.
@@ -665,8 +676,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   (interactive)
   (gh/cycle-themes gh/light-themes))
 
-(global-set-key [(f6)] 'gh/cycle-dark-themes)
-(global-set-key [(shift f6)] 'gh/cycle-light-themes)
+(bind-key [(f6)] 'gh/cycle-dark-themes)
+(bind-key [(shift f6)] 'gh/cycle-light-themes)
 
 (gh/enable-theme 'sanityinc-tomorrow-bright)
 
@@ -777,7 +788,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 
 ;;;
 ;;; C++
-;;; 
+;;;
 (use-package cmake-mode
   :ensure t
   :mode "CMakeLists.txt")
@@ -873,7 +884,7 @@ directory to make multiple eshell windows easier."
 ;;
 ;; Octave
 ;;
-;; for some reason this is in octave-mod on my mac 
+;; for some reason this is in octave-mod on my mac
 (autoload 'octave-mode "octave-mod" nil t)
 (use-package octave-mode
   :mode ("\\.m$" . octave-mode))
@@ -904,15 +915,15 @@ directory to make multiple eshell windows easier."
 ;;
 (define-key shell-mode-map (kbd "SPC") 'comint-magic-space)
 
-(global-set-key "\C-o" 'query-replace)
-(global-set-key [(control next)] 'scroll-other-window)
-(global-set-key [(control prior)] 'scroll-other-window-down)
-(global-set-key [(f8)] 'toggle-truncate-lines)
-(global-set-key [(shift f8)] 'linum-mode)
+(bind-key "\C-o" 'query-replace)
+(bind-key [(control next)] 'scroll-other-window)
+(bind-key [(control prior)] 'scroll-other-window-down)
+(bind-key [(f8)] 'toggle-truncate-lines)
+(bind-key [(shift f8)] 'linum-mode)
 ;; put all kinds of shells on f9...
-(global-set-key [(ctrl f9)] 'run-python)
-(global-set-key [(shift f9)] 'shell) 
-(global-set-key [(f9)] 'eshell-here)
+(bind-key [(ctrl f9)] 'run-python)
+(bind-key [(shift f9)] 'shell)
+(bind-key [(f9)] 'eshell-here)
 
 ;;
 ;; keychords and hydras to combat emacs-pinky
@@ -946,8 +957,8 @@ directory to make multiple eshell windows easier."
     (key-chord-define-global "YY" 'counsel-yank-pop)
     (key-chord-mode 1)))
 
-(global-set-key
- (kbd "C-M-o")
+(bind-key
+ "C-M-o"
  (defhydra hydra-window (:color amaranth)
    "window"
    ("h" windmove-left)
@@ -973,4 +984,3 @@ directory to make multiple eshell windows easier."
    ("b" ido-switch-buffer "buf")
    ("q" nil "cancel")))
 (put 'set-goal-column 'disabled nil)
-
