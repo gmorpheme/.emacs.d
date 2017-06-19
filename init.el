@@ -221,8 +221,22 @@
   :diminish projectile-mode
   :defer 5
   :config
-  (setq projectile-completion-system 'ivy)
-  (projectile-global-mode))
+  (progn
+
+    (setq projectile-completion-system 'ivy)
+    (setq projectile-switch-project-action #'projectile-commander)
+
+    (def-projectile-commander-method ?S
+      "Open a *shell* buffer for the project."
+      (projectile-run-shell))
+
+    (def-projectile-commander-method ?F
+      "Refres: fetch from git and go to magit status"
+      (call-interactively #'magit-fetch-from-upstream)
+      (projectile-vc))
+
+    (projectile-global-mode))
+  )
 
 (defun gh/kill-current-buffer ()
   (interactive)
@@ -294,6 +308,21 @@
 ;;   :ensure t
 ;;   :after magit
 ;;   :config (magithub-feature-autoinject t))
+
+;;;
+;;; General Programming Stuff
+;;;
+(defun gh/recompile-comint ()
+  "Rerun a compilation in comint-mode for interaction"
+  (interactive)
+  (setf (elt compilation-arguments 1) t)
+  (recompile))
+
+(bind-key "<f5>" 'gh/recompile-comint)
+
+(setq compilation-ask-about-save nil)
+(setq compilation-scroll-output 'next-error)
+(setq compilation-skip-threshold 2)
 
 ;;
 ;; lambdas and todos
