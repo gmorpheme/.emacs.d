@@ -132,7 +132,7 @@
 (use-package whitespace-cleanup-mode
   :ensure t
   :diminish whitespace-cleanup-mode
-  :init (global-whitespace-cleanup-mode))
+  :config (global-whitespace-cleanup-mode))
 
 ;;
 ;; Markdown
@@ -304,10 +304,10 @@
     (setq magit-log-auto-more t)
     (setq magit-status-buffer-switch-function 'switch-to-buffer)))
 
-;; (use-package magithub
-;;   :ensure t
-;;   :after magit
-;;   :config (magithub-feature-autoinject t))
+(use-package magithub
+  :ensure t
+  :after magit
+  :config (magithub-feature-autoinject t))
 
 ;;;
 ;;; General Programming Stuff
