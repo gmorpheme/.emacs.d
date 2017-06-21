@@ -500,7 +500,7 @@
 (use-package org
   :init
   (setq default-major-mode 'org-mode)
-  (setq org-directory "~/dropbox/notes")
+  (setq org-directory "~/Dropbox/notes")
   (setq org-default-notes-file (concat org-directory "/notes.org"))
   (setq gh/refile-file (concat org-directory "/refile.org"))
   (setq org-adapt-indentation nil)
@@ -520,8 +520,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   (setq org-html-head-include-default-style nil)
 
   ;; Mobile settings
-  (setq org-mobile-directory "~/dropbox/MobileOrg")
-  (setq org-mobile-inbox-for-pull "~/dropbox/from-mobile.org")
+  (setq org-mobile-directory "~/Dropbox/MobileOrg")
+  (setq org-mobile-inbox-for-pull "~/Dropbox/from-mobile.org")
 
   (gh/org-mobile-start-sync)
 
