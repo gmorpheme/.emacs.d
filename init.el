@@ -165,21 +165,21 @@
         ivy-minibuffer-faces nil
         ivy-use-virtual-buffers t))
 
-;; (use-package ido
-;;   :ensure ido-ubiquitous
-;;   :init
-;;   ;; ido with flex-matching already turned on in better-defaults.el
-;;   (setq ido-enable-prefix nil
-;;         ido-auto-merge-work-directories-length nil
-;;         ido-create-new-buffer 'always
-;;         ido-use-filename-at-point 'guess
-;;         ido-use-virtual-buffers t
-;;         ido-handle-duplicate-virtual-buffers 2
-;;         ido-max-prospects 10
-;;         ido-default-file-method 'selected-window
-;;         ido-default-buffer-method 'selected-window)
-;;   :config
-;;   (ido-ubiquitous t))
+(use-package ido
+  :ensure ido-ubiquitous
+  :init
+  ;; ido with flex-matching already turned on in better-defaults.el
+  (setq ido-enable-prefix nil
+        ido-auto-merge-work-directories-length nil
+        ido-create-new-buffer 'always
+        ido-use-filename-at-point 'guess
+        ido-use-virtual-buffers t
+        ido-handle-duplicate-virtual-buffers 2
+        ido-max-prospects 10
+        ido-default-file-method 'selected-window
+        ido-default-buffer-method 'selected-window)
+  :config
+  (ido-ubiquitous t))
 
 (use-package ace-jump-mode
   :bind ("C-c SPC" . ace-jump-mode))
