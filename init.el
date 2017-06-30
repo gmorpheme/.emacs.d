@@ -86,7 +86,7 @@
  ;; try and get appropriate path by looking at what shell does
  (exec-path-from-shell-initialize)
  ;; and make sure we have a few other auth settings
- (exec-path-from-shell-copy-envs '("AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY"))
+ (exec-path-from-shell-copy-envs '("AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY" "GOPATH"))
  ;; typing hash on a UK mac in emacs is tricky
  (bind-key "s-3" '(lambda () (interactive) (insert "#")))
  ;; work around "empty or unsupported pasteboard type" bug
@@ -269,6 +269,9 @@
 
 (setq require-final-newline t)
 (setq inhibit-splash-screen t)
+;; why are these no longer coming from better-defaults?
+(tool-bar-mode -1)
+(toggle-scroll-bar -1)
 (blink-cursor-mode 0)
 (auto-compression-mode 1)
 (setq visible-bell nil)
@@ -847,7 +850,9 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   :ensure t
   :ensure go-autocomplete
   :ensure go-projectile
-  :mode "\\.go")
+  :mode "\\.go"
+  :init
+  (add-hook 'before-save-hook 'gofmt-before-save))
 
 ;;
 ;; Racket
