@@ -166,6 +166,7 @@
         ivy-use-virtual-buffers t))
 
 (use-package ido
+  :ensure t
   :ensure ido-ubiquitous
   :init
   ;; ido with flex-matching already turned on in better-defaults.el
@@ -179,7 +180,7 @@
         ido-default-file-method 'selected-window
         ido-default-buffer-method 'selected-window)
   :config
-  (ido-ubiquitous t))
+  (ido-ubiquitous-mode t))
 
 (use-package ace-jump-mode
   :bind ("C-c SPC" . ace-jump-mode))
