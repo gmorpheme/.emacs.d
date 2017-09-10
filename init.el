@@ -718,9 +718,10 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 ;; CIDER / Clojure / ClojureScript / clj-refactor
 ;;
 (use-package cider
+  :ensure t
+  :ensure seq
   :ensure clojure-mode
   :ensure clj-refactor
-  :ensure t
   :mode (("\\.clj\\[scx\\]?$" . clojure-mode)
          ("\\.boot$" . clojure-mode))
   :init
@@ -753,12 +754,10 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                                    (cljr-add-keybindings-with-prefix "C-c r")))
     (add-hook 'cider-repl-mode-hook #'subword-mode)
     (add-hook 'cider-repl-mode-hook #'paredit-mode))
-  :config
-  (use-package midje-mode)
-  (use-package eval-sexp-fu
-    :ensure t)
-  (use-package cider-eval-sexp-fu
-    :ensure t))
+  ;; :config
+  ;; (use-package eval-sexp-fu :ensure t)
+  ;; (use-package cider-eval-sexp-fu :ensure t)
+  )
 
 ;;
 ;; REST client
