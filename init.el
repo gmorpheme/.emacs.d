@@ -289,6 +289,7 @@
 
 ;;
 ;; backups already in .emacs.d/backups -
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups"))
 ;; keep several old versions but delete excess without prompting
 (setq version-control t)
 (setq delete-old-versions t)
