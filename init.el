@@ -289,7 +289,7 @@
 
 ;;
 ;; backups already in .emacs.d/backups -
-(setq backup-directory-alist '(("." . "~/.emacs.d/backups"))
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 ;; keep several old versions but delete excess without prompting
 (setq version-control t)
 (setq delete-old-versions t)
@@ -309,10 +309,10 @@
     (setq magit-log-auto-more t)
     (setq magit-status-buffer-switch-function 'switch-to-buffer)))
 
-(use-package magithub
-  :ensure t
-  :after magit
-  :config (magithub-feature-autoinject t))
+;; (use-package magithub
+;;   :ensure t
+;;   :after magit
+;;   :config (magithub-feature-autoinject t))
 
 ;;;
 ;;; General Programming Stuff
@@ -340,6 +340,10 @@
   (set (make-local-variable 'comment-auto-fill-only-comments) t)
   (auto-fill-mode t))
 
+(defun gh/set-comment-columns ()
+  (set (make-local-variable 'comment-column) 68)
+  (set (make-local-variable 'comment-fill-column) 80))
+
 (defun gh/turn-on-hl-line-mode ()
   (when (> (display-color-cells) 8)
     (hl-line-mode t)))
@@ -349,7 +353,7 @@
 
 (defun gh/add-watchwords ()
   (font-lock-add-keywords
-   nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|HACK\\)"
+   nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|HACK\\|QQ\\)"
           1 font-lock-warning-face t))))
 
 (defun gh/truncate-lines ()
@@ -358,6 +362,7 @@
 (add-hook 'prog-mode-hook 'gh/local-column-number-mode)
 (add-hook 'prog-mode-hook 'gh/local-comment-auto-fill)
 (add-hook 'prog-mode-hook 'gh/add-prettify-symbols)
+(add-hook 'prog-mode-hook 'gh/set-comment-columns)
 (add-hook 'prog-mode-hook 'prettify-symbols-mode)
 (add-hook 'prog-mode-hook 'gh/add-watchwords)
 (add-hook 'prog-mode-hook 'idle-highlight-mode)
@@ -616,7 +621,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
            (clojure . t)
            (ruby . t)
            (python . t)
-           (sh . t)
+           (shell . t)
            (dot . t))))
   (setq org-confirm-babel-evaluate nil
         org-src-fontify-natively t
