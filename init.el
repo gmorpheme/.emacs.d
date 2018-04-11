@@ -569,6 +569,9 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 
   ;; Agenda settings
 
+  ;; Just one day in the agenda please
+  (setq org-agenda-span 'day)
+  
   ;; Modal effect, full window but restore windows on q
   (setq org-agenda-window-setup 'reorganize-frame)
   (setq org-agenda-restore-windows-after-quit t)
