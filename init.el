@@ -220,7 +220,6 @@
 (use-package projectile
   :ensure t
   :diminish projectile-mode
-  :defer 5
   :config
   (progn
 
@@ -247,6 +246,18 @@
 (use-package winner
   :defer t
   :init (winner-mode 1))
+
+;;; Make it easy to maintain desktop set-ups in projects
+
+(defun toggle-window-dedicated ()
+  "Set window as dedicated or not"
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+         (set-window-dedicated-p window (not (window-dedicated-p window))))
+       "%s: dedicated window"
+     "%s: undedicated window")
+   (current-buffer)))
 
 ;;
 ;; basic defaults
