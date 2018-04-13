@@ -143,7 +143,7 @@
          "\\.apib$"))
 
 ;;
-;; ivy
+;; ivy / counsel
 ;;
 
 (use-package ivy
@@ -157,7 +157,10 @@
   :bind (("C-'" . ivy-avy)
          ("M-x" . counsel-M-x)
          ("C-x f" . counsel-find-file)
-         ("C-x b" . ivy-switch-buffer))
+         ("C-x b" . ivy-switch-buffer)
+	 ("C-h f" . counsel-describe-function)
+	 ("C-h v" . 'counsel-describe-variable)
+	 ("C-c C-r" . 'ivy-resume))
   :config
   (ivy-mode 1)
   (setq ivy-count-format ""
@@ -995,6 +998,7 @@ directory to make multiple eshell windows easier."
   :config
   (progn
     (key-chord-define-global "jj" 'ibuffer)
+    (key-chord-define-global "j0" 'delete-window)
     (key-chord-define-global "j1" 'delete-other-windows)
     (key-chord-define-global "JJ" 'magit-status)
     (key-chord-define-global "jz" 'magit-dispatch-popup)
@@ -1003,10 +1007,7 @@ directory to make multiple eshell windows easier."
     (key-chord-define-global "jk" 'transpose-frame)
     (key-chord-define-global "jf" 'counsel-find-file)
     (key-chord-define-global "jg" 'org-agenda)
-    (key-chord-define-global "jp" 'projectile-find-file)
-    (key-chord-define-global "jP" 'projectile-switch-project)
-    (key-chord-define-global "jt" 'ace-jump-mode)
-    (key-chord-define-global "jw" 'ace-window)
+    (key-chord-define-global "jp" 'counsel-projectileqq-find-file)
     (key-chord-define-global "kk" 'gh/kill-current-buffer)
     (key-chord-define-global "YY" 'counsel-yank-pop)
     (key-chord-mode 1)))
