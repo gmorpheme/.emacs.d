@@ -15,8 +15,7 @@
                       better-defaults
                       exec-path-from-shell
                       idle-highlight-mode
-                      paredit
-                      rainbow-delimiters
+		      rainbow-delimiters
                       ess
                       soft-stone-theme
                       soft-morning-theme
@@ -81,7 +80,10 @@
  ;; try and get appropriate path by looking at what shell does
  (exec-path-from-shell-initialize)
  ;; and make sure we have a few other auth settings
- (exec-path-from-shell-copy-envs '("AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY" "GOPATH"))
+ (exec-path-from-shell-copy-envs '("AWS_ACCESS_KEY_ID"
+				   "AWS_SECRET_ACCESS_KEY"
+				   "GOPATH"
+				   "RUST_SRC_PATH"))
  ;; typing hash on a UK mac in emacs is tricky
  (bind-key "s-3" '(lambda () (interactive) (insert "#")))
  ;; work around "empty or unsupported pasteboard type" bug
@@ -395,6 +397,16 @@
 (defun gh/prog-mode-hook ()
   (run-hooks 'prog-mode-hook))
 
+(use-package smartparens
+  :ensure t
+  :init
+  (progn
+    (use-package smartparens-config)
+    (smartparens-global-mode 1)
+    (show-smartparens-global-mode 1))
+  :config
+  (sp-use-smartparens-bindings))
+
 ;;
 ;; An actually usable imenu thing
 ;;
@@ -410,7 +422,7 @@
 (dolist (mode '(scheme emacs-lisp lisp clojure racket))
   (let ((hook (intern (concat (symbol-name mode) "-mode-hook"))))
     (add-hook hook 'gh/prog-mode-hook)
-    (add-hook hook 'paredit-mode)
+    (add-hook hook 'smartparens-strict-mode)
     (add-hook hook 'rainbow-delimiters-mode)))
 
 (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
@@ -472,9 +484,7 @@
      'js-mode `(("\\(function *\\)("
                  (0 (progn (compose-region (match-beginning 1)
                                            (match-end 1) "\u0192")
-                           nil)))))
-    (bind-key "{" 'paredit-open-curly js-mode-map)
-    (bind-key "}" 'paredit-close-curly js-mode-map)))
+                           nil)))))))
 
 (use-package web-mode
   :ensure t
@@ -499,13 +509,6 @@
     (add-hook 'css-mode-hook 'rainbow-mode)
     (add-hook 'css-mode-hook 'skewer-css-mode)))
 
-;;
-;; Ensure that lisp-interaction can still evaluate on ctrl-j...
-;;
-(defadvice paredit-newline (around eval-print-last-sexp activate)
-  (if (eq major-mode 'lisp-interaction-mode)
-      (eval-print-last-sexp)
-    (paredit-newline)))
 
 ;;
 ;; Org Mode
@@ -786,8 +789,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
                                    (eldoc-mode 1)
                                    (clj-refactor-mode 1)
                                    (cljr-add-keybindings-with-prefix "C-c r")))
-    (add-hook 'cider-repl-mode-hook #'subword-mode)
-    (add-hook 'cider-repl-mode-hook #'paredit-mode))
+    (add-hook 'cider-repl-mode-hook #'subword-mode))
   ;; :config
   ;; (use-package eval-sexp-fu :ensure t)
   ;; (use-package cider-eval-sexp-fu :ensure t)
