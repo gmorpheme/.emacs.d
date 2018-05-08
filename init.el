@@ -11,9 +11,6 @@
              '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (package-initialize)
 
-(when (not package-archive-contents)
-  (package-refresh-contents))
-
 (defvar my-packages '(use-package
                       better-defaults
                       exec-path-from-shell
@@ -26,15 +23,13 @@
                       color-theme-solarized
                       color-theme-sanityinc-tomorrow
                       zenburn-theme
-                      base16-theme
-                      melpa)
+                      base16-theme)
   "A list of packages to ensure are installed at launch.")
 
-(setq use-package-verbose t)
-
 (dolist (p my-packages)
-  (when (not (package-installed-p p))
+  (unless (package-installed-p p)
     (condition-case err
+	(package-refresh-contents)
         (package-install p)
       (error
        (message "%s" (error-message-string err))))))
@@ -126,9 +121,23 @@
 ;; use package
 (require 'use-package)
 
-;;;
-;;; Whitespace cleanup mode -
-;;;
+;;
+;; try
+;; 
+(use-package try
+  :ensure t)
+
+;;
+;; which-key
+;;
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode))
+
+;;
+;; Whitespace cleanup mode
+;;
 (use-package whitespace-cleanup-mode
   :ensure t
   :diminish whitespace-cleanup-mode
@@ -412,13 +421,15 @@
 (use-package haskell-mode
   :ensure t
   :ensure intero
+  :ensure hindent
   :mode (("\\.hs" . haskell-mode)
          ("\\.fr" . haskell-mode))
   :init
   (setq haskell-compile-cabal-build-command "stack build")
   (add-hook 'haskell-mode-hook 'gh/prog-mode-hook)
   (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-  (add-hook 'haskell-mode-hook 'intero-mode))
+  (add-hook 'haskell-mode-hook 'intero-mode)
+  (add-hook 'haskell-mode-hook 'hindent-mode))
 
 ;;;
 ;;; Elm mode
@@ -867,6 +878,19 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
   :defer t)
 
 ;;
+;; Rust
+;;
+(use-package rust-mode
+  :ensure t
+  :ensure cargo
+  :ensure racer
+  :mode "\\.rs"
+  :init
+  (add-hook 'rust-mode-hook 'cargo-minor-mode)
+  (add-hook 'rust-mode-hook 'racer-mode)
+  (add-hook 'racer-mode-hook 'eldoc-mode))
+
+;;
 ;; Golang
 ;;
 (use-package go-mode
@@ -1007,7 +1031,7 @@ directory to make multiple eshell windows easier."
     (key-chord-define-global "jk" 'transpose-frame)
     (key-chord-define-global "jf" 'counsel-find-file)
     (key-chord-define-global "jg" 'org-agenda)
-    (key-chord-define-global "jp" 'counsel-projectileqq-find-file)
+    (key-chord-define-global "jp" 'counsel-projectile-find-file)
     (key-chord-define-global "kk" 'gh/kill-current-buffer)
     (key-chord-define-global "YY" 'counsel-yank-pop)
     (key-chord-mode 1)))
