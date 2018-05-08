@@ -5,6 +5,7 @@
 ;;
 
 (require 'package)
+(require 'cl)
 (add-to-list 'package-archives
              '("org" . "http://orgmode.org/elpa/") t)
 (add-to-list 'package-archives
@@ -15,7 +16,7 @@
                       better-defaults
                       exec-path-from-shell
                       idle-highlight-mode
-		      rainbow-delimiters
+											rainbow-delimiters
                       ess
                       soft-stone-theme
                       soft-morning-theme
@@ -32,17 +33,6 @@
         (package-install p)
       (error
        (message "%s" (error-message-string err))))))
-
-(defun gh/package-list-unaccounted-packages ()
-  "Like `package-list-packages', but shows only the packages that
-   are installed and are not in `my-packages'.  useful for
-   cleaning out unwanted packages."
-  (interactive)
-  (package-show-package-list
-   (remove-if-not (lambda (x) (and (not (memq x my-packages))
-                                   (not (package-built-in-p x))
-                                   (package-installed-p x)))
-                  (mapcar 'car package-archive-contents))))
 
 (defun gh/package-list-installed-packages ()
 
