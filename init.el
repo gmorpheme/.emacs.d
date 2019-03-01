@@ -123,6 +123,13 @@
   :ensure t)
 
 ;;
+;; beacon mode for keeping track of cursor
+;;
+(use-package beacon
+  :ensure t
+  :init (beacon-mode 1))
+
+;;
 ;; which-key
 ;;
 (use-package which-key
