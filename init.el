@@ -16,12 +16,13 @@
                       better-defaults
                       exec-path-from-shell
                       idle-highlight-mode
-											rainbow-delimiters
+		      rainbow-delimiters
                       ess
                       soft-stone-theme
                       soft-morning-theme
                       color-theme-solarized
                       color-theme-sanityinc-tomorrow
+		      nimbus-theme
                       zenburn-theme
                       base16-theme)
   "A list of packages to ensure are installed at launch.")
@@ -54,8 +55,6 @@
 
 (load "~/.emacs.secrets" t)
 
-(require 'bind-key)
-
 ;;;
 ;;; mac specifics
 ;;;
@@ -66,19 +65,6 @@
      ,statement
      ,@statements))
 
-(gcr/on-osx
- ;; try and get appropriate path by looking at what shell does
- (exec-path-from-shell-initialize)
- ;; and make sure we have a few other auth settings
- (exec-path-from-shell-copy-envs '("AWS_ACCESS_KEY_ID"
-				   "AWS_SECRET_ACCESS_KEY"
-				   "GOPATH"
-				   "RUST_SRC_PATH"))
- ;; typing hash on a UK mac in emacs is tricky
- (bind-key "s-3" '(lambda () (interactive) (insert "#")))
- ;; work around "empty or unsupported pasteboard type" bug
- ;; should be fixed in 24.4 so can remove at that point
- (setq save-interprogram-paste-before-kill nil))
 
 ;;
 ;; Load other files
@@ -112,6 +98,23 @@
 
 ;; use package
 (require 'use-package)
+
+(use-package bind-key
+  :ensure t)
+
+(gcr/on-osx
+ ;; try and get appropriate path by looking at what shell does
+ (exec-path-from-shell-initialize)
+ ;; and make sure we have a few other auth settings
+ (exec-path-from-shell-copy-envs '("AWS_ACCESS_KEY_ID"
+				   "AWS_SECRET_ACCESS_KEY"
+				   "GOPATH"
+				   "RUST_SRC_PATH"))
+ ;; typing hash on a UK mac in emacs is tricky
+ (bind-key "s-3" '(lambda () (interactive) (insert "#")))
+ ;; work around "empty or unsupported pasteboard type" bug
+ ;; should be fixed in 24.4 so can remove at that point
+ (setq save-interprogram-paste-before-kill nil))
 
 ;;
 ;; try
@@ -224,6 +227,7 @@
 (use-package projectile
   :ensure t
   :diminish projectile-mode
+  :bind-keymap ("C-c p" . projectile-command-map)
   :config
   (progn
 
@@ -310,6 +314,12 @@
 (setq delete-old-versions t)
 
 ;;
+;; dired
+;;
+
+(setq dired-listing-switches "-alh")
+
+;;
 ;; Git
 ;;
 (use-package magit
@@ -343,6 +353,13 @@
 (setq compilation-ask-about-save nil)
 (setq compilation-scroll-output 'next-error)
 (setq compilation-skip-threshold 2)
+
+;;
+;; dash at point
+;;
+(use-package dash-at-point
+  :ensure t
+  :bind ("C-c d" . dash-at-point))
 
 ;;
 ;; lambdas and todos
@@ -451,18 +468,19 @@
 ;;
 ;; Javascript
 ;;
-(use-package js
-  :ensure js2-mode
+;; TODO: steal from https://github.com/CSRaghunandan/.emacs.d/blob/master/setup-files/setup-js.el
+(use-package js2-mode
+  :ensure t
   :ensure json-mode
-  :ensure ac-js2
   :ensure js-comint
+  :ensure js2-refactor
+  :ensure xref-js2
   :mode "\\.js$"
   :init
   (progn
-    (add-hook 'js-mode-hook 'js2-minor-mode)
-    (add-hook 'js-mode-hook 'skewer-mode)
-    (add-hook 'js2-mode-hook 'ac-js2-mode)
     (add-hook 'inferior-js-mode-hook 'ansi-color-for-comint-mode-on)
+		(add-hook 'js2-mode-hook #'js2-refactor-mode)
+		(js2r-add-keybindings-with-prefix "C-c C-r")
     (setenv "NODE_NO_READLINE" "1")
     (setq tab-width 2)
     (setq js-indent-level 2)
@@ -710,6 +728,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
     (load-theme theme)))
 
 (setq gh/dark-themes '(zenburn
+		       nimbus
                        sanityinc-tomorrow-bright
                        sanityinc-tomorrow-eighties
                        sanityinc-tomorrow-blue
@@ -739,7 +758,7 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 (bind-key [(f6)] 'gh/cycle-dark-themes)
 (bind-key [(shift f6)] 'gh/cycle-light-themes)
 
-(gh/enable-theme 'sanityinc-tomorrow-bright)
+(gh/enable-theme 'nimbus)
 
 ;;
 ;; CIDER / Clojure / ClojureScript / clj-refactor
@@ -1054,4 +1073,7 @@ directory to make multiple eshell windows easier."
    ("i" ace-maximize-window "ace-one" :color blue)
    ("b" ido-switch-buffer "buf")
    ("q" nil "cancel")))
+
+
 (put 'set-goal-column 'disabled nil)
+(put 'narrow-to-page 'disabled nil)
