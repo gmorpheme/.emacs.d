@@ -529,24 +529,6 @@
 ;; Org Mode
 ;;
 
-(defvar gh/org-mobile-sync-timer nil)
-
-(defun gh/org-mobile-sync ()
-  (message "Syncing org-mobile...")
-  (org-mobile-pull)
-  (org-mobile-push))
-
-(defun gh/org-mobile-start-sync ()
-  "Start automated `org-mobile-push'"
-  (interactive)
-  (setq gh/org-mobile-sync-timer
-        (run-with-idle-timer (* 60 20) t 'gh/org-mobile-sync)))
-
-(defun gh/org-mobile-stop-sync ()
-  "Stop automated `org-mobile-push'"
-  (interactive)
-  (cancel-timer gh/org-mobile-sync-timer))
-
 (use-package org
   :init
   (setq default-major-mode 'org-mode)
@@ -555,28 +537,10 @@
   (setq gh/refile-file (concat org-directory "/refile.org"))
   (setq org-adapt-indentation nil)
   (setq org-list-description-max-indent 5)
-  (setq org-html-head-extra "<link rel=\"stylesheet\" href=\"http://www.gmorpheme.net/theme/css/main.css\">
-<script type=\"text/javascript\">
-WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
-  var wf = document.createElement('script');
-  wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
-  '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
-  wf.type = 'text/javascript';
-  wf.async = 'true';
-  var s = document.getElementsByTagName('script')[0];
-  s.parentNode.insertBefore(wf, s);
-})();</script>")
-
   (setq org-html-head-include-default-style nil)
-
-  ;; Mobile settings
-  (setq org-mobile-directory "~/Dropbox/MobileOrg")
-  (setq org-mobile-inbox-for-pull "~/Dropbox/from-mobile.org")
-
-  (gh/org-mobile-start-sync)
-
+  
   (setq org-startup-indented t)
-  (setq org-insert-heading-respect-content nil)
+  (setq org-insert-heading-respect-content t)
   (setq org-return-follows-link t)
 
   (setq org-use-speed-commands t)
@@ -598,7 +562,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
 
   ;; exclude certain tags from inheritance
   (setq org-tags-exclude-from-inheritance '("PROJECT"))
-
+  (setq org-stuck-projects '("+PROJECT/-MAYBE-DONE" ("TODO" "NEXT" "WAITING") nil "\\<IGNORE\\>"))
+  
   ;; Agenda settings
 
   ;; Just one day in the agenda please
@@ -620,7 +585,8 @@ WebFontConfig = { fontdeck: { id: '35882' } }; (function() {
             (tags "REFILE|TIDY"
                   ((org-agenda-overriding-header "=== To Refile / Tidy")))
             (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
-                       ((org-agenda-overriding-header "=== Unscheduled High Priority")))))))
+                       ((org-agenda-overriding-header "=== Unscheduled High Priority")))
+	    (org-agenda-list-stuck-projects)))))
 
   ;; Capture and refile settings
   (setq org-capture-templates
@@ -1084,3 +1050,6 @@ directory to make multiple eshell windows easier."
 
 (put 'set-goal-column 'disabled nil)
 (put 'narrow-to-page 'disabled nil)
+
+;; Enable server / emacsclient
+(server-start)
