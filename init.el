@@ -18,13 +18,14 @@
                       idle-highlight-mode
 		      rainbow-delimiters
                       ess
-                      soft-stone-theme
-                      soft-morning-theme
-                      color-theme-solarized
+		      color-theme-solarized
                       color-theme-sanityinc-tomorrow
 		      nimbus-theme
                       zenburn-theme
-                      base16-theme)
+		      twilight-bright-theme
+                      base16-theme
+		      ample-theme
+		      plan9-theme)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -411,6 +412,11 @@
 (defun gh/prog-mode-hook ()
   (run-hooks 'prog-mode-hook))
 
+(use-package ws-butler
+  :ensure t
+  :init
+  (add-hook 'prog-mode-hook 'ws-butler-mode))
+
 (use-package smartparens
   :ensure t
   :init
@@ -540,6 +546,8 @@
   (setq org-html-head-include-default-style nil)
   
   (setq org-startup-indented t)
+  (setq org-cycle-separator-lines 0)
+  
   (setq org-insert-heading-respect-content t)
   (setq org-return-follows-link t)
 
@@ -548,16 +556,18 @@
         (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
                 (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING"))))
 
+  (setq org-catch-invisible-edits 'show-and-error)
   ;; Clock settings
 
   (setq org-clock-into-drawer t)
-  (setq org-clock-out-remove-zero-time-clocks t) ; Remove zero second clocks
-  (setq org-clock-report-include-clocking-task t) ; Include current clocking task in clock reports
+  (setq org-clock-continuously t)
   (setq org-clock-in-resume t)
   (setq org-clock-persist t)
+  (setq org-clock-persist-query-resume nil)
+  (setq org-clock-out-remove-zero-time-clocks t)
+  (setq org-clock-report-include-clocking-task t)
   (setq org-clock-auto-clock-resolution 'when-no-clock-is-running)
-  (setq org-clock-persist-query-resume nil) ; Do not prompt to resume an active clock
-
+  
   (setq org-drawers '("PROPERTIES" "LOGBOOK" "CLOCK" "RESULTS"))
 
   ;; exclude certain tags from inheritance
@@ -707,9 +717,9 @@
                        sanityinc-tomorrow-blue
                        base16-monokai))
 
-(setq gh/light-themes '(soft-morning
-                        soft-stone
-                        solarized))
+(setq gh/light-themes '(plan9
+			ample-light
+			twilight-bright))
 
 (defun gh/cycle-themes (themes)
   (let* ((current-theme (car custom-enabled-themes))
@@ -868,7 +878,7 @@
   :ensure t
   :ensure cargo
   :ensure racer
-  :mode "\\.rs"
+  :mode ("\\.rs" "\\.lalrpop")
   :init
   (add-hook 'rust-mode-hook 'cargo-minor-mode)
   (add-hook 'rust-mode-hook 'racer-mode)
@@ -974,6 +984,13 @@ directory to make multiple eshell windows easier."
 (use-package scala-mode
   :ensure t
   :mode "\\.scala$")
+
+;;;
+;;; Jsonnet mode
+;;;
+(use-package jsonnet-mode
+  :ensure t
+  :mode "\\..*jsonnet$")
 
 ;;
 ;; My bindings
