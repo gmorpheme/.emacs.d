@@ -1,4 +1,4 @@
-; init.el
+;;; Commentary:
 ;;
 ;; Much of this is stolen from elsehwere, in particular Phil
 ;; Hagelberg's emacs-starter-kit, while it existed.
@@ -6,6 +6,8 @@
 
 (require 'package)
 (require 'cl)
+
+;;; Code:
 (add-to-list 'package-archives
              '("org" . "http://orgmode.org/elpa/") t)
 (add-to-list 'package-archives
@@ -13,26 +15,26 @@
 (package-initialize)
 
 (defvar my-packages '(use-package
-                      better-defaults
-                      exec-path-from-shell
-                      idle-highlight-mode
-		      rainbow-delimiters
-                      ess
-		      color-theme-solarized
-                      color-theme-sanityinc-tomorrow
-		      nimbus-theme
-                      zenburn-theme
-		      twilight-bright-theme
-                      base16-theme
-		      ample-theme
-		      plan9-theme)
+                       better-defaults
+                       exec-path-from-shell
+                       idle-highlight-mode
+		       rainbow-delimiters
+                       ess
+		       color-theme-solarized
+                       color-theme-sanityinc-tomorrow
+		       nimbus-theme
+                       zenburn-theme
+		       twilight-bright-theme
+                       base16-theme
+		       ample-theme
+		       plan9-theme)
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
   (unless (package-installed-p p)
     (condition-case err
 	(package-refresh-contents)
-        (package-install p)
+      (package-install p)
       (error
        (message "%s" (error-message-string err))))))
 
@@ -61,7 +63,7 @@
 ;;;
 
 (defmacro gcr/on-osx (statement &rest statements)
-  "Evaluate the enclosed body only when run on OSX."
+  "Evaluate the `STATEMENT' and `STATEMENTS' only when run on OSX."
   `(when (eq system-type 'darwin)
      ,statement
      ,@statements))
@@ -76,13 +78,13 @@
 
 
 (defun gh/eval-after-init (form)
-    "Add `(lambda () FORM)' to `after-init-hook'.
+  "Add `(lambda () FORM)' to `after-init-hook'.
 
     If Emacs has already finished initialization, also eval FORM immediately."
-    (let ((func (list 'lambda nil form)))
-      (add-hook 'after-init-hook func)
-      (when after-init-time
-        (eval form))))
+  (let ((func (list 'lambda nil form)))
+    (add-hook 'after-init-hook func)
+    (when after-init-time
+      (eval form))))
 
 (gh/eval-after-init
  '(progn
@@ -190,7 +192,6 @@
         ido-create-new-buffer 'always
         ido-use-filename-at-point 'guess
         ido-use-virtual-buffers t
-        ido-handle-duplicate-virtual-buffers 2
         ido-max-prospects 10
         ido-default-file-method 'selected-window
         ido-default-buffer-method 'selected-window)
@@ -204,21 +205,22 @@
   :ensure t
   :bind ("C-x o" . ace-window))
 
-; quick access to occur from interactive search
+								    ; quick access to occur from interactive search
 (define-key isearch-mode-map (kbd "C-o")
-    (lambda () (interactive)
-      (let ((case-fold-search isearch-case-fold-search))
-        (occur (if isearch-regexp isearch-string (regexp-quote isearch-string))))))
+  (lambda () (interactive)
+    (let ((case-fold-search isearch-case-fold-search))
+      (occur (if isearch-regexp isearch-string (regexp-quote isearch-string))))))
 
 ;; company mode wherever - unless and until it gets slow
 (use-package company
   :ensure t
+  :hook (prog-mode . company-mode)
   :defer 10
   :diminish company-mode
   :init
   (setq
-   company-idle-delay 0.05
-   company-dabbrev-downcase nil)
+   company-tooltip-align-annotations t
+   company-idle-delay 0.05)
   :config (global-company-mode))
 
 ;; snippets
@@ -226,10 +228,10 @@
   :ensure t
   :defer 30
   :diminish yas-minor-mode
-  :commands yas/hippie-try-expand
-  :init (progn
-          (add-to-list 'hippie-expand-try-functions-list 'yas/hippie-try-expand)
-          (yas-global-mode 1)))
+  :commands yas-hippie-try-expand
+  :config
+  (setq yas-wrap-around-region t)
+  (yas-global-mode 1))
 
 ;; projectile mode everywhere
 (use-package projectile
@@ -412,11 +414,17 @@
 (defun gh/prog-mode-hook ()
   (run-hooks 'prog-mode-hook))
 
+;;
+;; Whitespace butler
+;;
 (use-package ws-butler
   :ensure t
   :init
   (add-hook 'prog-mode-hook 'ws-butler-mode))
 
+;;
+;; Smartparens
+;;
 (use-package smartparens
   :ensure t
   :init
@@ -426,6 +434,32 @@
     (show-smartparens-global-mode 1))
   :config
   (sp-use-smartparens-bindings))
+
+
+;;
+;; Flycheck
+;;
+(use-package flycheck
+  :ensure t
+  :hook (prog-mode . flycheck-mode))
+
+
+;;
+;; Language server protocol
+;;
+(use-package lsp-mode
+  :ensure t
+  :commands lsp
+  :config (setq lsp-prefer-flymake nil) (require 'lsp-clients))
+
+(use-package lsp-ui
+  :ensure t
+  :config
+  ())
+
+(use-package company-lsp
+  :ensure t
+  :config (push 'company-lsp company-backends))
 
 ;;
 ;; An actually usable imenu thing
@@ -457,7 +491,7 @@
   :mode (("\\.hs" . haskell-mode)
          ("\\.fr" . haskell-mode))
   :init
-  (setq haskell-compile-cabal-build-command "stack build")
+  (setq haskell-compile-cabal-build-command "stack build --test --fast --file-watch --copy-bins --exec 'hlint .'")
   (add-hook 'haskell-mode-hook 'gh/prog-mode-hook)
   (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
   (add-hook 'haskell-mode-hook 'intero-mode)
@@ -492,8 +526,8 @@
   :init
   (progn
     (add-hook 'inferior-js-mode-hook 'ansi-color-for-comint-mode-on)
-		(add-hook 'js2-mode-hook #'js2-refactor-mode)
-		(js2r-add-keybindings-with-prefix "C-c C-r")
+    (add-hook 'js2-mode-hook #'js2-refactor-mode)
+    (js2r-add-keybindings-with-prefix "C-c C-r")
     (setenv "NODE_NO_READLINE" "1")
     (setq tab-width 2)
     (setq js-indent-level 2)
@@ -519,6 +553,18 @@
   :mode "\\.ts$")
 
 ;;
+;; Python
+;;
+(use-package python
+  :ensure t
+  :commands (run-python)
+  :mode (("\\.py$" . python-mode))
+  :init (progn
+	  (setq python-shell-interpreter "python3")
+	  (add-hook 'python-mode-hook 'gh/prog-mode-hook)))
+
+
+;;
 ;; CSS mode
 ;;
 (use-package css-mode
@@ -537,14 +583,14 @@
 
 (use-package org
   :init
-  (setq default-major-mode 'org-mode)
   (setq org-directory "~/Dropbox/notes")
   (setq org-default-notes-file (concat org-directory "/notes.org"))
   (setq gh/refile-file (concat org-directory "/refile.org"))
+  (add-hook 'auto-save-hook 'org-save-all-org-buffers)
+
   (setq org-adapt-indentation nil)
   (setq org-list-description-max-indent 5)
-  (setq org-html-head-include-default-style nil)
-  
+
   (setq org-startup-indented t)
   (setq org-cycle-separator-lines 0)
   
@@ -649,10 +695,6 @@
         org-src-fontify-natively t
         org-src-tab-acts-natively t))
 
-(defun gh/clock-in-from-history ()
-  (interactive)
-  (org-clock-in '(4)))
-
 ;; Global key bindings for org stuff
 (bind-key "\C-cl" 'org-store-link)
 (bind-key "\C-ca" 'org-agenda)
@@ -678,22 +720,12 @@
 (modify-coding-system-alist 'file "\\.reg\\'" 'utf-16-le)
 
 ;;
-;; Python
-;;
-(use-package python
-  :ensure t
-  :commands (run-python)
-  :mode "\\.py$"
-  :init
-  (add-hook 'python-mode-hook 'gh/prog-mode-hook))
-
-;;
 ;; Windows specifics
 ;;
 (if (eq system-type 'windows-nt)
     (progn
       (set-default-font "-outline-Consolas-normal-r-normal-normal-12-97-96-96-c-*-iso8859-1")
-                                        ; stop hangs?
+								    ; stop hangs?
       (setq w32-get-true-file-attributes nil)
       (remove-hook 'text-mode-hook 'turn-on-flyspell)))
 
@@ -718,6 +750,7 @@
                        base16-monokai))
 
 (setq gh/light-themes '(plan9
+			leuven
 			ample-light
 			twilight-bright))
 
@@ -872,17 +905,20 @@
   :defer t)
 
 ;;
-;; Rust
+;; Rust (using LSP)
 ;;
 (use-package rust-mode
   :ensure t
-  :ensure cargo
-  :ensure racer
-  :mode ("\\.rs" "\\.lalrpop")
-  :init
-  (add-hook 'rust-mode-hook 'cargo-minor-mode)
-  (add-hook 'rust-mode-hook 'racer-mode)
-  (add-hook 'racer-mode-hook 'eldoc-mode))
+  :hook (rust-mode . lsp)
+  :mode ("\\.rs" "\\.lalrpop"))
+
+(use-package cargo
+  :ensure t
+  :hook (rust-mode . cargo-minor-mode))
+
+(use-package flycheck-rust
+  :ensure t
+  :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 ;;
 ;; Golang
@@ -925,9 +961,9 @@
 
 ;; From howardism.org
 (defun eshell-here ()
-  "Opens up a new shell in the directory associated with the
-current buffer's file. The eshell is renamed to match that
-directory to make multiple eshell windows easier."
+  "Opens up a new shell in the current buffer's directory.
+The eshell is renamed to match that directory to make multiple
+eshell windows easier."
   (interactive)
   (let* ((parent (if (buffer-file-name)
                      (file-name-directory (buffer-file-name))
