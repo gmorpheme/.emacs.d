@@ -98,6 +98,7 @@
 ;;; Other small customisations
 ;;;
 (setq sentence-end-double-space nil)
+(setq help-window-select t)
 
 ;; use package
 (require 'use-package)
@@ -124,6 +125,17 @@
 ;; 
 (use-package try
   :ensure t)
+
+;; Developer fonts
+;;
+;; Call (all-the-icons-install-fonts) if fonts aren't installed
+(use-package all-the-icons
+  :ensure t)
+
+(use-package doom-modeline
+  :ensure t
+  :ensure all-the-icons
+  :hook (after-init . doom-modeline-mode))
 
 ;;
 ;; beacon mode for keeping track of cursor
@@ -470,13 +482,18 @@
   :commands popup-imenu
   :bind ("M-i" . popup-imenu))
 
+;; Lispy
+(use-package lispy
+  :ensure t
+  :init (setq lispy-compat '(edebug cider)))
+
 ;;
 ;; Lisp modes
 ;;
 (dolist (mode '(scheme emacs-lisp lisp clojure racket))
   (let ((hook (intern (concat (symbol-name mode) "-mode-hook"))))
     (add-hook hook 'gh/prog-mode-hook)
-    (add-hook hook 'smartparens-strict-mode)
+    (add-hook hook (lambda () (lispy-mode 1)))
     (add-hook hook 'rainbow-delimiters-mode)))
 
 (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
@@ -581,6 +598,7 @@
 ;; Org Mode
 ;;
 
+;;*
 (use-package org
   :init
   (setq org-directory "~/Dropbox/notes")
@@ -599,8 +617,8 @@
 
   (setq org-use-speed-commands t)
   (setq org-todo-keywords
-        (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
-                (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING"))))
+        (quote ((sequence "NEXT(n)" "TODO(t)" "PROJECT(p)" "|" "DONE(d)")
+                (sequence "WAITING(w@/!)" "HOLD(h@/!)" "SOMEDAY(s@/!)" "DEFERRED(f@/!)" "|" "CANCELLED(c@/!)"))))
 
   (setq org-catch-invisible-edits 'show-and-error)
   ;; Clock settings
@@ -618,7 +636,7 @@
 
   ;; exclude certain tags from inheritance
   (setq org-tags-exclude-from-inheritance '("PROJECT"))
-  (setq org-stuck-projects '("+PROJECT/-MAYBE-DONE" ("TODO" "NEXT" "WAITING") nil "\\<IGNORE\\>"))
+  (setq org-stuck-projects '("+TODO=\"PROJECT\"" ("NEXT") nil "\\<IGNORE\\>"))
   
   ;; Agenda settings
 
@@ -638,7 +656,7 @@
             (tags "FLAGGED"
                   ((org-agenda-overriding-header "=== Flagged")
                    (org-show-context-detail 'lineage)))
-            (tags "REFILE|TIDY"
+            (tags "refile|tidy"
                   ((org-agenda-overriding-header "=== To Refile / Tidy")))
             (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
                        ((org-agenda-overriding-header "=== Unscheduled High Priority")))
@@ -647,33 +665,33 @@
   ;; Capture and refile settings
   (setq org-capture-templates
         '(("s" "start day" entry (file+datetree org-default-notes-file)
-           (file "template-day.org")
-           :clock-in t)
+	   (file "templates/template-day.org")
+	   :clock-in t
+	   :unnarrowed t)
 
-          ("w" "weekly review" entry (file+datetree org-default-notes-file)
-           (file "template-week.org")
-           :clock-in t)
+	  ("t" "todo" entry (file gh/refile-file)
+	   "* TODO %?\n  %i\n  %a")
 
-          ("M" "monthly review" entry (file+datetree org-default-notes-file)
-           (file "template-month.org") :clock-in t)
+	  ("r" "respond" entry (file gh/refile-file)
+	   "* NEXT Respond to %? \nSCHEDULED: %t\n%U\n%a\n"
+	   :clock-in t
+	   :clock-resume t
+	   :immediate-finish t)
 
-          ("t" "todo" entry (file gh/refile-file)
-           "* TODO %?\n  %i\n  %a")
+	  ("n" "note" entry (file gh/refile-file)
+	   "* %? :NOTE:\n%U\n\n"
+	   :clock-in t
+	   :clock-resume t)
 
-          ("r" "respond" entry (file gh/refile-file)
-           "* NEXT Respond to %? \nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+	  ("i" "interruption" entry (file gh/refile-file)
+	   "* %? :INTERRUPTION:\n\n\n"
+	   :clock-resume t
+	   :clock-in t)
 
-          ("n" "note" entry (file gh/refile-file)
-           "* %? :NOTE:\n%U\n\n" :clock-in t :clock-resume t)
-
-          ("i" "interruption" entry (file gh/refile-file)
-           "* %? :INTERRUPTION:\n\n\n" :clock-resume t :clock-in t)
-
-          ("m" "meeting" entry (file gh/refile-file)
-           "* MEETING %? :MEETING:\n%U" :clock-in t :clock-resume t)
-
-          ("p" "phone call" entry (file gh/refile-file)
-           "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)))
+	  ("m" "meeting" entry (file gh/refile-file)
+	   "* MEETING %? :MEETING:\n%U"
+	   :clock-in t
+	   :clock-resume t)))
 
   (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
   (setq org-refile-allow-creating-parent-nodes (quote confirm))
