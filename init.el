@@ -608,6 +608,7 @@
 
   (setq org-adapt-indentation nil)
   (setq org-list-description-max-indent 5)
+  (setq org-hide-emphasis-markers t)
 
   (setq org-startup-indented t)
   (setq org-cycle-separator-lines 0)
@@ -652,19 +653,19 @@
         '((" " "Grand Unified Agenda"
            ((agenda ""
                     ((org-agenda-ndays 1)
-                     (org-agenda-overriding-header "=== Today")))
+                     (org-agenda-overriding-header "Today")))
             (tags "FLAGGED"
-                  ((org-agenda-overriding-header "=== Flagged")
+                  ((org-agenda-overriding-header "Flagged")
                    (org-show-context-detail 'lineage)))
             (tags "refile|tidy"
-                  ((org-agenda-overriding-header "=== To Refile / Tidy")))
+                  ((org-agenda-overriding-header "To Refile / Tidy")))
             (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
-                       ((org-agenda-overriding-header "=== Unscheduled High Priority")))
+                       ((org-agenda-overriding-header "Unscheduled High Priority")))
 	    (org-agenda-list-stuck-projects)))))
 
   ;; Capture and refile settings
   (setq org-capture-templates
-        '(("s" "start day" entry (file+datetree org-default-notes-file)
+        '(("s" "start day" entry (function org-journal-find-location)
 	   (file "templates/template-day.org")
 	   :clock-in t
 	   :unnarrowed t)
@@ -718,6 +719,45 @@
 (bind-key "\C-ca" 'org-agenda)
 (bind-key "<f12>" 'org-agenda)
 (bind-key "\C-cc" 'org-capture)
+
+(defun journal-file-insert (time)
+  "Insert new journal file contents for a journal file for TIME."
+  (with-temp-buffer
+    (insert "#+TITLE: ")
+    (insert (format-time-string "%A %x" time))
+    (insert "\n* ")
+    (insert (format-time-string "%A %m" time))
+    (insert " Journal")
+    (buffer-string)))
+
+(defun org-journal-find-location ()
+  "Function to locate today's journal for capture template."
+  (org-journal-new-entry t))
+
+;;
+;; org-journal to manage daily org files
+;;
+(use-package org-journal
+  :ensure t
+  :init
+  (setq org-journal-dir (concat org-directory "/journal/"))
+  (setq org-journal-file-format "%Y%m%d.org")
+  (setq org-journal-date-prefix " ")
+  (setq org-journal-date-format 'journal-file-insert)
+  (setq org-journal-enable-agenda-integration t))
+
+
+(defun get-journal-file-today ()
+  "Return filename for today's journal entry."
+  (let ((daily-name (format-time-string "%Y%m%d")))
+    (expand-file-name (concat org-journal-dir daily-name))))
+
+(defun journal-file-today ()
+  "Create and load a journal file based on today's date."
+  (interactive)
+  (find-file (get-journal-file-today)))
+
+(global-set-key (kbd "C-c f j") 'journal-file-today)
 
 ;;
 ;; Check for modifications to open files.
