@@ -714,6 +714,15 @@
         org-src-fontify-natively t
         org-src-tab-acts-natively t))
 
+(use-package org-crypt
+  :init
+  (require 'epa-file)
+  (epa-file-enable)
+  (org-crypt-use-before-save-magic)
+  (setq org-tags-exclude-from-inheritance (quote ("crypt")))
+  (setq epa-pinentry-mode 'loopback))
+
+
 ;; Global key bindings for org stuff
 (bind-key "\C-cl" 'org-store-link)
 (bind-key "\C-ca" 'org-agenda)
@@ -725,7 +734,7 @@
   (with-temp-buffer
     (insert "#+TITLE: ")
     (insert (format-time-string "%A %x" time))
-    (insert "\n* ")
+    (insert "\n#+STARTUP: showall\n* ")
     (insert (format-time-string "%A %m" time))
     (insert " Journal")
     (buffer-string)))
