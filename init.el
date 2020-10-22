@@ -4,47 +4,9 @@
 ;; Hagelberg's emacs-starter-kit, while it existed.
 ;;
 
-(require 'package)
-(require 'cl)
-
 ;;; Code:
-(add-to-list 'package-archives
-             '("org" . "http://orgmode.org/elpa/") t)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/") t)
-(package-initialize)
-
-(defvar my-packages '(use-package
-                       better-defaults
-                       exec-path-from-shell
-                       idle-highlight-mode
-		       rainbow-delimiters
-                       ess
-		       color-theme-solarized
-                       color-theme-sanityinc-tomorrow
-		       nimbus-theme
-                       zenburn-theme
-		       twilight-bright-theme
-                       base16-theme
-		       ample-theme
-		       plan9-theme)
-  "A list of packages to ensure are installed at launch.")
-
-(dolist (p my-packages)
-  (unless (package-installed-p p)
-    (condition-case err
-	(package-refresh-contents)
-      (package-install p)
-      (error
-       (message "%s" (error-message-string err))))))
-
-(defun gh/package-list-installed-packages ()
-
-  (interactive)
-  (package-show-package-list
-   (remove-if-not
-    'package-installed-p
-    (mapcar 'car package-archive-contents))))
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(require 'use-package)
 
 ;;
 ;; Keep customize-based settings separate
@@ -93,6 +55,20 @@
     (when (file-exists-p gh/user-dir)
       (mapc 'load (directory-files gh/user-dir t "^[^#].*el$")))))
 
+;; Basic packages
+
+(use-package better-defaults :defer t)
+(use-package exec-path-from-shell :defer t)
+(use-package idle-highlight-mode :defer t)
+(use-package rainbow-delimiters :defer t)
+(use-package ess :defer t)
+(use-package color-theme-solarized :defer t)
+(use-package color-theme-sanityinc-tomorrow :defer t)
+(use-package nimbus-theme :defer t)
+(use-package zenburn-theme :defer t)
+(use-package twilight-bright-theme :defer t)
+(use-package base16-theme :defer t)
+(use-package plan9-theme :defer t)
 
 ;;;
 ;;; Other small customisations
@@ -194,22 +170,6 @@
         ivy-minibuffer-faces nil
         ivy-use-virtual-buffers t))
 
-(use-package ido
-  :ensure t
-  :ensure ido-ubiquitous
-  :init
-  ;; ido with flex-matching already turned on in better-defaults.el
-  (setq ido-enable-prefix nil
-        ido-auto-merge-work-directories-length nil
-        ido-create-new-buffer 'always
-        ido-use-filename-at-point 'guess
-        ido-use-virtual-buffers t
-        ido-max-prospects 10
-        ido-default-file-method 'selected-window
-        ido-default-buffer-method 'selected-window)
-  :config
-  (ido-ubiquitous-mode t))
-
 (use-package ace-jump-mode
   :bind ("C-c SPC" . ace-jump-mode))
 
@@ -255,6 +215,7 @@
 
     (setq projectile-completion-system 'ivy)
     (setq projectile-switch-project-action #'projectile-commander)
+    (setq projectile-create-missing-test-files t)
 
     (def-projectile-commander-method ?S
       "Open a *shell* buffer for the project."
@@ -462,7 +423,7 @@
 (use-package lsp-mode
   :ensure t
   :commands lsp
-  :config (setq lsp-prefer-flymake nil) (require 'lsp-clients))
+  :config (setq lsp-prefer-flymake nil))
 
 (use-package lsp-ui
   :ensure t
@@ -503,15 +464,16 @@
 ;;
 (use-package haskell-mode
   :ensure t
-  :ensure intero
+  :ensure lsp-haskell
   :ensure hindent
   :mode (("\\.hs" . haskell-mode)
          ("\\.fr" . haskell-mode))
   :init
+  (setq lsp-haskell-process-path-hie "hie-wrapper")
   (setq haskell-compile-cabal-build-command "stack build --test --fast --file-watch --copy-bins --exec 'hlint .'")
   (add-hook 'haskell-mode-hook 'gh/prog-mode-hook)
   (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-  (add-hook 'haskell-mode-hook 'intero-mode)
+  (add-hook 'haskell-mode-hook 'lsp)
   (add-hook 'haskell-mode-hook 'hindent-mode))
 
 ;;;
@@ -650,7 +612,7 @@
 
   (setq org-agenda-compact-blocks t)
   (setq org-agenda-custom-commands
-        '((" " "Grand Unified Agenda"
+        '(("-" "Grand Unified Agenda"
            ((agenda ""
                     ((org-agenda-ndays 1)
                      (org-agenda-overriding-header "Today")))
@@ -712,16 +674,15 @@
            (dot . t))))
   (setq org-confirm-babel-evaluate nil
         org-src-fontify-natively t
-        org-src-tab-acts-natively t))
+        org-src-tab-acts-natively t)
 
-(use-package org-crypt
-  :init
+  :config
+  (require 'org-crypt)
   (require 'epa-file)
   (epa-file-enable)
   (org-crypt-use-before-save-magic)
   (setq org-tags-exclude-from-inheritance (quote ("crypt")))
   (setq epa-pinentry-mode 'loopback))
-
 
 ;; Global key bindings for org stuff
 (bind-key "\C-cl" 'org-store-link)
@@ -735,7 +696,7 @@
     (insert "#+TITLE: ")
     (insert (format-time-string "%A %x" time))
     (insert "\n#+STARTUP: showall\n* ")
-    (insert (format-time-string "%A %m" time))
+    (insert (format-time-string "%A %d" time))
     (insert " Journal")
     (buffer-string)))
 
@@ -753,7 +714,8 @@
   (setq org-journal-file-format "%Y%m%d.org")
   (setq org-journal-date-prefix " ")
   (setq org-journal-date-format 'journal-file-insert)
-  (setq org-journal-enable-agenda-integration t))
+  (setq org-journal-enable-agenda-integration t)
+  (setq org-journal-carryover-items ""))
 
 
 (defun get-journal-file-today ()
@@ -818,7 +780,6 @@
 
 (setq gh/light-themes '(plan9
 			leuven
-			ample-light
 			twilight-bright))
 
 (defun gh/cycle-themes (themes)
@@ -860,7 +821,8 @@
           cider-repl-print-length 200
           cider-prompt-save-file-on-load nil
           cider-repl-use-clojure-font-lock t
-          nrepl-hide-special-buffers t)
+          nrepl-hide-special-buffers t
+	  cljr-favor-prefix-notation t)
     (add-hook 'clojure-mode-hook
               (lambda ()
                 (define-clojure-indent

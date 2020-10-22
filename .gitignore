@@ -34,3 +34,11 @@
 /request
 /recentf
 /smex-items
+/greg.el
+/*.cache
+/.lsp-session-v1
+/.mc-lists.el
+/magithub/
+/network-security.data
+/semanticdb/
+/transient/
