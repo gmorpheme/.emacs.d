@@ -30,7 +30,6 @@
      ,statement
      ,@statements))
 
-
 ;;
 ;; Load other files
 ;;
@@ -177,7 +176,7 @@
   :ensure t
   :bind ("C-x o" . ace-window))
 
-								    ; quick access to occur from interactive search
+;; quick access to occur from interactive search
 (define-key isearch-mode-map (kbd "C-o")
   (lambda () (interactive)
     (let ((case-fold-search isearch-case-fold-search))
@@ -266,9 +265,11 @@
 (define-key global-map (kbd "C--") 'text-scale-decrease)
 
 (put 'narrow-to-region 'disabled nil)
+(put 'narrow-to-page 'disabled nil)
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
 (put 'eval-expression 'disabled nil)
+(put 'set-goal-column 'disabled nil)
 
 (setq require-final-newline t)
 (setq inhibit-splash-screen t)
@@ -408,6 +409,11 @@
   :config
   (sp-use-smartparens-bindings))
 
+
+;;
+;; iedit
+;;
+(use-package iedit :defer t)
 
 ;;
 ;; Flycheck
@@ -578,7 +584,10 @@
   (setq org-insert-heading-respect-content t)
   (setq org-return-follows-link t)
 
+  (setq org-special-ctrl-a/e t)
+  (setq org-special-ctrl-k t)
   (setq org-use-speed-commands t)
+
   (setq org-todo-keywords
         (quote ((sequence "NEXT(n)" "TODO(t)" "PROJECT(p)" "|" "DONE(d)")
                 (sequence "WAITING(w@/!)" "HOLD(h@/!)" "SOMEDAY(s@/!)" "DEFERRED(f@/!)" "|" "CANCELLED(c@/!)"))))
@@ -603,9 +612,15 @@
   
   ;; Agenda settings
 
+  (setq org-agenda-prefix-format '((agenda . " %i %-12:c%?-12t% s")
+                                   ;; Indent todo items by level to show nesting
+                                   (todo . " %i %-12:c%l")
+                                   (tags . " %i %-12:c")
+                                   (search . " %i %-12:c")))
+
   ;; Just one day in the agenda please
   (setq org-agenda-span 'day)
-  
+
   ;; Modal effect, full window but restore windows on q
   (setq org-agenda-window-setup 'reorganize-frame)
   (setq org-agenda-restore-windows-after-quit t)
@@ -988,25 +1003,6 @@
 (use-package eshell
   :commands (eshell))
 
-;; From howardism.org
-(defun eshell-here ()
-  "Opens up a new shell in the current buffer's directory.
-The eshell is renamed to match that directory to make multiple
-eshell windows easier."
-  (interactive)
-  (let* ((parent (if (buffer-file-name)
-                     (file-name-directory (buffer-file-name))
-                   default-directory))
-         (height (/ (window-total-height) 3))
-         (name   (car (last (split-string parent "/" t)))))
-    (split-window-vertically (- height))
-    (other-window 1)
-    (eshell "new")
-    (rename-buffer (concat "*eshell: " name "*"))
-
-    (insert (concat "ls"))
-    (eshell-send-input)))
-
 (defun eshell/x ()
   (delete-window))
 
@@ -1020,6 +1016,11 @@ eshell windows easier."
 (use-package tramp
   :init
   (set-default 'tramp-auto-save-directory (expand-file-name "~/temp")))
+
+;;
+;; vterm
+;;
+(use-package vterm :defer t)
 
 ;;
 ;; Octave
@@ -1065,12 +1066,22 @@ eshell windows easier."
 (bind-key "\C-o" 'query-replace)
 (bind-key [(control next)] 'scroll-other-window)
 (bind-key [(control prior)] 'scroll-other-window-down)
+
+;; A few line related toggles on f8
 (bind-key [(f8)] 'toggle-truncate-lines)
 (bind-key [(shift f8)] 'linum-mode)
-;; put all kinds of shells on f9...
+
+;;
+;; All kinds of shells on f9...
+;;
+(use-package eshell-toggle
+  :custom
+  (eshell-toggle-use-projectile-root t)
+  :bind
+  ("<f9>" . eshell-toggle))
+
 (bind-key [(ctrl f9)] 'run-python)
 (bind-key [(shift f9)] 'shell)
-(bind-key [(f9)] 'eshell-here)
 
 ;;
 ;; keychords and hydras to combat emacs-pinky
@@ -1129,9 +1140,25 @@ eshell windows easier."
    ("b" ido-switch-buffer "buf")
    ("q" nil "cancel")))
 
+;;
+;; Narrow or widen DWIM
+;;
+(defun gh/narrow-or-widen-dwim (p)
+  "Widen if buffer is narrowed else narrow to appropriate region."
+  (interactive "P")
+  (declare (interactive-only))
+  (cond ((and (buffer-narrowed-p) (not p)) (widen))
+	((region-active-p) (narrow-to-region (region-beginning) (region-end)))
+	((derived-mode-p 'org-mode)
 
-(put 'set-goal-column 'disabled nil)
-(put 'narrow-to-page 'disabled nil)
+	 (cond ((ignore-errors (org-edit-src-code) t) (delete-other-windows))
+	       ((ignore-errors (org-narrow-to-block) t))
+	       (t (org-narrow-to-subtree))))
+	(t (narrow-to-defun))))
 
+(global-set-key (kbd "<f6>") #'gh/narrow-or-widen-dwim)
+
+;;
 ;; Enable server / emacsclient
+;;
 (server-start)
