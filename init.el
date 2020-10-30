@@ -1,3 +1,5 @@
+;;; init.el -- summary
+
 ;;; Commentary:
 ;;
 ;; Much of this is stolen from elsehwere, in particular Phil
@@ -34,9 +36,7 @@
 ;; Load other files
 ;;
 (setq gh/system-config (concat user-emacs-directory system-name ".el")
-      gh/user-config (concat user-emacs-directory user-login-name ".el")
-      gh/user-dir (concat user-emacs-directory user-login-name))
-
+      gh/user-config (concat user-emacs-directory user-login-name ".el"))
 
 (defun gh/eval-after-init (form)
   "Add `(lambda () FORM)' to `after-init-hook'.
@@ -56,18 +56,19 @@
 
 ;; Basic packages
 
-(use-package better-defaults :defer t)
-(use-package exec-path-from-shell :defer t)
-(use-package idle-highlight-mode :defer t)
-(use-package rainbow-delimiters :defer t)
-(use-package ess :defer t)
-(use-package color-theme-solarized :defer t)
-(use-package color-theme-sanityinc-tomorrow :defer t)
-(use-package nimbus-theme :defer t)
-(use-package zenburn-theme :defer t)
-(use-package twilight-bright-theme :defer t)
-(use-package base16-theme :defer t)
-(use-package plan9-theme :defer t)
+(use-package better-defaults :ensure t :defer t)
+(use-package exec-path-from-shell :ensure t :defer t)
+(use-package idle-highlight-mode :ensure t :defer t)
+(use-package rainbow-delimiters :ensure t :defer t)
+(use-package ess :ensure t :defer t)
+(use-package berrys-theme :ensure t :defer t)
+(use-package color-theme-solarized :ensure t :defer t)
+(use-package color-theme-sanityinc-tomorrow :ensure t :defer t)
+(use-package nimbus-theme :ensure t :defer t)
+(use-package zenburn-theme :ensure t :defer t)
+(use-package twilight-bright-theme :ensure t :defer t)
+(use-package base16-theme :ensure t :defer t)
+(use-package plan9-theme :ensure t :defer t)
 
 ;;;
 ;;; Other small customisations
@@ -147,16 +148,21 @@
 ;; ivy / counsel
 ;;
 
+(use-package avy
+  :ensure t
+  :config
+  (avy-setup-default))
+
 (use-package ivy
   :ensure t
   :ensure flx
   :ensure smex
+  :ensure ivy-avy
   :ensure ivy-hydra
   :ensure counsel
   :ensure counsel-projectile
   :diminish (ivy-mode . "")
-  :bind (("C-'" . ivy-avy)
-         ("M-x" . counsel-M-x)
+  :bind (("M-x" . counsel-M-x)
          ("C-x f" . counsel-find-file)
          ("C-x b" . ivy-switch-buffer)
 	 ("C-h f" . counsel-describe-function)
@@ -165,6 +171,7 @@
   :config
   (ivy-mode 1)
   (setq ivy-count-format ""
+	ivy-height 16
         ivy-display-style nil
         ivy-minibuffer-faces nil
         ivy-use-virtual-buffers t))
@@ -210,23 +217,53 @@
   :diminish projectile-mode
   :bind-keymap ("C-c p" . projectile-command-map)
   :config
-  (progn
 
-    (setq projectile-completion-system 'ivy)
-    (setq projectile-switch-project-action #'projectile-commander)
-    (setq projectile-create-missing-test-files t)
+  (setq projectile-completion-system 'ivy)
+  (setq projectile-switch-project-action #'projectile-commander)
+  (setq projectile-create-missing-test-files t)
 
-    (def-projectile-commander-method ?S
-      "Open a *shell* buffer for the project."
-      (projectile-run-shell))
+  (def-projectile-commander-method ?S
+    "Open a *shell* buffer for the project."
+    (projectile-run-shell))
 
-    (def-projectile-commander-method ?F
-      "Refres: fetch from git and go to magit status"
-      (call-interactively #'magit-fetch-from-upstream)
-      (projectile-vc))
+  (def-projectile-commander-method ?F
+    "Refresh: fetch from git and go to magit status"
+    (call-interactively #'magit-fetch-from-upstream)
+    (projectile-vc))
 
-    (projectile-global-mode))
-  )
+  (projectile-global-mode)
+
+  (defun gh/switch-to-or-create-tab (name)
+    "Switch to tab named or create."
+    (if-let (index (tab-bar--tab-index-by-name name))
+	(tab-bar-switch-to-tab name)
+      (progn
+	(tab-new)
+	(tab-rename name))))
+
+  (defun gh/projectile-switch-project-new-tab (&optional arg)
+    "Like `projectile-switch-project' but in new tab (named after
+project. With prefix arg, invokes commander instead of dired."
+    (interactive "P")
+    (let ((projects (projectile-relevant-known-projects)))
+      (if projects
+	  (projectile-completing-read
+	   "Switch to project: " projects
+	   :action (lambda (project)
+		     (let ((project-name (projectile-project-name project)))
+		       (gh/switch-to-or-create-tab project-name)
+		       (let ((projectile-switch-project-action 'projectile-dired))
+			 (projectile-switch-project-by-name project arg)))))
+	(user-error "There are no known projects"))))
+
+  (defun gh/projectile-kill-project ()
+    "Kill project buffers and any tab named after the project."
+    (interactive)
+    (let* ((project (projectile-ensure-project (projectile-project-root)))
+	   (project-name (projectile-project-name project)))
+      (cl-letf (((symbol-function 'yes-or-no-p) (lambda (&rest args) t)))
+	(projectile-kill-buffers))
+      (tab-bar-close-tab-by-name project-name))))
 
 (defun gh/kill-current-buffer ()
   (interactive)
@@ -259,6 +296,9 @@
 (add-hook 'text-mode-hook 'turn-on-flyspell)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
+(setq confirm-kill-processes nil)
+(setq confirm-kill-emacs nil)
+
 (defalias 'auto-tail-revert-mode 'tail-mode)
 
 (define-key global-map (kbd "C-+") 'text-scale-increase)
@@ -548,6 +588,12 @@
 	  (setq python-shell-interpreter "python3")
 	  (add-hook 'python-mode-hook 'gh/prog-mode-hook)))
 
+;;
+;; Swift
+;;
+(use-package swift-mode
+  :ensure t
+  :mode (("\\.swift$" . swift-mode)))
 
 ;;
 ;; CSS mode
@@ -687,9 +733,7 @@
            (python . t)
            (shell . t)
            (dot . t))))
-  (setq org-confirm-babel-evaluate nil
-        org-src-fontify-natively t
-        org-src-tab-acts-natively t)
+
 
   :config
   (require 'org-crypt)
@@ -698,6 +742,27 @@
   (org-crypt-use-before-save-magic)
   (setq org-tags-exclude-from-inheritance (quote ("crypt")))
   (setq epa-pinentry-mode 'loopback))
+
+(use-package ob-restclient
+  :ensure t)
+
+(use-package org-babel
+  :no-require
+  :after ob-restclient
+  :config
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (js . t)
+     (clojure . t)
+     (ruby . t)
+     (python . t)
+     (shell . t)
+     (dot . t)
+     (restclient . t)))
+  (setq org-confirm-babel-evaluate nil
+        org-src-fontify-natively t
+        org-src-tab-acts-natively t))
 
 ;; Global key bindings for org stuff
 (bind-key "\C-cl" 'org-store-link)
@@ -794,6 +859,7 @@
                        base16-monokai))
 
 (setq gh/light-themes '(plan9
+			berrys
 			leuven
 			twilight-bright))
 
@@ -831,13 +897,11 @@
          ("\\.boot$" . clojure-mode))
   :init
   (progn
-    (setq cider-repl-popup-stacktraces t
-          cider-auto-select-error-buffer t
-          cider-repl-print-length 200
-          cider-prompt-save-file-on-load nil
+    (setq cider-auto-select-error-buffer t
           cider-repl-use-clojure-font-lock t
           nrepl-hide-special-buffers t
-	  cljr-favor-prefix-notation t)
+	  cljr-favor-prefix-notation t
+	  cider-print-quota (* 1024 10))
     (add-hook 'clojure-mode-hook
               (lambda ()
                 (define-clojure-indent
@@ -1075,13 +1139,18 @@
 ;; All kinds of shells on f9...
 ;;
 (use-package eshell-toggle
+  :ensure t
   :custom
   (eshell-toggle-use-projectile-root t)
   :bind
   ("<f9>" . eshell-toggle))
 
+(use-package shell-toggle
+  :ensure t
+  :bind
+  ([(shift f9)] . shell-toggle-cd))
+
 (bind-key [(ctrl f9)] 'run-python)
-(bind-key [(shift f9)] 'shell)
 
 ;;
 ;; keychords and hydras to combat emacs-pinky
@@ -1102,14 +1171,15 @@
     (key-chord-define-global "j0" 'delete-window)
     (key-chord-define-global "j1" 'delete-other-windows)
     (key-chord-define-global "JJ" 'magit-status)
-    (key-chord-define-global "jz" 'magit-dispatch-popup)
     (key-chord-define-global ",," 'ivy-switch-buffer)
     (key-chord-define-global "hh" 'ivy-switch-buffer-other-window)
     (key-chord-define-global "jk" 'transpose-frame)
     (key-chord-define-global "jf" 'counsel-find-file)
     (key-chord-define-global "jg" 'org-agenda)
     (key-chord-define-global "jp" 'counsel-projectile-find-file)
+    (key-chord-define-global "JP" 'gh/projectile-switch-project-new-tab)
     (key-chord-define-global "kk" 'gh/kill-current-buffer)
+    (key-chord-define-global "KK" 'gh/projectile-kill-project)
     (key-chord-define-global "YY" 'counsel-yank-pop)
     (key-chord-mode 1)))
 
@@ -1125,17 +1195,18 @@
           (interactive)
           (split-window-right)
           (windmove-right))
-        "vert")
+    "vert")
    ("x" (lambda ()
           (interactive)
           (split-window-below)
           (windmove-down))
-        "horz")
+    "horz")
    ("t" transpose-frame "'" :color blue)
    ("o" delete-other-windows "one" :color blue)
    ("a" ace-window "ace")
    ("s" ace-swap-window "swap")
    ("d" ace-delete-window "del")
+   ("D" toggle-window-dedicated "dedicated")
    ("i" ace-maximize-window "ace-one" :color blue)
    ("b" ido-switch-buffer "buf")
    ("q" nil "cancel")))
@@ -1156,7 +1227,7 @@
 	       (t (org-narrow-to-subtree))))
 	(t (narrow-to-defun))))
 
-(global-set-key (kbd "<f6>") #'gh/narrow-or-widen-dwim)
+(global-set-key (kbd "<f7>") #'gh/narrow-or-widen-dwim)
 
 ;;
 ;; Enable server / emacsclient
