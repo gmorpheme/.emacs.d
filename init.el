@@ -7,7 +7,10 @@
 ;;
 
 ;;; Code:
+(require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+
+;; may need manual M-x package-install
 (require 'use-package)
 
 ;;
@@ -50,9 +53,7 @@
 (gh/eval-after-init
  '(progn
     (when (file-exists-p gh/system-config) (load gh/system-config))
-    (when (file-exists-p gh/user-config) (load gh/user-config))
-    (when (file-exists-p gh/user-dir)
-      (mapc 'load (directory-files gh/user-dir t "^[^#].*el$")))))
+    (when (file-exists-p gh/user-config) (load gh/user-config))))
 
 ;; Basic packages
 
@@ -62,7 +63,7 @@
 (use-package rainbow-delimiters :ensure t :defer t)
 (use-package ess :ensure t :defer t)
 (use-package berrys-theme :ensure t :defer t)
-(use-package color-theme-solarized :ensure t :defer t)
+(use-package solarized-theme :ensure t :defer t)
 (use-package color-theme-sanityinc-tomorrow :ensure t :defer t)
 (use-package nimbus-theme :ensure t :defer t)
 (use-package zenburn-theme :ensure t :defer t)
@@ -475,10 +476,6 @@ project. With prefix arg, invokes commander instead of dired."
   :ensure t
   :config
   ())
-
-(use-package company-lsp
-  :ensure t
-  :config (push 'company-lsp company-backends))
 
 ;;
 ;; An actually usable imenu thing
