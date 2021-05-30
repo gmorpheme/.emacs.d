@@ -359,10 +359,8 @@ project. With prefix arg, invokes commander instead of dired."
     (setq magit-log-auto-more t)
     (setq magit-status-buffer-switch-function 'switch-to-buffer)))
 
-;; (use-package magithub
-;;   :ensure t
-;;   :after magit
-;;   :config (magithub-feature-autoinject t))
+(use-package git-auto-commit-mode
+  :ensure t)
 
 ;;;
 ;;; General Programming Stuff
