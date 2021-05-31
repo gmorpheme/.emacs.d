@@ -1,16 +1,15 @@
-;;; init.el -- summary
-
 ;;; Commentary:
 ;;
 ;; Much of this is stolen from elsehwere, in particular Phil
 ;; Hagelberg's emacs-starter-kit, while it existed.
 ;;
 
+;;; init.el -- summary
+
 ;;; Code:
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-
-;; may need manual M-x package-install
+(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
 (require 'use-package)
 
 ;;
@@ -393,7 +392,7 @@ project. With prefix arg, invokes commander instead of dired."
 
 (defun gh/local-comment-auto-fill ()
   (set (make-local-variable 'comment-auto-fill-only-comments) t)
-  (auto-fill-mode t))
+  (auto-fill-mode nil))
 
 (defun gh/set-comment-columns ()
   (set (make-local-variable 'comment-column) 68)
@@ -442,7 +441,8 @@ project. With prefix arg, invokes commander instead of dired."
   :ensure t
   :init
   (progn
-    (use-package smartparens-config)
+    (require 'smartparens-config)
+    (require 'smartparens-rust)
     (smartparens-global-mode 1)
     (show-smartparens-global-mode 1))
   :config
@@ -457,10 +457,7 @@ project. With prefix arg, invokes commander instead of dired."
 ;;
 ;; Flycheck
 ;;
-(use-package flycheck
-  :ensure t
-  :hook (prog-mode . flycheck-mode))
-
+(use-package flycheck :ensure)
 
 ;;
 ;; Language server protocol
@@ -468,21 +465,25 @@ project. With prefix arg, invokes commander instead of dired."
 (use-package lsp-mode
   :ensure t
   :commands lsp
-  :config (setq lsp-prefer-flymake nil))
+  :custom
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-eldoc-render-all t)
+  (lsp-idle-delay 1.2)
+  :config
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 
 (use-package lsp-ui
   :ensure t
-  :config
-  ())
-
-;;
-;; An actually usable imenu thing
-;;
-(set-default 'imenu-auto-rescan t)
-(use-package popup-imenu
-  :ensure t
-  :commands popup-imenu
-  :bind ("M-i" . popup-imenu))
+  :commands lsp-ui-mode
+  :bind ((:map lsp-ui-imenu-mode-map
+	       ("n" . next-line)
+	       ("p" . previous-line))
+	 (:map lsp-ui-doc-mode-map
+	       ("C-c C-c C-h" . lsp-ui-doc-hide)))
+  :custom
+  (lsp-ui-doc-delay 2.0)
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-sideline-show-hover t))
 
 ;; Lispy
 (use-package lispy
@@ -609,6 +610,8 @@ project. With prefix arg, invokes commander instead of dired."
 
 ;;*
 (use-package org
+  :ensure org-plus-contrib
+  :pin org
   :init
   (setq org-directory "~/Dropbox/notes")
   (setq org-default-notes-file (concat org-directory "/notes.org"))
@@ -929,9 +932,7 @@ project. With prefix arg, invokes commander instead of dired."
 (use-package restclient
   :ensure t
   :commands (restclient-mode)
-  :mode "\\.http"
-  :init (add-hook 'restclient-mode-hook
-                  (lambda () (setq tab-width 2))))
+  :mode "\\.http")
 
 ;;
 ;; Ruby
@@ -1010,18 +1011,20 @@ project. With prefix arg, invokes commander instead of dired."
 ;;
 ;; Rust (using LSP)
 ;;
-(use-package rust-mode
+(use-package rustic
   :ensure t
-  :hook (rust-mode . lsp)
-  :mode ("\\.rs" "\\.lalrpop"))
+  :bind (:map rustic-mode-map
+	      ("M-j" . lsp-ui-imenu)
+              ("C-c C-c a" . lsp-execute-code-action)
+              ("C-c C-c r" . lsp-rename))
+  :commands rustic
+  :config
+  (setq rustic-format-on-save t)
+  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
 
-(use-package cargo
-  :ensure t
-  :hook (rust-mode . cargo-minor-mode))
-
-(use-package flycheck-rust
-  :ensure t
-  :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+(defun rk/rustic-mode-hook ()
+  ;; so that run C-c C-c C-r works without having to confirm
+  (setq-local buffer-save-without-query t))
 
 ;;
 ;; Golang
@@ -1135,13 +1138,15 @@ project. With prefix arg, invokes commander instead of dired."
 ;;
 (use-package eshell-toggle
   :ensure t
-  :custom
-  (eshell-toggle-use-projectile-root t)
   :bind
   ("<f9>" . eshell-toggle))
 
+(setq shell-file-name "/usr/local/bin/zsh")
+
 (use-package shell-toggle
   :ensure t
+  :config
+  (setq shell-toggle-launch-shell 'shell)
   :bind
   ([(shift f9)] . shell-toggle-cd))
 
@@ -1223,6 +1228,28 @@ project. With prefix arg, invokes commander instead of dired."
 	(t (narrow-to-defun))))
 
 (global-set-key (kbd "<f7>") #'gh/narrow-or-widen-dwim)
+
+;;
+;; Toggle transparency
+;;
+(defvar gh/transparent nil)
+
+(defun gh/set-alpha (alpha-value)
+  (set-frame-parameter (selected-frame) 'alpha alpha-value)
+  (add-to-list 'default-frame-alist (list 'alpha alpha-value)))
+
+(defun gh/toggle-transparency ()
+  (interactive)
+  (if gh/transparent
+      (progn
+	(setq gh/transparent nil)
+	(gh/set-alpha 100))
+    (progn
+      (setq gh/transparent t)
+      (gh/set-alpha '(82 . 72)))))
+
+;; iterm2 uses command-U for this
+(bind-key "s-u" 'gh/toggle-transparency)
 
 ;;
 ;; Enable server / emacsclient
