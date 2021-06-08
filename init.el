@@ -613,9 +613,6 @@ project. With prefix arg, invokes commander instead of dired."
   :ensure org-plus-contrib
   :pin org
   :init
-  (setq org-directory "~/Dropbox/notes")
-  (setq org-default-notes-file (concat org-directory "/notes.org"))
-  (setq gh/refile-file (concat org-directory "/refile.org"))
   (add-hook 'auto-save-hook 'org-save-all-org-buffers)
 
   (setq org-adapt-indentation nil)
@@ -734,6 +731,7 @@ project. With prefix arg, invokes commander instead of dired."
 
 
   :config
+  ;; by this point host specific .el should have run
   (require 'org-crypt)
   (require 'epa-file)
   (epa-file-enable)
