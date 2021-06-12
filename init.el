@@ -759,7 +759,8 @@ project. With prefix arg, invokes commander instead of dired."
      (restclient . t)))
   (setq org-confirm-babel-evaluate nil
         org-src-fontify-natively t
-        org-src-tab-acts-natively t))
+        org-src-tab-acts-natively t
+	org-babel-clojure-backend 'cider))
 
 ;; Global key bindings for org stuff
 (bind-key "\C-cl" 'org-store-link)
