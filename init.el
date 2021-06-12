@@ -615,6 +615,7 @@ project. With prefix arg, invokes commander instead of dired."
   :pin org
   :init
   (add-hook 'auto-save-hook 'org-save-all-org-buffers)
+  (add-hook 'org-mode-hook 'turn-on-visual-line-mode)
 
   (setq org-adapt-indentation nil)
   (setq org-list-description-max-indent 5)
@@ -760,6 +761,7 @@ project. With prefix arg, invokes commander instead of dired."
   (setq org-confirm-babel-evaluate nil
         org-src-fontify-natively t
         org-src-tab-acts-natively t
+	org-edit-src-content-indentation 0
 	org-babel-clojure-backend 'cider))
 
 ;; Global key bindings for org stuff
