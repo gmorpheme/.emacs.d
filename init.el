@@ -607,7 +607,9 @@ project. With prefix arg, invokes commander instead of dired."
 ;; Org Mode
 ;;
 
-;;*
+;; HACK: `org-directory', `org-default-notes-file', `gh/refile-file' are
+;; different on my different systems - ensure they're set in
+;; `gh/system-config'
 (use-package org
   :ensure org-plus-contrib
   :pin org
