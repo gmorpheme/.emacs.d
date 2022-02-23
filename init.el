@@ -8,8 +8,7 @@
 
 ;;; Code:
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (require 'use-package)
 
 ;;
@@ -156,8 +155,7 @@
 (use-package ivy
   :ensure t
   :ensure flx
-  :ensure smex
-  :ensure ivy-avy
+  :ensure ivy-avy 						    ; adds C-' in the isearch mode map
   :ensure ivy-hydra
   :ensure counsel
   :ensure counsel-projectile
@@ -167,21 +165,27 @@
          ("C-x b" . ivy-switch-buffer)
 	 ("C-h f" . counsel-describe-function)
 	 ("C-h v" . 'counsel-describe-variable)
+	 ("C-h o" . counsel-describe-symbol)
+	 ("C-x 8 RET" . counsel-unicode-char)
 	 ("C-c C-r" . 'ivy-resume))
   :config
   (ivy-mode 1)
   (setq ivy-count-format ""
 	ivy-height 16
-        ivy-display-style nil
-        ivy-minibuffer-faces nil
         ivy-use-virtual-buffers t))
 
-(use-package ace-jump-mode
-  :bind ("C-c SPC" . ace-jump-mode))
+;;; Window configuration
 
 (use-package ace-window
   :ensure t
   :bind ("C-x o" . ace-window))
+
+;; undo for window config C-c <- and C-c ->
+(use-package winner
+  :defer t
+  :init (winner-mode 1))
+
+;; TODO: possibly use depp.brause.shackle
 
 ;; quick access to occur from interactive search
 (define-key isearch-mode-map (kbd "C-o")
@@ -231,48 +235,11 @@
     (call-interactively #'magit-fetch-from-upstream)
     (projectile-vc))
 
-  (projectile-global-mode)
-
-  (defun gh/switch-to-or-create-tab (name)
-    "Switch to tab named or create."
-    (if-let (index (tab-bar--tab-index-by-name name))
-	(tab-bar-switch-to-tab name)
-      (progn
-	(tab-new)
-	(tab-rename name))))
-
-  (defun gh/projectile-switch-project-new-tab (&optional arg)
-    "Like `projectile-switch-project' but in new tab (named after
-project. With prefix arg, invokes commander instead of dired."
-    (interactive "P")
-    (let ((projects (projectile-relevant-known-projects)))
-      (if projects
-	  (projectile-completing-read
-	   "Switch to project: " projects
-	   :action (lambda (project)
-		     (let ((project-name (projectile-project-name project)))
-		       (gh/switch-to-or-create-tab project-name)
-		       (let ((projectile-switch-project-action 'projectile-dired))
-			 (projectile-switch-project-by-name project arg)))))
-	(user-error "There are no known projects"))))
-
-  (defun gh/projectile-kill-project ()
-    "Kill project buffers and any tab named after the project."
-    (interactive)
-    (let* ((project (projectile-ensure-project (projectile-project-root)))
-	   (project-name (projectile-project-name project)))
-      (cl-letf (((symbol-function 'yes-or-no-p) (lambda (&rest args) t)))
-	(projectile-kill-buffers))
-      (tab-bar-close-tab-by-name project-name))))
+  (projectile-global-mode))
 
 (defun gh/kill-current-buffer ()
   (interactive)
   (kill-buffer nil))
-
-;; undo for window config C-c <- and C-c ->
-(use-package winner
-  :defer t
-  :init (winner-mode 1))
 
 ;;; Make it easy to maintain desktop set-ups in projects
 
@@ -289,6 +256,8 @@ project. With prefix arg, invokes commander instead of dired."
 ;;
 ;; basic defaults
 ;;
+(global-so-long-mode 1)
+
 (prefer-coding-system 'utf-8)
 (set-default 'indicate-empty-lines t)
 
@@ -297,23 +266,16 @@ project. With prefix arg, invokes commander instead of dired."
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 (setq confirm-kill-processes nil)
-(setq confirm-kill-emacs nil)
 
 (defalias 'auto-tail-revert-mode 'tail-mode)
 
 (define-key global-map (kbd "C-+") 'text-scale-increase)
 (define-key global-map (kbd "C--") 'text-scale-decrease)
 
-(put 'narrow-to-region 'disabled nil)
-(put 'narrow-to-page 'disabled nil)
-(put 'upcase-region 'disabled nil)
-(put 'downcase-region 'disabled nil)
-(put 'eval-expression 'disabled nil)
-(put 'set-goal-column 'disabled nil)
-
+(setq disabled-command-function nil)
 (setq require-final-newline t)
 (setq inhibit-splash-screen t)
-;; why are these no longer coming from better-defaults?
+
 (tool-bar-mode -1)
 (toggle-scroll-bar -1)
 (blink-cursor-mode 0)
@@ -329,7 +291,6 @@ project. With prefix arg, invokes commander instead of dired."
 ;; prefer side-by-side window splits if the window is wide
 (setq split-height-threshold nil)
 (setq split-width-threshold 160)
-
 ;;
 ;; backups already in .emacs.d/backups -
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
@@ -395,15 +356,11 @@ project. With prefix arg, invokes commander instead of dired."
   (auto-fill-mode nil))
 
 (defun gh/set-comment-columns ()
-  (set (make-local-variable 'comment-column) 68)
   (set (make-local-variable 'comment-fill-column) 80))
 
 (defun gh/turn-on-hl-line-mode ()
   (when (> (display-color-cells) 8)
     (hl-line-mode t)))
-
-(defun gh/add-prettify-symbols ()
-  (push '("fn" . "\u0192") prettify-symbols-alist))
 
 (defun gh/add-watchwords ()
   (font-lock-add-keywords
@@ -415,13 +372,11 @@ project. With prefix arg, invokes commander instead of dired."
 
 (add-hook 'prog-mode-hook 'gh/local-column-number-mode)
 (add-hook 'prog-mode-hook 'gh/local-comment-auto-fill)
-(add-hook 'prog-mode-hook 'gh/add-prettify-symbols)
 (add-hook 'prog-mode-hook 'gh/set-comment-columns)
 (add-hook 'prog-mode-hook 'prettify-symbols-mode)
 (add-hook 'prog-mode-hook 'gh/add-watchwords)
 (add-hook 'prog-mode-hook 'idle-highlight-mode)
 (add-hook 'prog-mode-hook 'gh/truncate-lines)
-(add-hook 'prog-mode-hook 'electric-indent-mode)
 
 (defun gh/prog-mode-hook ()
   (run-hooks 'prog-mode-hook))
@@ -466,9 +421,10 @@ project. With prefix arg, invokes commander instead of dired."
   :ensure t
   :commands lsp
   :custom
-  (lsp-rust-analyzer-cargo-watch-command "clippy")
   (lsp-eldoc-render-all t)
   (lsp-idle-delay 1.2)
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-rust-analyzer-server-display-inlay-hints t)
   :config
   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 
@@ -483,7 +439,29 @@ project. With prefix arg, invokes commander instead of dired."
   :custom
   (lsp-ui-doc-delay 2.0)
   (lsp-ui-peek-always-show t)
+  (lsp-eldoc-hook nil)
+  (lsp-ui-doc-enable t)
   (lsp-ui-sideline-show-hover t))
+
+;;
+;; Rust (using LSP)
+;;
+(use-package rustic
+  :ensure t
+  :bind (:map rustic-mode-map
+	      ("M-j" . lsp-ui-imenu)
+              ("C-c C-c a" . lsp-execute-code-action)
+              ("C-c C-c r" . lsp-rename))
+  :commands rustic
+  :config
+  (setq rustic-format-on-save t)
+  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
+
+(defun rk/rustic-mode-hook ()
+  ;; so that run C-c C-c C-r works without having to confirm
+  (when buffer-file-name
+    (setq-local buffer-save-without-query t)))
+
 
 ;; Lispy
 (use-package lispy
@@ -612,7 +590,6 @@ project. With prefix arg, invokes commander instead of dired."
 ;; `gh/system-config'
 (use-package org
   :ensure org-plus-contrib
-  :pin org
   :init
   (add-hook 'auto-save-hook 'org-save-all-org-buffers)
   (add-hook 'org-mode-hook 'turn-on-visual-line-mode)
@@ -829,14 +806,14 @@ project. With prefix arg, invokes commander instead of dired."
 (modify-coding-system-alist 'file "\\.reg\\'" 'utf-16-le)
 
 ;;
-;; Windows specifics
+;; Set favourite of what fonts are available
 ;;
-(if (eq system-type 'windows-nt)
-    (progn
-      (set-default-font "-outline-Consolas-normal-r-normal-normal-12-97-96-96-c-*-iso8859-1")
-								    ; stop hangs?
-      (setq w32-get-true-file-attributes nil)
-      (remove-hook 'text-mode-hook 'turn-on-flyspell)))
+(require 'dash)
+(defun set-font-from (fonts)
+  (when-let (font (-first (lambda (x) (not (eq (font-info x) nil))) fonts))
+    (set-frame-font font)))
+
+(set-font-from '("Hack" "Hack Nerd Font Mono" "FiraCode Nerd Font Mono" "Consolas"))
 
 ;;
 ;; Theme
@@ -883,7 +860,7 @@ project. With prefix arg, invokes commander instead of dired."
 (bind-key [(f6)] 'gh/cycle-dark-themes)
 (bind-key [(shift f6)] 'gh/cycle-light-themes)
 
-(gh/enable-theme 'nimbus)
+(gh/enable-theme 'zenburn)
 
 ;;
 ;; CIDER / Clojure / ClojureScript / clj-refactor
@@ -901,7 +878,8 @@ project. With prefix arg, invokes commander instead of dired."
           cider-repl-use-clojure-font-lock t
           nrepl-hide-special-buffers t
 	  cljr-favor-prefix-notation t
-	  cider-print-quota (* 1024 10))
+	  cider-print-quota (* 1024 10)
+	  lispy-thread-last-macro "->>")
     (add-hook 'clojure-mode-hook
               (lambda ()
                 (define-clojure-indent
@@ -922,11 +900,25 @@ project. With prefix arg, invokes commander instead of dired."
                                    (eldoc-mode 1)
                                    (clj-refactor-mode 1)
                                    (cljr-add-keybindings-with-prefix "C-c r")))
-    (add-hook 'cider-repl-mode-hook #'subword-mode))
+    (add-hook 'cider-repl-mode-hook #'subword-mode)
+    (add-hook 'cider-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-S-x") #'rebl-eval-defun-at-point)
+            (local-set-key (kbd "C-x C-r") #'rebl-eval-last-sexp))))
   ;; :config
   ;; (use-package eval-sexp-fu :ensure t)
   ;; (use-package cider-eval-sexp-fu :ensure t)
   )
+
+(defun clerk-show ()
+  (interactive)
+  (save-buffer)
+  (let
+      ((filename
+        (buffer-file-name)))
+    (when filename
+      (cider-interactive-eval
+       (concat "(nextjournal.clerk/show! \"" filename "\")")))))
 
 ;;
 ;; REST client
@@ -1009,24 +1001,6 @@ project. With prefix arg, invokes commander instead of dired."
 (use-package alchemist
   :ensure t
   :defer t)
-
-;;
-;; Rust (using LSP)
-;;
-(use-package rustic
-  :ensure t
-  :bind (:map rustic-mode-map
-	      ("M-j" . lsp-ui-imenu)
-              ("C-c C-c a" . lsp-execute-code-action)
-              ("C-c C-c r" . lsp-rename))
-  :commands rustic
-  :config
-  (setq rustic-format-on-save t)
-  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
-
-(defun rk/rustic-mode-hook ()
-  ;; so that run C-c C-c C-r works without having to confirm
-  (setq-local buffer-save-without-query t))
 
 ;;
 ;; Golang
@@ -1177,11 +1151,9 @@ project. With prefix arg, invokes commander instead of dired."
     (key-chord-define-global "hh" 'ivy-switch-buffer-other-window)
     (key-chord-define-global "jk" 'transpose-frame)
     (key-chord-define-global "jf" 'counsel-find-file)
-    (key-chord-define-global "jg" 'org-agenda)
     (key-chord-define-global "jp" 'counsel-projectile-find-file)
-    (key-chord-define-global "JP" 'gh/projectile-switch-project-new-tab)
+    (key-chord-define-global "jw" 'ace-window)
     (key-chord-define-global "kk" 'gh/kill-current-buffer)
-    (key-chord-define-global "KK" 'gh/projectile-kill-project)
     (key-chord-define-global "YY" 'counsel-yank-pop)
     (key-chord-mode 1)))
 
@@ -1194,14 +1166,14 @@ project. With prefix arg, invokes commander instead of dired."
    ("k" windmove-up)
    ("l" windmove-right)
    ("v" (lambda ()
-          (interactive)
-          (split-window-right)
-          (windmove-right))
+	  (interactive)
+	  (split-window-right)
+	  (windmove-right))
     "vert")
    ("x" (lambda ()
-          (interactive)
-          (split-window-below)
-          (windmove-down))
+	  (interactive)
+	  (split-window-below)
+	  (windmove-down))
     "horz")
    ("t" transpose-frame "'" :color blue)
    ("o" delete-other-windows "one" :color blue)
