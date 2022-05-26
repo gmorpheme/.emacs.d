@@ -600,8 +600,7 @@ project. With prefix arg, invokes commander instead of dired."
   :init
   (progn
     (add-hook 'css-mode-hook 'gh/prog-mode-hook)
-    (add-hook 'css-mode-hook 'rainbow-mode)
-    (add-hook 'css-mode-hook 'skewer-css-mode)))
+    (add-hook 'css-mode-hook 'rainbow-mode)))
 
 
 ;;
