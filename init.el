@@ -154,8 +154,10 @@
 
 (use-package ivy
   :ensure t
+  :ensure rg
+  :ensure ripgrep
   :ensure flx
-  :ensure ivy-avy 						    ; adds C-' in the isearch mode map
+  :ensure ivy-avy			      ; adds C-' in the isearch mode map
   :ensure ivy-hydra
   :ensure counsel
   :ensure counsel-projectile
@@ -412,7 +414,10 @@
 ;;
 ;; Flycheck
 ;;
-(use-package flycheck :ensure)
+(use-package flycheck
+  :ensure
+  :bind (("M-n" . flycheck-next-error)
+	 ("M-p" . flycheck-previous-error)))
 
 ;;
 ;; Language server protocol
