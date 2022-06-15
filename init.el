@@ -41,19 +41,12 @@
 (setq gh/system-config (concat user-emacs-directory system-name ".el")
       gh/user-config (concat user-emacs-directory user-login-name ".el"))
 
-(defun gh/eval-after-init (form)
-  "Add `(lambda () FORM)' to `after-init-hook'.
+(defun gh/eval-extra-init-files ()
+  (when (file-exists-p gh/system-config) (load gh/system-config))
+  (when (file-exists-p gh/user-config) (load gh/user-config)))
 
-    If Emacs has already finished initialization, also eval FORM immediately."
-  (let ((func (list 'lambda nil form)))
-    (add-hook 'after-init-hook func)
-    (when after-init-time
-      (eval form))))
+(add-hook 'after-init-hook 'gh/eval-extra-init-files)
 
-(gh/eval-after-init
- '(progn
-    (when (file-exists-p gh/system-config) (load gh/system-config))
-    (when (file-exists-p gh/user-config) (load gh/user-config))))
 
 ;; Basic packages
 
@@ -78,22 +71,25 @@
 (setq sentence-end-double-space nil)
 (setq help-window-select t)
 
-;; use package
-(require 'use-package)
-
 (use-package bind-key
   :ensure t)
 
 (gcr/on-osx
+
  ;; try and get appropriate path by looking at what shell does
+ (setq exec-path-from-shell-variables '("PATH"
+					"AWS_ACCESS_KEY_ID"
+					"AWS_SECRET_ACCESS_KEY"
+					"GOPATH"
+					"RUST_SRC_PATH"))
+
+ (setq exec-path-from-shell-arguments '("-l"))
+
  (exec-path-from-shell-initialize)
- ;; and make sure we have a few other auth settings
- (exec-path-from-shell-copy-envs '("AWS_ACCESS_KEY_ID"
-				   "AWS_SECRET_ACCESS_KEY"
-				   "GOPATH"
-				   "RUST_SRC_PATH"))
+
  ;; typing hash on a UK mac in emacs is tricky
- (bind-key "s-3" '(lambda () (interactive) (insert "#")))
+ (bind-key "s-3" (lambda () (interactive) (insert "#")))
+
  ;; work around "empty or unsupported pasteboard type" bug
  ;; should be fixed in 24.4 so can remove at that point
  (setq save-interprogram-paste-before-kill nil))
