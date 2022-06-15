@@ -57,6 +57,7 @@
 
 ;; Basic packages
 
+(use-package paradox :ensure t :defer t)
 (use-package better-defaults :ensure t :defer t)
 (use-package exec-path-from-shell :ensure t :defer t)
 (use-package idle-highlight-mode :ensure t :defer t)
