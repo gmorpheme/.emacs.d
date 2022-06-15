@@ -817,8 +817,9 @@
 ;;
 (require 'dash)
 (defun set-font-from (fonts)
-  (when-let (font (-first (lambda (x) (not (eq (font-info x) nil))) fonts))
-    (set-frame-font font)))
+  (when window-system
+      (when-let (font (-first (lambda (x) (not (eq (font-info x) nil))) fonts))
+	(set-frame-font font))))
 
 (set-font-from '("Hack" "Hack Nerd Font Mono" "FiraCode Nerd Font Mono" "Consolas"))
 
