@@ -63,7 +63,7 @@
   :ensure t)
 
 (when (eq system-type 'darwin)
-  (bind-key "s-3" (lambda () (interactive) (insert "#"))))
+  (define-key key-translation-map (kbd "s-3") (kbd "#")))
 
 ;;
 ;; try
