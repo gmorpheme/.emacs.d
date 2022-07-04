@@ -814,10 +814,12 @@
 (setq gh/dark-themes '(zenburn
 		       nimbus
 		       tao-yin
+		       base16-kimber
                        base16-monokai
                        sanityinc-tomorrow-bright
                        sanityinc-tomorrow-eighties
                        sanityinc-tomorrow-blue
+		       base16-greenscreen
 		       material))
 
 (setq gh/light-themes '(tao-yang
@@ -845,7 +847,7 @@
 (bind-key [(f6)] 'gh/cycle-dark-themes)
 (bind-key [(shift f6)] 'gh/cycle-light-themes)
 
-(gh/enable-theme 'zenburn)
+(gh/enable-theme 'nimbus)
 
 ;;
 ;; CIDER / Clojure / ClojureScript / clj-refactor
