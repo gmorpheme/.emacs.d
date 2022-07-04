@@ -24,17 +24,6 @@
 ;;;
 
 (load "~/.emacs.secrets" t)
-
-;;;
-;;; mac specifics
-;;;
-
-(defmacro gcr/on-osx (statement &rest statements)
-  "Evaluate the `STATEMENT' and `STATEMENTS' only when run on OSX."
-  `(when (eq system-type 'darwin)
-     ,statement
-     ,@statements))
-
 ;;
 ;; Load other files
 ;;
@@ -52,7 +41,6 @@
 
 (use-package paradox :ensure t :defer t)
 (use-package better-defaults :ensure t :defer t)
-(use-package exec-path-from-shell :ensure t :defer t)
 (use-package idle-highlight-mode :ensure t :defer t)
 (use-package rainbow-delimiters :ensure t :defer t)
 (use-package ess :ensure t :defer t)
@@ -74,25 +62,8 @@
 (use-package bind-key
   :ensure t)
 
-(gcr/on-osx
-
- ;; try and get appropriate path by looking at what shell does
- (setq exec-path-from-shell-variables '("PATH"
-					"AWS_ACCESS_KEY_ID"
-					"AWS_SECRET_ACCESS_KEY"
-					"GOPATH"
-					"RUST_SRC_PATH"))
-
- (setq exec-path-from-shell-arguments '("-l"))
-
- (exec-path-from-shell-initialize)
-
- ;; typing hash on a UK mac in emacs is tricky
- (bind-key "s-3" (lambda () (interactive) (insert "#")))
-
- ;; work around "empty or unsupported pasteboard type" bug
- ;; should be fixed in 24.4 so can remove at that point
- (setq save-interprogram-paste-before-kill nil))
+(when (eq system-type 'darwin)
+  (bind-key "s-3" (lambda () (interactive) (insert "#"))))
 
 ;;
 ;; try
