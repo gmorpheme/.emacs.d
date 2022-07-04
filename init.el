@@ -44,8 +44,8 @@
 (use-package idle-highlight-mode :ensure t :defer t)
 (use-package rainbow-delimiters :ensure t :defer t)
 (use-package ess :ensure t :defer t)
-(use-package berrys-theme :ensure t :defer t)
 (use-package solarized-theme :ensure t :defer t)
+(use-package material-theme :ensure t :defer t)
 (use-package color-theme-sanityinc-tomorrow :ensure t :defer t)
 (use-package nimbus-theme :ensure t :defer t)
 (use-package zenburn-theme :ensure t :defer t)
@@ -815,11 +815,12 @@
                        sanityinc-tomorrow-bright
                        sanityinc-tomorrow-eighties
                        sanityinc-tomorrow-blue
-                       base16-monokai))
+                       base16-monokai
+		       material))
 
 (setq gh/light-themes '(plan9
-			berrys
 			leuven
+			material-light
 			twilight-bright))
 
 (defun gh/cycle-themes (themes)
