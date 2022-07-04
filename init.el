@@ -45,6 +45,7 @@
 (use-package rainbow-delimiters :ensure t :defer t)
 (use-package ess :ensure t :defer t)
 (use-package solarized-theme :ensure t :defer t)
+(use-package tao-theme :ensure t :defer t)
 (use-package material-theme :ensure t :defer t)
 (use-package color-theme-sanityinc-tomorrow :ensure t :defer t)
 (use-package nimbus-theme :ensure t :defer t)
@@ -812,13 +813,14 @@
 
 (setq gh/dark-themes '(zenburn
 		       nimbus
+		       tao-yin
+                       base16-monokai
                        sanityinc-tomorrow-bright
                        sanityinc-tomorrow-eighties
                        sanityinc-tomorrow-blue
-                       base16-monokai
 		       material))
 
-(setq gh/light-themes '(plan9
+(setq gh/light-themes '(tao-yang
 			leuven
 			material-light
 			twilight-bright))
