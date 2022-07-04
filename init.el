@@ -467,6 +467,12 @@
     (setq-local buffer-save-without-query t)))
 
 
+;; Kotlin
+(use-package kotlin-mode
+  :ensure t
+  :hook
+  (kotlin-mode . lsp))
+
 ;; Lispy
 (use-package lispy
   :ensure t
