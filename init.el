@@ -650,7 +650,7 @@
 	   :unnarrowed t)
 
 	  ("t" "todo" entry (file gh/refile-file)
-	   "* TODO %?\n  %i\n  %a")
+	   "* TODO %?\n")
 
 	  ("r" "respond" entry (file gh/refile-file)
 	   "* NEXT Respond to %? \nSCHEDULED: %t\n%U\n%a\n"
