@@ -1216,3 +1216,14 @@
 ;; Enable server / emacsclient
 ;;
 (server-start)
+
+
+;;
+;; Experimental dispatch functions for access by an experimental
+;; Alfred workflow I'm working on
+;;
+
+(defun alfred/repl (text)
+  "Send TEXT to a current CIDER repl."
+  (cider--switch-to-repl-buffer (cadar (cider-sessions)))
+  (cider-insert-in-repl text t))
