@@ -809,7 +809,7 @@
   (progn
     (gh/clear-themes)
     (message (format "Switched to theme: %s" theme))
-    (load-theme theme)))
+    (load-theme theme t)))
 
 (setq gh/dark-themes '(zenburn
 		       nimbus
