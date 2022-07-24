@@ -450,10 +450,14 @@
   :ensure t
   :init (setq lispy-compat '(edebug cider)))
 
+;; Fennel
+(use-package fennel-mode
+  :ensure t)
+
 ;;
 ;; Lisp modes
 ;;
-(dolist (mode '(scheme emacs-lisp lisp clojure racket))
+(dolist (mode '(scheme emacs-lisp lisp clojure racket fennel))
   (let ((hook (intern (concat (symbol-name mode) "-mode-hook"))))
     (add-hook hook 'gh/prog-mode-hook)
     (add-hook hook (lambda () (lispy-mode 1)))
