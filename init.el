@@ -310,12 +310,8 @@
 (setq compilation-scroll-output 'next-error)
 (setq compilation-skip-threshold 2)
 
-;;
-;; dash at point
-;;
-(use-package dash-at-point
-  :ensure t
-  :bind ("C-c d" . dash-at-point))
+(use-package edit-indirect
+  :ensure t)
 
 ;;
 ;; lambdas and todos
@@ -464,6 +460,8 @@
     (add-hook hook 'rainbow-delimiters-mode)))
 
 (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+
+
 
 ;;
 ;; Haskell mode
@@ -868,9 +866,9 @@
     (setq cider-auto-select-error-buffer t
           cider-repl-use-clojure-font-lock t
           nrepl-hide-special-buffers t
-	  cljr-favor-prefix-notation t
-	  cider-print-quota (* 1024 10)
-	  lispy-thread-last-macro "->>")
+	        cljr-favor-prefix-notation t
+	        cider-print-quota (* 1024 10)
+	        lispy-thread-last-macro "->>")
     (add-hook 'clojure-mode-hook
               (lambda ()
                 (define-clojure-indent
@@ -900,6 +898,23 @@
   ;; (use-package eval-sexp-fu :ensure t)
   ;; (use-package cider-eval-sexp-fu :ensure t)
   )
+
+(use-package lisp-mode
+  :config
+  (add-hook 'lisp-mode-hook
+            (lambda ()
+              (setq tab-width 2
+	                  indent-tabs-mode nil)
+              (put '$define! 'lisp-indent-function 1)
+              (put '$vau 'lisp-indent-function 'defun)
+              (put '$lambda 'lisp-indent-function 'defun)
+              (put '$provide! 'lisp-indent-function 1)
+              (put '$let 'lisp-indent-function 1)
+              (put '$let* 'lisp-indent-function 1)
+              (put '$letrec 'lisp-indent-function 1)
+              (put '$letrec* 'lisp-indent-function 1)
+              (put '$let-redirect 'lisp-indent-function 1)
+              (put '$let-safe 'lisp-indent-function 1))))
 
 (defun clerk-show ()
   (interactive)
