@@ -389,31 +389,8 @@
 ;;
 ;; Language server protocol
 ;;
-(use-package lsp-mode
-  :ensure t
-  :commands lsp
-  :custom
-  (lsp-eldoc-render-all t)
-  (lsp-idle-delay 1.2)
-  (lsp-rust-analyzer-cargo-watch-command "clippy")
-  (lsp-rust-analyzer-server-display-inlay-hints t)
-  :config
-  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
-
-(use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode
-  :bind ((:map lsp-ui-imenu-mode-map
-	       ("n" . next-line)
-	       ("p" . previous-line))
-	 (:map lsp-ui-doc-mode-map
-	       ("C-c C-c C-h" . lsp-ui-doc-hide)))
-  :custom
-  (lsp-ui-doc-delay 2.0)
-  (lsp-ui-peek-always-show t)
-  (lsp-eldoc-hook nil)
-  (lsp-ui-doc-enable t)
-  (lsp-ui-sideline-show-hover t))
+(use-package eglot
+  :ensure t)
 
 ;;
 ;; Rust (using LSP)
@@ -421,12 +398,11 @@
 (use-package rustic
   :ensure t
   :bind (:map rustic-mode-map
-	      ("M-j" . lsp-ui-imenu)
-              ("C-c C-c a" . lsp-execute-code-action)
-              ("C-c C-c r" . lsp-rename))
+              ("C-c C-c r" . eglot-rename))
   :commands rustic
   :config
-  (setq rustic-format-on-save t)
+  (setq rustic-format-on-save t
+	rustic-lsp-client 'eglot)
   (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
 
 (defun rk/rustic-mode-hook ()
@@ -437,9 +413,7 @@
 
 ;; Kotlin
 (use-package kotlin-mode
-  :ensure t
-  :hook
-  (kotlin-mode . lsp))
+  :ensure t)
 
 ;; Lispy
 (use-package lispy
@@ -461,8 +435,6 @@
 
 (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
 
-
-
 ;;
 ;; Haskell mode
 ;;
@@ -473,11 +445,9 @@
   :mode (("\\.hs" . haskell-mode)
          ("\\.fr" . haskell-mode))
   :init
-  (setq lsp-haskell-process-path-hie "hie-wrapper")
   (setq haskell-compile-cabal-build-command "stack build --test --fast --file-watch --copy-bins --exec 'hlint .'")
   (add-hook 'haskell-mode-hook 'gh/prog-mode-hook)
   (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-  (add-hook 'haskell-mode-hook 'lsp)
   (add-hook 'haskell-mode-hook 'hindent-mode))
 
 ;;;
