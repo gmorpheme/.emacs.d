@@ -114,38 +114,34 @@
   :mode ("\\.md$"
          "\\.apib$"))
 
-;;
-;; ivy / counsel
-;;
+;;; Vertico / Consult
 
-(use-package avy
+(use-package vertico
   :ensure t
-  :config
-  (avy-setup-default))
+  :init
+  (vertico-mode)
+  (setq vertico-count 16))
 
-(use-package ivy
+(use-package recentf
   :ensure t
-  :ensure rg
-  :ensure ripgrep
-  :ensure flx
-  :ensure ivy-avy			      ; adds C-' in the isearch mode map
-  :ensure ivy-hydra
-  :ensure counsel
-  :ensure counsel-projectile
-  :diminish (ivy-mode . "")
-  :bind (("M-x" . counsel-M-x)
-         ("C-x f" . counsel-find-file)
-         ("C-x b" . ivy-switch-buffer)
-	 ("C-h f" . counsel-describe-function)
-	 ("C-h v" . 'counsel-describe-variable)
-	 ("C-h o" . counsel-describe-symbol)
-	 ("C-x 8 RET" . counsel-unicode-char)
-	 ("C-c C-r" . 'ivy-resume))
-  :config
-  (ivy-mode 1)
-  (setq ivy-count-format ""
-	ivy-height 16
-        ivy-use-virtual-buffers t))
+  :init
+  (recentf-mode 1))
+
+(use-package savehist
+  :init
+  (savehist-mode))
+
+(use-package orderless
+  :ensure t
+  :init
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))))
+
+(use-package consult
+  :ensure t
+  :ensure consult-projectile
+  :bind (("M-y" . consult-yank-pop)))
 
 ;;; Window configuration
 
@@ -157,8 +153,6 @@
 (use-package winner
   :defer t
   :init (winner-mode 1))
-
-;; TODO: possibly use depp.brause.shackle
 
 ;; quick access to occur from interactive search
 (define-key isearch-mode-map (kbd "C-o")
@@ -195,9 +189,17 @@
   :bind-keymap ("C-c p" . projectile-command-map)
   :config
 
-  (setq projectile-completion-system 'ivy)
+  (setq projectile-completion-system 'default)
   (setq projectile-switch-project-action #'projectile-commander)
   (setq projectile-create-missing-test-files t)
+
+  ;; rejig to allow projects in monorepos to take preference over
+  ;; outer .git
+  (setq projectile-project-root-functions '(projectile-root-local
+					    projectile-root-marked
+					    projectile-root-top-down
+					    projectile-root-bottom-up
+					    projectile-root-top-down-recurring))
 
   (def-projectile-commander-method ?S
     "Open a *shell* buffer for the project."
@@ -372,19 +374,10 @@
   :config
   (sp-use-smartparens-bindings))
 
-
 ;;
 ;; iedit
 ;;
 (use-package iedit :defer t)
-
-;;
-;; Flycheck
-;;
-(use-package flycheck
-  :ensure
-  :bind (("M-n" . flycheck-next-error)
-	 ("M-p" . flycheck-previous-error)))
 
 ;;
 ;; Language server protocol
@@ -440,7 +433,6 @@
 ;;
 (use-package haskell-mode
   :ensure t
-  :ensure lsp-haskell
   :ensure hindent
   :mode (("\\.hs" . haskell-mode)
          ("\\.fr" . haskell-mode))
@@ -1123,14 +1115,14 @@
     (key-chord-define-global "j0" 'delete-window)
     (key-chord-define-global "j1" 'delete-other-windows)
     (key-chord-define-global "JJ" 'magit-status)
-    (key-chord-define-global ",," 'ivy-switch-buffer)
-    (key-chord-define-global "hh" 'ivy-switch-buffer-other-window)
+    (key-chord-define-global ",," 'consult-buffer)
+    (key-chord-define-global "hh" 'consult-buffer-other-window)
     (key-chord-define-global "jk" 'transpose-frame)
-    (key-chord-define-global "jf" 'counsel-find-file)
-    (key-chord-define-global "jp" 'counsel-projectile-find-file)
+    (key-chord-define-global "jf" 'consult-recent-file)
+    (key-chord-define-global "jp" 'consult-projectile)
     (key-chord-define-global "jw" 'ace-window)
     (key-chord-define-global "kk" 'gh/kill-current-buffer)
-    (key-chord-define-global "YY" 'counsel-yank-pop)
+    (key-chord-define-global "YY" 'consult-yank-pop)
     (key-chord-mode 1)))
 
 (bind-key
