@@ -383,7 +383,10 @@
 ;; Language server protocol
 ;;
 (use-package eglot
-  :ensure t)
+  :ensure t
+  :init
+  ;; don't lose flymake errors in the minibuffer behind eldoc
+  (setq eldoc-documentation-strategy 'eldoc-documentation-compose))
 
 ;;
 ;; Rust (using LSP)
@@ -1198,6 +1201,8 @@
 ;;
 (server-start)
 
+(require 'epg)
+(setq epg-pinentry-mode 'loopback)
 
 ;;
 ;; Experimental dispatch functions for access by an experimental
