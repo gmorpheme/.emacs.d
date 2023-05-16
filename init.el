@@ -1,3 +1,4 @@
+
 ;;; Commentary:
 ;;
 ;; Much of this is stolen from elsehwere, in particular Phil
@@ -591,7 +592,7 @@
   (setq org-agenda-span 'day)
 
   ;; Modal effect, full window but restore windows on q
-  (setq org-agenda-window-setup 'reorganize-frame)
+  (setq org-agenda-window-setup 'current-window)
   (setq org-agenda-restore-windows-after-quit t)
 
   (setq org-agenda-compact-blocks t)
