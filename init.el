@@ -12,7 +12,13 @@
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
 
-(require 'use-package)
+
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(eval-when-compile
+  (require 'use-package))
 
 ;;
 ;; Keep customize-based settings separate
@@ -1088,8 +1094,6 @@
   :ensure t
   :bind
   ("<f9>" . eshell-toggle))
-
-(setq shell-file-name "/usr/local/bin/zsh")
 
 (use-package shell-toggle
   :ensure t
