@@ -546,7 +546,6 @@
 ;; different on my different systems - ensure they're set in
 ;; `gh/system-config'
 (use-package org
-  :ensure org-plus-contrib
   :init
   (add-hook 'auto-save-hook 'org-save-all-org-buffers)
   (add-hook 'org-mode-hook 'turn-on-visual-line-mode)
