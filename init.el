@@ -71,6 +71,7 @@
   :ensure t)
 
 (when (eq system-type 'darwin)
+  (setq direct-use-ls-dired nil)
   (define-key key-translation-map (kbd "s-3") (kbd "#")))
 
 ;;
