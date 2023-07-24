@@ -64,8 +64,44 @@
 ;;;
 ;;; Other small customisations
 ;;;
-(setq sentence-end-double-space nil)
-(setq help-window-select t)
+(use-package emacs
+  :init
+
+  (setq sentence-end-double-space nil)
+  (setq help-window-select t)
+
+
+  ;; Window manager configuration
+
+  (setq window-sides-slots '(0 0 1 1))
+
+  (setq display-buffer-alist
+	'(
+	  ;; - compilation in right hand side bar
+	  ("\\*Compilation\\*\\|\\*rustic-compilation\\*"
+	   display-buffer-in-side-window
+	   (side . right)
+	   (slot . 0)
+	   (window-width . 80)
+	   (window-parameters
+	    (no-delete-other-windows . t)))
+	  ;; - various help windows in right hand side bar
+	  ("\\*info\\*\\|\\*Help\\*\\|\\*Shortdoc.*\\*"
+	   display-buffer-in-side-window
+	   (side . right)
+	   (slot . 0)
+	   (window-width . 80)
+	   (window-parameters
+	    (no-delete-other-windows . t)))
+	  ;; - shells below
+	  ("\\*e?shell\\*" display-buffer-in-direction
+	   (direction . bottom)
+	   (window . root)
+	   (window-height . 0.3))))
+
+  )
+
+
 
 (use-package bind-key
   :ensure t)
@@ -150,6 +186,7 @@
   :ensure t
   :ensure consult-projectile
   :bind (("M-y" . consult-yank-pop)))
+
 
 ;;; Window configuration
 
@@ -267,9 +304,9 @@
 (setq ring-bell-function 'ignore)
 (delete-selection-mode 1)
 
-;; make mouse and gesture scroll work sanely
-(setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
-(setq mouse-wheel-progressive-speed nil)
+;; ;; make mouse and gesture scroll work sanely
+;; (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
+;; (setq mouse-wheel-progressive-speed nil)
 
 ;; prefer side-by-side window splits if the window is wide
 (setq split-height-threshold nil)
@@ -281,11 +318,14 @@
 (setq version-control t)
 (setq delete-old-versions t)
 
+(setq next-error-message-highlight t)
+
 ;;
 ;; dired
 ;;
 
 (setq dired-listing-switches "-alh")
+(setq dired-kill-when-opening-new-dired-buffer t)
 
 ;;
 ;; Git
