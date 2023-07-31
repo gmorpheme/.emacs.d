@@ -1,51 +1,32 @@
-
-;;; Commentary:
-;;
-;; Much of this is stolen from elsehwere, in particular Phil
-;; Hagelberg's emacs-starter-kit, while it existed.
-;;
-
 ;;; init.el -- summary
 
-;;; Code:
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)
-
-
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-(eval-when-compile
-  (require 'use-package))
+;; -*- lexical-binding: t -*-
 
 ;;
-;; Keep customize-based settings separate
+;; use-package available by deafult since 29 and archives initialised
+;; in early-init.el
 ;;
-(setq custom-file "~/.emacs.d/.emacs-custom")
-(load custom-file 'no-error)
+(require 'use-package)
 
-;;;
-;;; Load a secrets file if present too
-;;;
-
-(load "~/.emacs.secrets" t)
 ;;
-;; Load other files
+;; Ensure other files get loaded if present, including customisation
+;; (kept out of this file), encrypted secrets and a file specific to
+;; the host we're running on.
 ;;
-(setq gh/system-config (concat user-emacs-directory system-name ".el")
-      gh/user-config (concat user-emacs-directory user-login-name ".el"))
+(setq custom-file "~/.emacs.d/.emacs-custom"
+      gh/secrets-file "~/.emacs.d/.emacs-secrets"
+      gh/system-config (concat user-emacs-directory system-name ".el"))
 
 (defun gh/eval-extra-init-files ()
-  (when (file-exists-p gh/system-config) (load gh/system-config))
-  (when (file-exists-p gh/user-config) (load gh/user-config)))
+  (load custom-file 'no-error)
+  (load gh/secrets-file 'no-error)
+  (load gh/system-config 'no-error))
 
 (add-hook 'after-init-hook 'gh/eval-extra-init-files)
 
-
+;;
 ;; Basic packages
-
+;;
 (use-package paradox :ensure t :defer t)
 (use-package better-defaults :ensure t :defer t)
 (use-package idle-highlight-mode :ensure t :defer t)
@@ -60,16 +41,52 @@
 (use-package twilight-bright-theme :ensure t :defer t)
 (use-package base16-theme :ensure t :defer t)
 (use-package plan9-theme :ensure t :defer t)
+(use-package bind-key :ensure t)
 
 ;;;
-;;; Other small customisations
+;;; Small and miscellaneous customisations
 ;;;
 (use-package emacs
   :init
 
+  (setq inhibit-splash-screen t)
+  (tool-bar-mode -1)
+  (toggle-scroll-bar -1)
+  (pixel-scroll-precision-mode 1)
+  (blink-cursor-mode 0)
+  (auto-compression-mode 1)
+  (setq visible-bell nil)
+  (setq ring-bell-function 'ignore)
+  (delete-selection-mode 1)
   (setq sentence-end-double-space nil)
   (setq help-window-select t)
+  (set-default-coding-systems 'utf-8)
+  (set-default 'indicate-empty-lines t)
 
+  (add-hook 'text-mode-hook 'turn-on-auto-fill)
+  (add-hook 'text-mode-hook 'turn-on-flyspell)
+
+  (defalias 'yes-or-no-p 'y-or-n-p)
+  (setq confirm-kill-processes nil)
+
+  (defalias 'auto-tail-revert-mode 'tail-mode)
+
+  (define-key global-map (kbd "C-+") 'global-text-scale-adjust)
+  (define-key global-map (kbd "C--") 'global-text-scale-adjust)
+
+  (setq disabled-command-function nil)
+  (setq require-final-newline t)
+
+  ;; ;; prefer side-by-side window splits if the window is wide
+  ;; (setq split-height-threshold nil)
+  ;; (setq split-width-threshold 160)
+  ;;
+  ;; backups already in .emacs.d/backups -
+  (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+  (setq version-control t)
+  (setq delete-old-versions t)
+
+  (setq next-error-message-highlight t)
 
   ;; Window manager configuration
 
@@ -97,26 +114,19 @@
 	  ("\\*e?shell\\*" display-buffer-in-direction
 	   (direction . bottom)
 	   (window . root)
-	   (window-height . 0.3))))
-
-  )
-
-
-
-(use-package bind-key
-  :ensure t)
-
-(when (eq system-type 'darwin)
-  (setq direct-use-ls-dired nil)
-  (define-key key-translation-map (kbd "s-3") (kbd "#")))
+	   (window-height . 0.3)))))
 
 ;;
-;; try
-;; 
-(use-package try
-  :ensure t)
+;; MacOS specifics
+;;
+(when (eq system-type 'darwin)
+  (setq dired-use-ls-dired nil)
+  ;; I resolve the UK MBP `#` character problem by putting it on cmd-3
+  ;; so alt-3 is still available for command prefix numerics
+  (bind-key "s-3" (kbd "#") 'key-translation-map))
 
-;; Developer fonts
+;;
+;; Developer fonts & modeline
 ;;
 ;; Call (all-the-icons-install-fonts) if fonts aren't installed
 (use-package all-the-icons
@@ -128,7 +138,7 @@
   :hook (after-init . doom-modeline-mode))
 
 ;;
-;; beacon mode for keeping track of cursor
+;; Beacon mode for keeping track of cursor
 ;;
 (use-package beacon
   :ensure t
@@ -155,7 +165,7 @@
 ;;
 (use-package markdown-mode
   :ensure t
-  :mode ("\\.md$"
+  :mode (("\\.md$" . gfm-mode)
          "\\.apib$"))
 
 ;;; Vertico / Consult
@@ -168,6 +178,7 @@
 
 (use-package recentf
   :ensure t
+  :defer t
   :init
   (recentf-mode 1))
 
@@ -187,14 +198,16 @@
   :ensure consult-projectile
   :bind (("M-y" . consult-yank-pop)))
 
-
-;;; Window configuration
-
+;;
+;; Window configuration
+;;
 (use-package ace-window
   :ensure t
   :bind ("C-x o" . ace-window))
 
+;;
 ;; undo for window config C-c <- and C-c ->
+;;
 (use-package winner
   :defer t
   :init (winner-mode 1))
@@ -258,6 +271,7 @@
   (projectile-global-mode))
 
 (defun gh/kill-current-buffer ()
+  "(just to pop this on a keychord later "
   (interactive)
   (kill-buffer nil))
 
@@ -273,59 +287,14 @@
      "%s: undedicated window")
    (current-buffer)))
 
-;;
-;; basic defaults
-;;
-(global-so-long-mode 1)
-
-(prefer-coding-system 'utf-8)
-(set-default 'indicate-empty-lines t)
-
-(add-hook 'text-mode-hook 'turn-on-auto-fill)
-(add-hook 'text-mode-hook 'turn-on-flyspell)
-
-(defalias 'yes-or-no-p 'y-or-n-p)
-(setq confirm-kill-processes nil)
-
-(defalias 'auto-tail-revert-mode 'tail-mode)
-
-(define-key global-map (kbd "C-+") 'text-scale-increase)
-(define-key global-map (kbd "C--") 'text-scale-decrease)
-
-(setq disabled-command-function nil)
-(setq require-final-newline t)
-(setq inhibit-splash-screen t)
-
-(tool-bar-mode -1)
-(toggle-scroll-bar -1)
-(blink-cursor-mode 0)
-(auto-compression-mode 1)
-(setq visible-bell nil)
-(setq ring-bell-function 'ignore)
-(delete-selection-mode 1)
-
-;; ;; make mouse and gesture scroll work sanely
-;; (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
-;; (setq mouse-wheel-progressive-speed nil)
-
-;; prefer side-by-side window splits if the window is wide
-(setq split-height-threshold nil)
-(setq split-width-threshold 160)
-;;
-;; backups already in .emacs.d/backups -
-(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
-;; keep several old versions but delete excess without prompting
-(setq version-control t)
-(setq delete-old-versions t)
-
-(setq next-error-message-highlight t)
 
 ;;
-;; dired
+;; Dired
 ;;
-
-(setq dired-listing-switches "-alh")
-(setq dired-kill-when-opening-new-dired-buffer t)
+(use-package dired
+  :init
+  (setq dired-listing-switches "-alh")
+  (setq dired-kill-when-opening-new-dired-buffer t))
 
 ;;
 ;; Git
@@ -337,13 +306,14 @@
          ("C-c b" . magit-blame)
          ("C-c t" . git-timemachine))
   :init
-  (progn
-    (setq magit-restore-window-configuration t)
-    (setq magit-log-auto-more t)
-    (setq magit-status-buffer-switch-function 'switch-to-buffer)))
+  (setq magit-restore-window-configuration t
+	magit-log-auto-more t
+	magit-status-buffer-switch-function 'switch-to-buffer))
 
-(use-package git-auto-commit-mode
-  :ensure t)
+;;
+;; Auto commit for directories with dir local vars to specify it
+;;
+(use-package git-auto-commit-mode :ensure t)
 
 ;;;
 ;;; General Programming Stuff
@@ -354,14 +324,14 @@
   (setf (elt compilation-arguments 1) t)
   (recompile))
 
-(bind-key "<f5>" 'gh/recompile-comint)
+(use-package comint
+  :bind ("<f5>" . gh/recompile-comint)
+  :init
+  (setq compilation-ask-about-save nil
+	compilation-scroll-output 'next-error
+	compilation-skip-threshold 2))
 
-(setq compilation-ask-about-save nil)
-(setq compilation-scroll-output 'next-error)
-(setq compilation-skip-threshold 2)
-
-(use-package edit-indirect
-  :ensure t)
+(use-package edit-indirect :ensure t :defer t)
 
 ;;
 ;; lambdas and todos
@@ -1117,15 +1087,12 @@
 ;;
 ;; My bindings
 ;;
-(define-key shell-mode-map (kbd "SPC") 'comint-magic-space)
-
-(bind-key "\C-o" 'query-replace)
-(bind-key [(control next)] 'scroll-other-window)
-(bind-key [(control prior)] 'scroll-other-window-down)
-
-;; A few line related toggles on f8
-(bind-key [(f8)] 'toggle-truncate-lines)
-(bind-key [(shift f8)] 'linum-mode)
+(bind-keys
+ ("\C-o" . query-replace)
+ ([(control next)] . scroll-other-window)
+ ([(control prior)] . scroll-other-window-down)
+ ([(f8)] . toggle-truncate-lines)
+ ([(shift f8)] . display-line-numbers-mode))
 
 ;;
 ;; All kinds of shells on f9...
@@ -1145,12 +1112,8 @@
 (bind-key [(ctrl f9)] 'run-python)
 
 ;;
-;; keychords and hydras to combat emacs-pinky
+;; keychords to combat emacs-pinky
 ;;
-
-(use-package hydra
-  :ensure t)
-
 (use-package transpose-frame
   :ensure t
   :commands (transpose-frame))
@@ -1172,34 +1135,6 @@
     (key-chord-define-global "kk" 'gh/kill-current-buffer)
     (key-chord-define-global "YY" 'consult-yank-pop)
     (key-chord-mode 1)))
-
-(bind-key
- "C-M-o"
- (defhydra hydra-window (:color amaranth)
-   "window"
-   ("h" windmove-left)
-   ("j" windmove-down)
-   ("k" windmove-up)
-   ("l" windmove-right)
-   ("v" (lambda ()
-	  (interactive)
-	  (split-window-right)
-	  (windmove-right))
-    "vert")
-   ("x" (lambda ()
-	  (interactive)
-	  (split-window-below)
-	  (windmove-down))
-    "horz")
-   ("t" transpose-frame "'" :color blue)
-   ("o" delete-other-windows "one" :color blue)
-   ("a" ace-window "ace")
-   ("s" ace-swap-window "swap")
-   ("d" ace-delete-window "del")
-   ("D" toggle-window-dedicated "dedicated")
-   ("i" ace-maximize-window "ace-one" :color blue)
-   ("b" ido-switch-buffer "buf")
-   ("q" nil "cancel")))
 
 ;;
 ;; Narrow or widen DWIM
