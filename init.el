@@ -42,6 +42,7 @@
 (use-package base16-theme :ensure t :defer t)
 (use-package plan9-theme :ensure t :defer t)
 (use-package bind-key :ensure t)
+(use-package transpose-frame :ensure t :commands (transpose-frame))
 
 ;;;
 ;;; Small and miscellaneous customisations
@@ -1085,38 +1086,18 @@
   :mode "\\..*jsonnet$")
 
 ;;
-;; My bindings
+;; Key and keychord bindings
 ;;
 (bind-keys
  ("\C-o" . query-replace)
  ([(control next)] . scroll-other-window)
  ([(control prior)] . scroll-other-window-down)
  ([(f8)] . toggle-truncate-lines)
- ([(shift f8)] . display-line-numbers-mode))
+ ([(shift f8)] . display-line-numbers-mode)
+ ([(ctrl f9)] . run-python))
 
-;;
-;; All kinds of shells on f9...
-;;
-(use-package eshell-toggle
-  :ensure t
-  :bind
-  ("<f9>" . eshell-toggle))
-
-(use-package shell-toggle
-  :ensure t
-  :config
-  (setq shell-toggle-launch-shell 'shell)
-  :bind
-  ([(shift f9)] . shell-toggle-cd))
-
-(bind-key [(ctrl f9)] 'run-python)
-
-;;
-;; keychords to combat emacs-pinky
-;;
-(use-package transpose-frame
-  :ensure t
-  :commands (transpose-frame))
+(use-package eshell-toggle :ensure t :bind ("<f9>" . eshell-toggle))
+(use-package shell-toggle :ensure t :config (setq shell-toggle-launch-shell 'shell) :bind ([(shift f9)] . shell-toggle-cd))
 
 (use-package key-chord
   :ensure t
