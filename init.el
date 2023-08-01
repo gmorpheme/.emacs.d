@@ -72,8 +72,8 @@
 
   (defalias 'auto-tail-revert-mode 'tail-mode)
 
-  (define-key global-map (kbd "C-+") 'global-text-scale-adjust)
-  (define-key global-map (kbd "C--") 'global-text-scale-adjust)
+  (setq mouse-drag-and-drop-region-cross-program t
+	mouse-drag-and-drop-region-scroll-margin t)
 
   (setq disabled-command-function nil)
   (setq require-final-newline t)
@@ -709,10 +709,10 @@
 	org-babel-clojure-backend 'cider))
 
 ;; Global key bindings for org stuff
-(bind-key "\C-cl" 'org-store-link)
-(bind-key "\C-ca" 'org-agenda)
+(bind-key "C-c l" 'org-store-link)
+(bind-key "C-c a" 'org-agenda)
 (bind-key "<f12>" 'org-agenda)
-(bind-key "\C-cc" 'org-capture)
+(bind-key "C-c c" 'org-capture)
 
 (defun journal-file-insert (time)
   "Insert new journal file contents for a journal file for TIME."
@@ -829,8 +829,8 @@
   (interactive)
   (gh/cycle-themes gh/light-themes))
 
-(bind-key [(f6)] 'gh/cycle-dark-themes)
-(bind-key [(shift f6)] 'gh/cycle-light-themes)
+(bind-key "<f6>" 'gh/cycle-dark-themes)
+(bind-key "S-<f6>" 'gh/cycle-light-themes)
 
 (gh/enable-theme 'nimbus)
 
@@ -918,12 +918,10 @@
   :mode "\\.http")
 
 ;;
-;; Ruby
+;; Ruby - barely ever use it so experiment with tree-sitter
 ;;
-(use-package enh-ruby-mode
+(use-package ruby-ts-mode
   :ensure t
-  :ensure rvm
-  :ensure robe
   :mode ("\\.rb$"
          "\\.rake$"
          "\\.gemspec$"
@@ -933,17 +931,7 @@
          "Thorfile$"
          "Gemfile$"
          "Gapfile$"
-         "Vagrantfile$")
-  :interpreter "ruby"
-  :init
-  (progn
-    (defadvice inf-ruby-console-auto
-        (before activate-rvm-for-robe activate)
-      (rvm-activate-corresponding-ruby))
-    (add-hook 'enh-ruby-mode-hook 'robe-mode))
-  :config
-  (setq enh-ruby-bounce-deep-indent t)
-  (setq enh-ruby-hanging-brace-indent-level 2))
+         "Vagrantfile$"))
 
 ;;
 ;; Java mode
@@ -1030,9 +1018,7 @@
 (use-package eshell
   :commands (eshell))
 
-(defun eshell/x ()
-  (delete-window))
-
+(defalias 'x 'delete-window)
 (defalias 'd 'dired)
 (defalias 'ff 'find-file)
 (defalias 'g 'magit-status)
@@ -1086,36 +1072,36 @@
   :mode "\\..*jsonnet$")
 
 ;;
-;; Key and keychord bindings
+;; tree-sitter
 ;;
-(bind-keys
- ("\C-o" . query-replace)
- ([(control next)] . scroll-other-window)
- ([(control prior)] . scroll-other-window-down)
- ([(f8)] . toggle-truncate-lines)
- ([(shift f8)] . display-line-numbers-mode)
- ([(ctrl f9)] . run-python))
-
-(use-package eshell-toggle :ensure t :bind ("<f9>" . eshell-toggle))
-(use-package shell-toggle :ensure t :config (setq shell-toggle-launch-shell 'shell) :bind ([(shift f9)] . shell-toggle-cd))
-
-(use-package key-chord
-  :ensure t
-  :config
-  (progn
-    (key-chord-define-global "jj" 'ibuffer)
-    (key-chord-define-global "j0" 'delete-window)
-    (key-chord-define-global "j1" 'delete-other-windows)
-    (key-chord-define-global "JJ" 'magit-status)
-    (key-chord-define-global ",," 'consult-buffer)
-    (key-chord-define-global "hh" 'consult-buffer-other-window)
-    (key-chord-define-global "jk" 'transpose-frame)
-    (key-chord-define-global "jf" 'consult-recent-file)
-    (key-chord-define-global "jp" 'consult-projectile)
-    (key-chord-define-global "jw" 'ace-window)
-    (key-chord-define-global "kk" 'gh/kill-current-buffer)
-    (key-chord-define-global "YY" 'consult-yank-pop)
-    (key-chord-mode 1)))
+(setq treesit-language-source-alist
+   '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+     (cmake "https://github.com/uyha/tree-sitter-cmake")
+     (c "https://github.com/tree-sitter/tree-sitter-c")
+     (csharp "https://github.com/tree-sitter/tree-sitter-c-sharp")
+     (clojure "https://github.com/sogaiu/tree-sitter-clojure")
+     (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+     (css "https://github.com/tree-sitter/tree-sitter-css")
+     (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+     (elixir "https://github.com/elixir-lang/tree-sitter-elixir")
+     (fennel "https://github.com/TravonteD/tree-sitter-fennel")
+     (go "https://github.com/tree-sitter/tree-sitter-go")
+     (haskell "https://github.com/tree-sitter/tree-sitter-haskell")
+     (hcl "https://github.com/MichaHoffmann/tree-sitter-hcl")
+     (html "https://github.com/tree-sitter/tree-sitter-html")
+     (java "https://github.com/tree-sitter/tree-sitter-java")
+     (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+     (json "https://github.com/tree-sitter/tree-sitter-json")
+     (make "https://github.com/alemuller/tree-sitter-make")
+     (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+     (ocaml "https://github.com/tree-sitter/tree-sitter-ocaml")
+     (python "https://github.com/tree-sitter/tree-sitter-python")
+     (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+     (rust "https://github.com/tree-sitter/tree-sitter-rust")
+     (toml "https://github.com/tree-sitter/tree-sitter-toml")
+     (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+     (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+     (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
 ;;
 ;; Narrow or widen DWIM
@@ -1140,37 +1126,74 @@
 ;;
 (defvar gh/transparent nil)
 
+;; nb. could use alpha-background as of 29.1 but the main use case is
+;; occasionally to see through the window (on small displays) so alpha
+;; works pretty well
 (defun gh/set-alpha (alpha-value)
-  (set-frame-parameter (selected-frame) 'alpha alpha-value)
-  (add-to-list 'default-frame-alist (list 'alpha alpha-value)))
+  (set-frame-parameter (selected-frame) 'alpha-background alpha-value)
+  (add-to-list 'default-frame-alist (list 'alpha-background alpha-value)))
 
 (defun gh/toggle-transparency ()
   (interactive)
   (if gh/transparent
       (progn
 	(setq gh/transparent nil)
-	(gh/set-alpha 100))
+	(gh/set-alpha '(100 . 100)))
     (progn
       (setq gh/transparent t)
       (gh/set-alpha '(82 . 72)))))
 
-;; iterm2 uses command-U for this
-(bind-key "s-u" 'gh/toggle-transparency)
-
-;;
-;; Enable server / emacsclient
-;;
-(server-start)
 
 (require 'epg)
 (setq epg-pinentry-mode 'loopback)
 
 ;;
 ;; Experimental dispatch functions for access by an experimental
-;; Alfred workflow I'm working on
+;; Alfred workflow I'm working on. Any functions prefixed `alfred/x`
+;; are available in Alfred as `e/x`.
 ;;
-
 (defun alfred/repl (text)
   "Send TEXT to a current CIDER repl."
   (cider--switch-to-repl-buffer (cadar (cider-sessions)))
   (cider-insert-in-repl text t))
+
+
+;;
+;; Other key and keychord bindings
+;;
+(bind-keys
+ ("C-o" . query-replace)
+ ([(control next)] . scroll-other-window)
+ ([(control prior)] . scroll-other-window-down)
+ ("<f8>" . toggle-truncate-lines)
+ ("S-<f8>" . display-line-numbers-mode)
+ ("C-<f9>" . run-python)		; as per shells on F9
+ ("s-u" . gh/toggle-transparency)	; as per iterm
+ ("C-+" . global-text-scale-adjust)
+ ("C--" . global-text-scale-adjust))
+
+(use-package eshell-toggle :ensure t :bind ("<f9>" . eshell-toggle))
+(use-package shell-toggle :ensure t :config (setq shell-toggle-launch-shell 'shell) :bind ([(shift f9)] . shell-toggle-cd))
+
+(use-package key-chord
+  :ensure t
+  :config
+  (progn
+    (key-chord-define-global "jj" 'ibuffer)
+    (key-chord-define-global "j0" 'delete-window)
+    (key-chord-define-global "j1" 'delete-other-windows)
+    (key-chord-define-global "JJ" 'magit-status)
+    (key-chord-define-global ",," 'consult-buffer)
+    (key-chord-define-global "hh" 'consult-buffer-other-window)
+    (key-chord-define-global "jk" 'transpose-frame)
+    (key-chord-define-global "jf" 'consult-recent-file)
+    (key-chord-define-global "jp" 'consult-projectile)
+    (key-chord-define-global "jw" 'ace-window)
+    (key-chord-define-global "kk" 'gh/kill-current-buffer)
+    (key-chord-define-global "YY" 'consult-yank-pop)
+    (key-chord-mode 1)))
+
+;;
+;; Enable server / emacsclient
+;;
+(server-start)
