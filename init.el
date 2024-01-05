@@ -124,7 +124,23 @@
   (setq dired-use-ls-dired nil)
   ;; I resolve the UK MBP `#` character problem by putting it on cmd-3
   ;; so alt-3 is still available for command prefix numerics
-  (bind-key "s-3" (kbd "#") 'key-translation-map))
+  (bind-key "s-3" (kbd "#") 'key-translation-map)
+
+  ;; auth-source keychain stuff
+  (require 'subr-x)
+  (defun gh/password-from-keychain (label)
+    (let ((buffer-name "*sec-output*")
+	  (error-buffer-name "*sec-error*"))
+      (with-temp-buffer buffer-name
+			(shell-command (format "/usr/bin/security find-generic-password -w -l %s" label)
+				       buffer-name
+				       error-buffer-name)
+			(with-current-buffer buffer-name
+			  (let ((result (string-trim (buffer-string))))
+			    (unless (string-empty-p result)
+			      result)))))))
+
+
 
 ;;
 ;; Developer fonts & modeline
@@ -526,9 +542,25 @@
   :ensure t
   :commands (run-python)
   :mode (("\\.py$" . python-mode))
+  :hook ((python-mode . gh/prog-mode-hook)
+	 (python-mode . eglot-ensure))
   :init (progn
 	  (setq python-shell-interpreter "python3")
+	  (setq python-shell-completion-native-enable nil)
 	  (add-hook 'python-mode-hook 'gh/prog-mode-hook)))
+
+(use-package poetry
+  :ensure t
+  :hook (python-mode . poetry-tracking-mode)
+  :init (setq poetry-tracking-strategy 'switch-buffer))
+
+(use-package blacken
+  :ensure t
+  :defer t
+  :custom
+  (blacken-allow-py36 t)
+  (blacken-skip-string-normalization t)
+  :hook (python-mode-hook . blacken-mode))
 
 ;;
 ;; Swift
@@ -662,7 +694,7 @@
   (setq org-refile-allow-creating-parent-nodes (quote confirm))
 
   ;; Archival
-  (setq org-archive-location "%s_archive::datetree/")
+  (setq org-archive-location "archive/%s_archive::datetree/")
 
   ;; Org babel
   (org-babel-do-load-languages
@@ -1120,6 +1152,17 @@
 	(t (narrow-to-defun))))
 
 (global-set-key (kbd "<f7>") #'gh/narrow-or-widen-dwim)
+
+;;
+;; AI
+;;
+
+(use-package chatgpt-shell
+  :ensure t
+  :custom
+  ((chatgpt-shell-openai-key
+    (lambda ()
+      (gh/password-from-keychain "gptshell")))))
 
 ;;
 ;; Toggle transparency
