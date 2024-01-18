@@ -126,6 +126,10 @@
   ;; so alt-3 is still available for command prefix numerics
   (bind-key "s-3" (kbd "#") 'key-translation-map)
 
+  (use-package exec-path-from-shell
+    :ensure t
+    :init  (exec-path-from-shell-initialize))
+
   ;; auth-source keychain stuff
   (require 'subr-x)
   (defun gh/password-from-keychain (label)
