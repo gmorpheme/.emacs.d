@@ -92,30 +92,35 @@
   ;; Window manager configuration
 
   (setq window-sides-slots '(0 0 1 1))
+  (setq switch-to-buffer-obey-display-actions t)
+  (setq switch-to-buffer-in-dedicated-window 'pop)
 
   (setq display-buffer-alist
 	'(
 	  ;; - compilation in right hand side bar
-	  ("\\*Compilation\\*\\|\\*rustic-compilation\\*"
-	   display-buffer-in-side-window
+	  ("\\*.*ompilation\\*"
+	   (display-buffer-reuse-window display-buffer-in-side-window)
 	   (side . right)
 	   (slot . 0)
 	   (window-width . 80)
 	   (window-parameters
 	    (no-delete-other-windows . t)))
 	  ;; - various help windows in right hand side bar
-	  ("\\*info\\*\\|\\*Help\\*\\|\\*Shortdoc.*\\*"
-	   display-buffer-in-side-window
+	  ("\\*info\\*\\|\\*Help\\*\\|\\*Shortdoc.*\\*\\|\\*Apropos\\*\\|\\*Man.*\\*\\|\\*WoMan\\*\\|\\*eww\\*"
+	   (display-buffer-reuse-window display-buffer-in-side-window)
 	   (side . right)
 	   (slot . 0)
 	   (window-width . 80)
 	   (window-parameters
 	    (no-delete-other-windows . t)))
-	  ;; - shells below
-	  ("\\*e?shell\\*" display-buffer-in-direction
-	   (direction . bottom)
-	   (window . root)
-	   (window-height . 0.3)))))
+	  ;; - shells go below
+	  ("\\*e?shell\\*\\|\\*scratch\\*\\|\\*ielm\\*\\|\\*inferior-.*\\*\\|\\*.*repl\\*\\|\\*Python\\*\\|\\*Claude*\\|\\*.*GPT*\\*"
+	   (display-buffer-reuse-window display-buffer-in-side-window)
+	   (side . bottom)
+	   (slot . 0)
+	   (window-height . 0.4)
+	   (window-parameters
+	    (no-delete-other-windows . t))))))
 
 ;;
 ;; MacOS specifics
@@ -290,11 +295,6 @@
     (projectile-vc))
 
   (projectile-global-mode))
-
-(defun gh/kill-current-buffer ()
-  "(just to pop this on a keychord later "
-  (interactive)
-  (kill-buffer nil))
 
 ;;; Make it easy to maintain desktop set-ups in projects
 
@@ -1161,12 +1161,35 @@
 ;; AI
 ;;
 
-(use-package chatgpt-shell
+(defun gh/retrieve-openai-key ()
+  (gh/password-from-keychain "gptshell"))
+
+(defun gh/retrieve-anthropic-key ()
+  (gh/password-from-keychain "anthropic-api-key"))
+
+(use-package gptel
   :ensure t
-  :custom
-  ((chatgpt-shell-openai-key
-    (lambda ()
-      (gh/password-from-keychain "gptshell")))))
+  :config
+  (setq gptel-api-key 'gh/retrieve-openai-key)
+  (gptel-make-anthropic "Claude" :stream t :key 'gh/retrieve-anthropic-key)
+  (setq gptel-default-mode 'org-mode))
+
+;; -- until emacs 30 hits:
+(unless (package-installed-p 'vc-use-package)
+  (package-vc-install "https://github.com/slotThe/vc-use-package"))
+(require 'vc-use-package)
+
+(use-package editorconfig
+  :ensure t)
+
+(use-package copilot
+  :vc (:fetcher github :repo copilot-emacs/copilot.el)
+  :ensure t
+  :bind (("C-c C-c" . copilot-accept-completion)
+	 ("C-c C-v" . copilot-accept-completion-by-word)
+	 ("C-c C-n" . copilot-next-completion)
+	 ("C-c C-p" . copilot-previous-completion)
+	 ("C-c C-d" . copilot-clear-overlay)))
 
 ;;
 ;; Toggle transparency
@@ -1177,8 +1200,8 @@
 ;; occasionally to see through the window (on small displays) so alpha
 ;; works pretty well
 (defun gh/set-alpha (alpha-value)
-  (set-frame-parameter (selected-frame) 'alpha-background alpha-value)
-  (add-to-list 'default-frame-alist (list 'alpha-background alpha-value)))
+  (set-frame-parameter (selected-frame) 'alpha alpha-value)
+  (add-to-list 'default-frame-alist (list 'alpha alpha-value)))
 
 (defun gh/toggle-transparency ()
   (interactive)
@@ -1190,6 +1213,9 @@
       (setq gh/transparent t)
       (gh/set-alpha '(82 . 72)))))
 
+(defun gh/toggle-frame-header ()
+  (interactive)
+  (set-frame-parameter nil 'undecorated-round (not (frame-parameter nil 'undecorated-round))))
 
 (require 'epg)
 (setq epg-pinentry-mode 'loopback)
@@ -1205,6 +1231,38 @@
   (cider-insert-in-repl text t))
 
 
+;; Helpers for shell toggling, e.g. for short shell sessions that are
+;; easy to pop up and then hide.
+
+
+(defun gh/toggle-eshell (&optional arg)
+  "Call eshell to launch or reuse an eshell, unless we're in one and there are no args - then close."
+  (interactive "P")
+  (if arg
+      (eshell arg)
+    (if (string-match-p "\\*eshell.*" (buffer-name))
+	(quit-window)
+      (eshell))))
+
+(defun gh/toggle-shell (&optional arg)
+  "Call gptel to launch or reuse gptel session, unless we're in one and there are no args - then close."
+  (interactive "P")
+  (if current-prefix-arg
+      (call-interactively 'shell)
+    (if (string-match-p "\\*shell.*" (buffer-name))
+	(quit-window)
+      (call-interactively 'shell))))
+
+(defun gh/toggle-gptel (&optional arg)
+  "Call gptel to launch or reuse gptel session, unless we're in one and there are no args - then close."
+  (interactive "P")
+  (if-let ((buf (if current-prefix-arg
+		    (call-interactively 'gptel)
+		  (if gptel-mode
+		      (quit-window)
+		    (call-interactively 'gptel)))))
+      ;; Don't know why gptel window isn't automatically selected...
+      (select-window (get-buffer-window buf))))
 ;;
 ;; Other key and keychord bindings
 ;;
@@ -1214,13 +1272,13 @@
  ([(control prior)] . scroll-other-window-down)
  ("<f8>" . toggle-truncate-lines)
  ("S-<f8>" . display-line-numbers-mode)
- ("C-<f9>" . run-python)		; as per shells on F9
+ ("<f9>" . gh/toggle-eshell)
+ ("S-<f9>" . gh/toggle-shell)
+ ("M-<f9>" . gh/toggle-gptel)
+ ("C-<f9>" . run-python)
  ("s-u" . gh/toggle-transparency)	; as per iterm
  ("C-+" . global-text-scale-adjust)
  ("C--" . global-text-scale-adjust))
-
-(use-package eshell-toggle :ensure t :bind ("<f9>" . eshell-toggle))
-(use-package shell-toggle :ensure t :config (setq shell-toggle-launch-shell 'shell) :bind ([(shift f9)] . shell-toggle-cd))
 
 (use-package key-chord
   :ensure t
@@ -1236,7 +1294,7 @@
     (key-chord-define-global "jf" 'consult-recent-file)
     (key-chord-define-global "jp" 'consult-projectile)
     (key-chord-define-global "jw" 'ace-window)
-    (key-chord-define-global "kk" 'gh/kill-current-buffer)
+    (key-chord-define-global "kk" 'quit-window)
     (key-chord-define-global "YY" 'consult-yank-pop)
     (key-chord-mode 1)))
 
