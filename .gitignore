@@ -49,3 +49,5 @@
 /multisession/
 /chatgpt/
 /Elgar.local.el
+/.DS_Store
+/eln-cache/
