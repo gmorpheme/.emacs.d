@@ -67,6 +67,9 @@
   (add-hook 'text-mode-hook 'turn-on-auto-fill)
   (add-hook 'text-mode-hook 'turn-on-flyspell)
 
+  (require 'epa-file)
+  (setq epa-pinentry-mode 'loopback)
+
   (defalias 'yes-or-no-p 'y-or-n-p)
   (setq confirm-kill-processes nil)
 
@@ -114,7 +117,7 @@
 	   (window-parameters
 	    (no-delete-other-windows . t)))
 	  ;; - shells go below
-	  ("\\*e?shell\\*\\|\\*scratch\\*\\|\\*ielm\\*\\|\\*inferior-.*\\*\\|\\*.*repl\\*\\|\\*Python\\*\\|\\*Claude*\\|\\*.*GPT*\\*"
+	  ("\\*e?shell.*\\*.*\\|\\*scratch\\*\\|\\*ielm\\*\\|\\*inferior-.*\\*\\|\\*.*repl\\*\\|\\*Python\\*\\|\\*Claude*\\|\\*.*GPT*\\*"
 	   (display-buffer-reuse-window display-buffer-in-side-window)
 	   (side . bottom)
 	   (slot . 0)
@@ -553,10 +556,9 @@
 	  (setq python-shell-completion-native-enable nil)
 	  (add-hook 'python-mode-hook 'gh/prog-mode-hook)))
 
-(use-package poetry
-  :ensure t
-  :hook (python-mode . poetry-tracking-mode)
-  :init (setq poetry-tracking-strategy 'switch-buffer))
+(use-package pet
+  :config
+  (add-hook 'python-base-mode-hook 'pet-mode -10))
 
 (use-package blacken
   :ensure t
@@ -715,11 +717,11 @@
   :config
   ;; by this point host specific .el should have run
   (require 'org-crypt)
-  (require 'epa-file)
+
   (epa-file-enable)
   (org-crypt-use-before-save-magic)
   (setq org-tags-exclude-from-inheritance (quote ("crypt")))
-  (setq epa-pinentry-mode 'loopback))
+  )
 
 (use-package ob-restclient
   :ensure t)
@@ -1185,7 +1187,8 @@
 (use-package copilot
   :vc (:fetcher github :repo copilot-emacs/copilot.el)
   :ensure t
-  :bind (("C-c C-c" . copilot-accept-completion)
+  :bind (("<TAB>" . copilot-accept-completion)
+	 ("C-c C-c" . copilot-accept-completion)
 	 ("C-c C-v" . copilot-accept-completion-by-word)
 	 ("C-c C-n" . copilot-next-completion)
 	 ("C-c C-p" . copilot-previous-completion)
