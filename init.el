@@ -90,7 +90,7 @@
   (require 'autorevert)
   (global-auto-revert-mode t)
 
-  (dolist (mode '(dired ibuffer package-menu process-menu org-agenda))
+  (dolist (mode '(dired ibuffer package-menu process-menu org-agenda locate))
     (add-hook (intern (concat (symbol-name mode) "-mode-hook"))
               'gh/turn-on-hl-line-mode))
 
@@ -128,7 +128,11 @@
 ;;* MacOS specifics
 ;;
 (when (eq system-type 'darwin)
+
   (setq dired-use-ls-dired nil)
+  (setq locate-command "mdfind")
+  (setq consult-locate-args "mdfind")
+
   ;; I resolve the UK MBP `#` character problem by putting it on cmd-3
   ;; so alt-3 is still available for command prefix numerics
   (bind-key "s-3" (kbd "#") 'key-translation-map)
@@ -410,20 +414,35 @@
 ;;
 ;;** Rust
 ;;
+;; (use-package rustic
+;;   :ensure t
+
+;;   :preface
+;;   (defun rk/rustic-mode-hook ()
+;;     ;; so that run C-c C-c C-r works without having to confirm
+;;     (when buffer-file-name
+;;       (setq-local buffer-save-without-query t)))
+
+;;   :bind (:map rustic-mode-map
+;;               ("C-c C-c r" . eglot-rename))
+;;   :commands rustic
+;;   :hook (rustic-mode-hook . rk/rustic-mode-hook)
+;;   :config
+;;   (setq rustic-format-on-save t
+;; 	rustic-lsp-client 'eglot))
+
+(use-package rust-mode
+  :ensure t
+  :init
+  (setq rust-mode-treesitter-derive t))
+
 (use-package rustic
   :ensure t
-
-  :preface
-  (defun rk/rustic-mode-hook ()
-    ;; so that run C-c C-c C-r works without having to confirm
-    (when buffer-file-name
-      (setq-local buffer-save-without-query t)))
-
+  :after (rust-mode)
   :bind (:map rustic-mode-map
               ("C-c C-c r" . eglot-rename))
-  :commands rustic
-  :hook (rustic-mode-hook . rk/rustic-mode-hook)
-  :config
+  :mode (("\\.rs$" . rustic-mode))
+  :init
   (setq rustic-format-on-save t
 	rustic-lsp-client 'eglot))
 
@@ -576,38 +595,6 @@
 
 (use-package elm-mode :defer t)
 
-;;
-;;** Javascript
-;;
-;; TODO: steal from https://github.com/CSRaghunandan/.emacs.d/blob/master/setup-files/setup-js.el
-(use-package js2-mode
-  :ensure t
-  :ensure json-mode
-  :ensure js-comint
-  :ensure js2-refactor
-  :ensure xref-js2
-  :mode "\\.js$"
-  :init
-  (progn
-    (add-hook 'inferior-js-mode-hook 'ansi-color-for-comint-mode-on)
-    (add-hook 'js2-mode-hook #'js2-refactor-mode)
-    (js2r-add-keybindings-with-prefix "C-c C-r")
-    (setenv "NODE_NO_READLINE" "1")
-    (setq tab-width 2)
-    (setq js-indent-level 2)
-    (setq js2-highlight-level 3)
-    (setq inferior-js-program-command "node --interactive"))
-  :config
-  (progn
-    (font-lock-add-keywords
-     'js-mode `(("\\(function *\\)("
-                 (0 (progn (compose-region (match-beginning 1)
-                                           (match-end 1) "\u0192")
-                           nil)))))))
-
-(use-package web-mode
-  :ensure t
-  :mode (("\\.jsx$" . web-mode)))
 
 ;;
 ;;** CSS
@@ -618,13 +605,6 @@
   :hook (css-mode . rainbow-mode)
   :init
   (add-hook 'css-mode-hook 'rainbow-mode))
-
-;;
-;;** TypeScript mode
-;;
-(use-package typescript-mode
-  :ensure t
-  :mode "\\.ts$")
 
 ;;
 ;;** Other development modes
@@ -655,7 +635,6 @@
       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
         (cmake "https://github.com/uyha/tree-sitter-cmake")
         (c "https://github.com/tree-sitter/tree-sitter-c")
-        (csharp "https://github.com/tree-sitter/tree-sitter-c-sharp")
         (clojure "https://github.com/sogaiu/tree-sitter-clojure")
         (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
         (css "https://github.com/tree-sitter/tree-sitter-css")
@@ -667,11 +646,11 @@
         (hcl "https://github.com/MichaHoffmann/tree-sitter-hcl")
         (html "https://github.com/tree-sitter/tree-sitter-html")
         (java "https://github.com/tree-sitter/tree-sitter-java")
-        (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+        (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
         (json "https://github.com/tree-sitter/tree-sitter-json")
         (make "https://github.com/alemuller/tree-sitter-make")
         (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-        (ocaml "https://github.com/tree-sitter/tree-sitter-ocaml")
+        (ocaml "https://github.com/tree-sitter/tree-sitter-ocaml" "master" "grammars/ocaml/src")
         (python "https://github.com/tree-sitter/tree-sitter-python")
         (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
         (rust "https://github.com/tree-sitter/tree-sitter-rust")
@@ -679,6 +658,40 @@
         (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
         (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
         (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+
+(use-package treesit
+  :mode (("\\.tsx\\'" . tsx-ts-mode)
+         ("\\.js\\'"  . typescript-ts-mode)
+         ("\\.mjs\\'" . typescript-ts-mode)
+         ("\\.mts\\'" . typescript-ts-mode)
+         ("\\.cjs\\'" . typescript-ts-mode)
+         ("\\.ts\\'"  . typescript-ts-mode)
+         ("\\.jsx\\'" . tsx-ts-mode)
+         ("\\.json\\'" .  json-ts-mode))
+  :preface
+
+  (defun gh/ensure-grammars-installed ()
+    "Install Tree-sitter grammars if they are absent."
+    (interactive)
+    (dolist (grammar treesit-language-source-alist)
+      (message (car (cdr grammar)))
+      (unless (treesit-language-available-p (car grammar))
+        (treesit-install-language-grammar (car grammar)))))
+
+  (dolist (mapping
+           '((typescript-mode . typescript-ts-mode)
+             (js-mode . typescript-ts-mode)
+             (js2-mode . typescript-ts-mode)
+             (json-mode . json-ts-mode)))
+    (add-to-list 'major-mode-remap-alist mapping))
+
+  :hook ((tsx-ts-mode . eglot-ensure)
+	 (typescript-ts-mode . eglot-ensure)
+	 (json-ts-mode . eglot-ensure))
+
+  :config
+  (gh/ensure-grammars-installed))
 
 ;;
 ;;** Ruby - barely ever use it so experiment with tree-sitter
