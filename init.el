@@ -2,11 +2,21 @@
 
 ;; -*- lexical-binding: t -*-
 
+;; TODO: tree-sitter based tsx mode
+;; TODO: fix rust save and format issues
+;; TODO: suppress smartparens et al for treesitter modes?
+;; TODO: try corfu
+
 ;;
 ;; use-package available by deafult since 29 and archives initialised
 ;; in early-init.el
 ;;
 (require 'use-package)
+
+;; -- until emacs 30 hits:
+(unless (package-installed-p 'vc-use-package)
+  (package-vc-install "https://github.com/slotThe/vc-use-package"))
+(require 'vc-use-package)
 
 ;;
 ;; Ensure other files get loaded if present, including customisation
@@ -25,108 +35,97 @@
 (add-hook 'after-init-hook 'gh/eval-extra-init-files)
 
 ;;
-;; Basic packages
+;;* Basic packages
 ;;
 (use-package paradox :ensure t :defer t)
-(use-package better-defaults :ensure t :defer t)
-(use-package idle-highlight-mode :ensure t :defer t)
 (use-package rainbow-delimiters :ensure t :defer t)
 (use-package ess :ensure t :defer t)
-(use-package solarized-theme :ensure t :defer t)
-(use-package tao-theme :ensure t :defer t)
-(use-package material-theme :ensure t :defer t)
-(use-package color-theme-sanityinc-tomorrow :ensure t :defer t)
-(use-package nimbus-theme :ensure t :defer t)
-(use-package zenburn-theme :ensure t :defer t)
-(use-package twilight-bright-theme :ensure t :defer t)
-(use-package base16-theme :ensure t :defer t)
-(use-package plan9-theme :ensure t :defer t)
-(use-package bind-key :ensure t)
-(use-package transpose-frame :ensure t :commands (transpose-frame))
+(use-package edit-indirect :ensure t :defer t)
 
-;;;
-;;; Small and miscellaneous customisations
-;;;
+
+;;
+;;* Small and miscellaneous customisations
+;;
+(use-package better-defaults
+  :ensure t)
+
 (use-package emacs
+  :ensure bind-key
+  :ensure beacon
+  :ensure which-key
   :init
+  (setq inhibit-splash-screen t
+        visible-bell nil
+        ring-bell-function 'ignore
+        sentence-end-double-space nil
+        help-window-select t
+        require-final-newline t
+        version-control t
+        delete-old-versions t
+        next-error-message-highlight t
+        mouse-drag-and-drop-region-cross-program t
+        mouse-drag-and-drop-region-scroll-margin t
+        disabled-command-function nil
+        switch-to-buffer-obey-display-actions t
+        switch-to-buffer-in-dedicated-window 'pop
+        backup-directory-alist '(("." . "~/.emacs.d/backups"))
+	confirm-kill-processes nil
+        indicate-empty-lines t
+        window-sides-slots '(0 0 1 1))
 
-  (setq inhibit-splash-screen t)
-  (tool-bar-mode -1)
-  (toggle-scroll-bar -1)
   (pixel-scroll-precision-mode 1)
   (blink-cursor-mode 0)
+  (column-number-mode 1)
   (auto-compression-mode 1)
-  (setq visible-bell nil)
-  (setq ring-bell-function 'ignore)
   (delete-selection-mode 1)
-  (setq sentence-end-double-space nil)
-  (setq help-window-select t)
-  (set-default-coding-systems 'utf-8)
-  (set-default 'indicate-empty-lines t)
-
-  (add-hook 'text-mode-hook 'turn-on-auto-fill)
-  (add-hook 'text-mode-hook 'turn-on-flyspell)
+  (beacon-mode 1)
+  (which-key-mode 1)
 
   (require 'epa-file)
   (setq epa-pinentry-mode 'loopback)
 
   (defalias 'yes-or-no-p 'y-or-n-p)
-  (setq confirm-kill-processes nil)
-
   (defalias 'auto-tail-revert-mode 'tail-mode)
 
-  (setq mouse-drag-and-drop-region-cross-program t
-	mouse-drag-and-drop-region-scroll-margin t)
+  (require 'autorevert)
+  (global-auto-revert-mode t)
 
-  (setq disabled-command-function nil)
-  (setq require-final-newline t)
-
-  ;; ;; prefer side-by-side window splits if the window is wide
-  ;; (setq split-height-threshold nil)
-  ;; (setq split-width-threshold 160)
-  ;;
-  ;; backups already in .emacs.d/backups -
-  (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
-  (setq version-control t)
-  (setq delete-old-versions t)
-
-  (setq next-error-message-highlight t)
-
-  ;; Window manager configuration
-
-  (setq window-sides-slots '(0 0 1 1))
-  (setq switch-to-buffer-obey-display-actions t)
-  (setq switch-to-buffer-in-dedicated-window 'pop)
+  (dolist (mode '(dired ibuffer package-menu process-menu org-agenda))
+    (add-hook (intern (concat (symbol-name mode) "-mode-hook"))
+              'gh/turn-on-hl-line-mode))
 
   (setq display-buffer-alist
-	'(
-	  ;; - compilation in right hand side bar
-	  ("\\*.*ompilation\\*"
-	   (display-buffer-reuse-window display-buffer-in-side-window)
-	   (side . right)
-	   (slot . 0)
-	   (window-width . 80)
-	   (window-parameters
-	    (no-delete-other-windows . t)))
-	  ;; - various help windows in right hand side bar
-	  ("\\*info\\*\\|\\*Help\\*\\|\\*Shortdoc.*\\*\\|\\*Apropos\\*\\|\\*Man.*\\*\\|\\*WoMan\\*\\|\\*eww\\*"
-	   (display-buffer-reuse-window display-buffer-in-side-window)
-	   (side . right)
-	   (slot . 0)
-	   (window-width . 80)
-	   (window-parameters
-	    (no-delete-other-windows . t)))
-	  ;; - shells go below
-	  ("\\*e?shell.*\\*.*\\|\\*scratch\\*\\|\\*ielm\\*\\|\\*inferior-.*\\*\\|\\*.*repl\\*\\|\\*Python\\*\\|\\*Claude*\\|\\*.*GPT*\\*"
-	   (display-buffer-reuse-window display-buffer-in-side-window)
-	   (side . bottom)
-	   (slot . 0)
-	   (window-height . 0.4)
-	   (window-parameters
-	    (no-delete-other-windows . t))))))
+        '(("\\*.*ompilation\\*"
+           (display-buffer-reuse-window display-buffer-in-side-window)
+           (side . right)
+           (slot . 0)
+           (window-width . 80)
+           (window-parameters (no-delete-other-windows . t)))
+          ("\\*info\\*\\|\\*Help\\*\\|\\*Shortdoc.*\\*\\|\\*Apropos\\*\\|\\*Man.*\\*\\|\\*WoMan\\*\\|\\*eww\\*"
+           (display-buffer-reuse-window display-buffer-in-side-window)
+           (side . right)
+           (slot . 0)
+           (window-width . 80)
+           (window-parameters (no-delete-other-windows . t)))
+          ("\\*e?shell.*\\*.*\\|\\*scratch\\*\\|\\*ielm\\*\\|\\*inferior-.*\\*\\|\\*.*repl\\*\\|\\*Python\\*\\|\\*Claude*\\|\\*.*GPT*\\*"
+           (display-buffer-reuse-window display-buffer-in-side-window)
+           (side . bottom)
+           (slot . 0)
+           (window-height . 0.4)
+           (window-parameters (no-delete-other-windows . t)))))
+
+  :hook
+  ((text-mode . turn-on-auto-fill)
+   (text-mode . turn-on-flyspell))
+
+  :bind (("C-+" . global-text-scale-adjust)
+         ("C--" . global-text-scale-adjust)
+         ("C-o" . query-replace)
+         ("<f8>" . toggle-truncate-lines)
+         ("S-<f8>" . display-line-numbers-mode)))
 
 ;;
-;; MacOS specifics
+;;* MacOS specifics
 ;;
 (when (eq system-type 'darwin)
   (setq dired-use-ls-dired nil)
@@ -155,49 +154,26 @@
 
 
 ;;
-;; Developer fonts & modeline
+;;* Fonts & Modeline
 ;;
 ;; Call (all-the-icons-install-fonts) if fonts aren't installed
-(use-package all-the-icons
-  :ensure t)
-
 (use-package doom-modeline
   :ensure t
   :ensure all-the-icons
   :hook (after-init . doom-modeline-mode))
 
 ;;
-;; Beacon mode for keeping track of cursor
-;;
-(use-package beacon
-  :ensure t
-  :init (beacon-mode 1))
-
-;;
-;; which-key
-;;
-(use-package which-key
-  :ensure t
-  :config
-  (which-key-mode))
-
-;;
-;; Whitespace cleanup mode
-;;
-(use-package whitespace-cleanup-mode
-  :ensure t
-  :diminish whitespace-cleanup-mode
-  :config (global-whitespace-cleanup-mode))
-
-;;
-;; Markdown
+;;* Markdown
+;; TODO: consider leanpub.com/markdown-mode/
 ;;
 (use-package markdown-mode
   :ensure t
   :mode (("\\.md$" . gfm-mode)
          "\\.apib$"))
 
-;;; Vertico / Consult
+;;
+;;* Minibuffer
+;;
 
 (use-package vertico
   :ensure t
@@ -228,24 +204,39 @@
   :bind (("M-y" . consult-yank-pop)))
 
 ;;
-;; Window configuration
+;;* Window configuration
 ;;
 (use-package ace-window
   :ensure t
   :bind ("C-x o" . ace-window))
 
-;;
-;; undo for window config C-c <- and C-c ->
-;;
 (use-package winner
   :defer t
   :init (winner-mode 1))
 
+(use-package transpose-frame
+  :ensure t
+  :commands transpose-frame)
+
+(defun toggle-window-dedicated ()
+  "Set window as dedicated or not"
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+         (set-window-dedicated-p window (not (window-dedicated-p window))))
+       "%s: dedicated window"
+     "%s: undedicated window")
+   (current-buffer)))
+
 ;; quick access to occur from interactive search
 (define-key isearch-mode-map (kbd "C-o")
-  (lambda () (interactive)
-    (let ((case-fold-search isearch-case-fold-search))
-      (occur (if isearch-regexp isearch-string (regexp-quote isearch-string))))))
+	    (lambda () (interactive)
+	      (let ((case-fold-search isearch-case-fold-search))
+		(occur (if isearch-regexp isearch-string (regexp-quote isearch-string))))))
+
+;;
+;;* Completion
+;;
 
 ;; company mode wherever - unless and until it gets slow
 (use-package company
@@ -269,63 +260,51 @@
   (setq yas-wrap-around-region t)
   (yas-global-mode 1))
 
-;; projectile mode everywhere
+;;
+;;* Projects
+;;
+
 (use-package projectile
   :ensure t
   :diminish projectile-mode
   :bind-keymap ("C-c p" . projectile-command-map)
+  :custom
+  (projectile-completion-system 'default)
+  (projectile-switch-project-action #'projectile-commander)
+  (projectile-create-missing-test-files t)
+  (projectile-project-root-functions '(projectile-root-local
+                                       projectile-root-marked
+                                       projectile-root-top-down
+                                       projectile-root-bottom-up
+                                       projectile-root-top-down-recurring))
   :config
-
-  (setq projectile-completion-system 'default)
-  (setq projectile-switch-project-action #'projectile-commander)
-  (setq projectile-create-missing-test-files t)
-
-  ;; rejig to allow projects in monorepos to take preference over
-  ;; outer .git
-  (setq projectile-project-root-functions '(projectile-root-local
-					    projectile-root-marked
-					    projectile-root-top-down
-					    projectile-root-bottom-up
-					    projectile-root-top-down-recurring))
-
   (def-projectile-commander-method ?S
-    "Open a *shell* buffer for the project."
-    (projectile-run-shell))
+				   "Open a *shell* buffer for the project."
+				   (projectile-run-shell))
 
   (def-projectile-commander-method ?F
-    "Refresh: fetch from git and go to magit status"
-    (call-interactively #'magit-fetch-from-upstream)
-    (projectile-vc))
+				   "Refresh: fetch from git and go to magit status"
+				   (magit-fetch-from-upstream)
+				   (projectile-vc))
 
   (projectile-global-mode))
 
-;;; Make it easy to maintain desktop set-ups in projects
-
-(defun toggle-window-dedicated ()
-  "Set window as dedicated or not"
-  (interactive)
-  (message
-   (if (let (window (get-buffer-window (current-buffer)))
-         (set-window-dedicated-p window (not (window-dedicated-p window))))
-       "%s: dedicated window"
-     "%s: undedicated window")
-   (current-buffer)))
-
 
 ;;
-;; Dired
+;;* Dired
 ;;
 (use-package dired
   :init
-  (setq dired-listing-switches "-alh")
-  (setq dired-kill-when-opening-new-dired-buffer t))
+  (setq dired-listing-switches "-alh"
+	dired-kill-when-opening-new-dired-buffer t))
 
 ;;
-;; Git
+;;* Git
 ;;
 (use-package magit
   :ensure t
   :ensure git-timemachine
+  :ensure git-auto-commit-mode
   :bind (("C-c g" . magit-status)
          ("C-c b" . magit-blame)
          ("C-c t" . git-timemachine))
@@ -334,95 +313,93 @@
 	magit-log-auto-more t
 	magit-status-buffer-switch-function 'switch-to-buffer))
 
-;;
-;; Auto commit for directories with dir local vars to specify it
-;;
-(use-package git-auto-commit-mode :ensure t)
-
-;;;
-;;; General Programming Stuff
-;;;
-(defun gh/recompile-comint ()
-  "Rerun a compilation in comint-mode for interaction"
-  (interactive)
-  (setf (elt compilation-arguments 1) t)
-  (recompile))
-
-(use-package comint
-  :bind ("<f5>" . gh/recompile-comint)
-  :init
-  (setq compilation-ask-about-save nil
-	compilation-scroll-output 'next-error
-	compilation-skip-threshold 2))
-
-(use-package edit-indirect :ensure t :defer t)
+(require 'epg)
+(setq epg-pinentry-mode 'loopback)
 
 ;;
-;; lambdas and todos
+;;* AI
 ;;
-(defun gh/local-column-number-mode ()
-  (make-local-variable 'column-number-mode)
-  (column-number-mode t))
 
-(defun gh/local-comment-auto-fill ()
-  (set (make-local-variable 'comment-auto-fill-only-comments) t)
-  (auto-fill-mode nil))
+(defun gh/retrieve-openai-key () (gh/password-from-keychain "gptshell"))
+(defun gh/retrieve-anthropic-key () (gh/password-from-keychain "anthropic-api-key"))
 
-(defun gh/set-comment-columns ()
-  (set (make-local-variable 'comment-fill-column) 80))
-
-(defun gh/turn-on-hl-line-mode ()
-  (when (> (display-color-cells) 8)
-    (hl-line-mode t)))
-
-(defun gh/add-watchwords ()
-  (font-lock-add-keywords
-   nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|HACK\\|QQ\\)"
-          1 font-lock-warning-face t))))
-
-(defun gh/truncate-lines ()
-  (setq truncate-lines t))
-
-(add-hook 'prog-mode-hook 'gh/local-column-number-mode)
-(add-hook 'prog-mode-hook 'gh/local-comment-auto-fill)
-(add-hook 'prog-mode-hook 'gh/set-comment-columns)
-(add-hook 'prog-mode-hook 'prettify-symbols-mode)
-(add-hook 'prog-mode-hook 'gh/add-watchwords)
-(add-hook 'prog-mode-hook 'idle-highlight-mode)
-(add-hook 'prog-mode-hook 'gh/truncate-lines)
-
-(defun gh/prog-mode-hook ()
-  (run-hooks 'prog-mode-hook))
-
-;;
-;; Whitespace butler
-;;
-(use-package ws-butler
+(use-package gptel
   :ensure t
-  :init
-  (add-hook 'prog-mode-hook 'ws-butler-mode))
+  :bind (("C-c <RET>" . gptel-send))
+  :config
+  (setq gptel-api-key 'gh/retrieve-openai-key)
+  (gptel-make-anthropic "Claude" :stream t :key 'gh/retrieve-anthropic-key)
+  (setq gptel-default-mode 'org-mode))
+
+
+(use-package copilot
+  :vc (:fetcher github :repo copilot-emacs/copilot.el)
+  :ensure t
+  :bind (("S-<TAB>" . copilot-accept-completion)
+	 ("C-c C-v" . copilot-accept-completion-by-word)
+	 ("C-c C-n" . copilot-next-completion)
+	 ("C-c C-p" . copilot-previous-completion)
+	 ("C-c C-d" . copilot-clear-overlay)))
 
 ;;
-;; Smartparens
+;;* Programming
 ;;
+
+;;
+;;** General programming mode settings
+;;
+
+(use-package prog-mode
+  :ensure ws-butler
+  :preface
+
+  (defun gh/local-comment-auto-fill ()
+    (set (make-local-variable 'comment-auto-fill-only-comments) t)
+    (auto-fill-mode nil))
+
+  (defun gh/set-comment-columns ()
+    (set (make-local-variable 'comment-fill-column) 80))
+
+  (defun gh/turn-on-hl-line-mode ()
+    (when (> (display-color-cells) 8)
+      (hl-line-mode t)))
+
+  (defun gh/add-watchwords ()
+    (font-lock-add-keywords
+     nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|HACK\\|QQ\\)"
+            1 font-lock-warning-face t))))
+
+  (defun gh/truncate-lines ()
+    (setq truncate-lines t))
+
+  :hook
+  ((prog-mode . gh/local-comment-auto-fill)
+   (prog-mode . gh/set-comment-columns)
+   (prog-mode . prettify-symbols-mode)
+   (prog-mode . gh/add-watchwords)
+   (prog-mode . gh/truncate-lines)
+   (prog-mode . ws-butler-mode)
+   (prog-mode . turn-on-eldoc-mode))
+
+  :init
+  (use-package iedit
+    :ensure t
+    :bind ("C-;" . iedit-mode)))
+
+
 (use-package smartparens
   :ensure t
   :init
-  (progn
-    (require 'smartparens-config)
-    (require 'smartparens-rust)
-    (smartparens-global-mode 1)
-    (show-smartparens-global-mode 1))
+  (require 'smartparens-config)
+  (require 'smartparens-rust)
+  (smartparens-global-mode 1)
+  (show-smartparens-global-mode 1)
   :config
   (sp-use-smartparens-bindings))
 
-;;
-;; iedit
-;;
-(use-package iedit :defer t)
 
 ;;
-;; Language server protocol
+;;** Language server protocol
 ;;
 (use-package eglot
   :ensure t
@@ -431,50 +408,160 @@
   (setq eldoc-documentation-strategy 'eldoc-documentation-compose))
 
 ;;
-;; Rust (using LSP)
+;;** Rust
 ;;
 (use-package rustic
   :ensure t
+
+  :preface
+  (defun rk/rustic-mode-hook ()
+    ;; so that run C-c C-c C-r works without having to confirm
+    (when buffer-file-name
+      (setq-local buffer-save-without-query t)))
+
   :bind (:map rustic-mode-map
               ("C-c C-c r" . eglot-rename))
   :commands rustic
+  :hook (rustic-mode-hook . rk/rustic-mode-hook)
   :config
   (setq rustic-format-on-save t
-	rustic-lsp-client 'eglot)
-  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
+	rustic-lsp-client 'eglot))
 
-(defun rk/rustic-mode-hook ()
-  ;; so that run C-c C-c C-r works without having to confirm
-  (when buffer-file-name
-    (setq-local buffer-save-without-query t)))
+;;
+;;** Python
+;;
+(use-package python
+  :ensure t
+  :ensure pet
+  :ensure blacken
+  :commands (run-python)
+  :mode (("\\.py$" . python-mode))
+  :custom
+  (python-shell-completion-native-enable nil)
+  (blacken-allow-py36 t)
+  (blacken-skip-string-normalization t)
+  :hook ((python-mode . eglot-ensure)
+	 (python-mode . pet-mode)
+	 (python-mode . blacken-mode)) )
 
-
-;; Kotlin
-(use-package kotlin-mode
-  :ensure t)
-
-;; Lispy
+;;
+;;** Lisps
+;;
 (use-package lispy
   :ensure t
   :init (setq lispy-compat '(edebug cider)))
 
-;; Fennel
-(use-package fennel-mode
-  :ensure t)
-
-;;
-;; Lisp modes
-;;
 (dolist (mode '(scheme emacs-lisp lisp clojure racket fennel))
   (let ((hook (intern (concat (symbol-name mode) "-mode-hook"))))
-    (add-hook hook 'gh/prog-mode-hook)
     (add-hook hook (lambda () (lispy-mode 1)))
     (add-hook hook 'rainbow-delimiters-mode)))
 
-(add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+;; hacks for kapow
+(use-package lisp-mode
+  :disabled t
+  :config
+  (add-hook 'lisp-mode-hook
+            (lambda ()
+              (setq tab-width 2)
+              (put '$define! 'lisp-indent-function 1)
+              (put '$vau 'lisp-indent-function 'defun)
+              (put '$lambda 'lisp-indent-function 'defun)
+              (put '$provide! 'lisp-indent-function 1)
+              (put '$let 'lisp-indent-function 1)
+              (put '$let* 'lisp-indent-function 1)
+              (put '$letrec 'lisp-indent-function 1)
+              (put '$letrec* 'lisp-indent-function 1)
+              (put '$let-redirect 'lisp-indent-function 1)
+              (put '$let-safe 'lisp-indent-function 1))))
 
 ;;
-;; Haskell mode
+;;** Clojure
+;;
+(use-package cider
+  :ensure t
+  :ensure seq
+  :ensure clojure-mode
+  :ensure clj-refactor
+  :mode (("\\.clj\\[scx\\]?$" . clojure-mode)
+         ("\\.boot$" . clojure-mode))
+
+  :preface
+  (defun gh/set-indents ()
+    (define-clojure-indent
+     (ANY 2)
+     (DELETE 2)
+     (GET 2)
+     (HEAD 2)
+     (POST 2)
+     (PUT 2)
+     (with 2)
+     (match 1)
+     (domonad 1)
+     (context 2)
+     (for-all 1)
+     (defui '(1 nil nil (1)))
+     (defroutes 'defun)))
+
+  :init
+  (setq cider-auto-select-error-buffer t
+        cider-repl-use-clojure-font-lock t
+        nrepl-hide-special-buffers t
+	cljr-favor-prefix-notation t
+	cider-print-quota (* 1024 10)
+	lispy-thread-last-macro "->>")
+  :hook ((clojure-mode . gh/set-indents)
+         (clojure-mode . (lambda ()
+                           (clj-refactor-mode 1)
+                           (cljr-add-keybindings-with-prefix "C-c r")))
+         (cider-repl-mode . subword-mode)))
+
+
+;;
+;;** Java
+;;
+(use-package java-mode
+  :mode "\\.java$"
+  :hook
+  (java-mode-hook . (lambda () (setq tab-width 2) (subword-mode t))))
+
+
+;;;
+;;;** C++
+;;;
+(use-package cmake-mode
+  :ensure t
+  :mode "CMakeLists.txt")
+
+
+;;
+;;** Golang
+;;
+(use-package go-mode
+  :ensure t
+  :ensure go-autocomplete
+  :ensure go-projectile
+  :mode "\\.go"
+  :init
+  (add-hook 'before-save-hook 'gofmt-before-save))
+
+
+;;
+;;** More rarely used languages
+;;
+(use-package fennel-mode :defer t)
+(use-package racket-mode :ensure t :defer t)
+(use-package kotlin-mode :defer t)
+(use-package swift-mode :defer t)
+(use-package tuareg :defer t)           ; OCaml
+(use-package erlang :defer t)
+(use-package elixir :defer t)
+(use-package julia :defer t)
+(use-package scala :defer t)
+(use-package terraform-mode :ensure t :defer t)
+(use-package docker :ensure t :ensure dockerfile-mode :defer t)
+
+;;
+;;** Haskell, Elm, Frege
 ;;
 (use-package haskell-mode
   :ensure t
@@ -483,27 +570,14 @@
          ("\\.fr" . haskell-mode))
   :init
   (setq haskell-compile-cabal-build-command "stack build --test --fast --file-watch --copy-bins --exec 'hlint .'")
-  (add-hook 'haskell-mode-hook 'gh/prog-mode-hook)
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-  (add-hook 'haskell-mode-hook 'hindent-mode))
+  :hook (
+         (haskell-mode-hook . turn-on-haskell-indentation)
+         (haskell-mode-hook . hindent-mode)))
 
-;;;
-;;; Elm mode
-;;;
-(use-package elm-mode
-  :ensure t
-  :mode "\\.elm")
+(use-package elm-mode :defer t)
 
 ;;
-;; OCaml
-;;
-(use-package tuareg
-  :ensure t
-  :mode (("\\.ml[ily]?$" . tuareg-mode)
-         ("\\.topml$" . tuareg-mode)))
-
-;;
-;; Javascript
+;;** Javascript
 ;;
 ;; TODO: steal from https://github.com/CSRaghunandan/.emacs.d/blob/master/setup-files/setup-js.el
 (use-package js2-mode
@@ -536,282 +610,298 @@
   :mode (("\\.jsx$" . web-mode)))
 
 ;;
-;; TypeScript mode
+;;** CSS
+;;
+(use-package css-mode
+  :ensure rainbow-mode
+  :mode "\\.css"
+  :hook (css-mode . rainbow-mode)
+  :init
+  (add-hook 'css-mode-hook 'rainbow-mode))
+
+;;
+;;** TypeScript mode
 ;;
 (use-package typescript-mode
   :ensure t
   :mode "\\.ts$")
 
 ;;
-;; Python
+;;** Other development modes
 ;;
-(use-package python
+(use-package log4j-mode
   :ensure t
-  :commands (run-python)
-  :mode (("\\.py$" . python-mode))
-  :hook ((python-mode . gh/prog-mode-hook)
-	 (python-mode . eglot-ensure))
-  :init (progn
-	  (setq python-shell-interpreter "python3")
-	  (setq python-shell-completion-native-enable nil)
-	  (add-hook 'python-mode-hook 'gh/prog-mode-hook)))
+  :mode "\\.log$"
+  :hook
+  (log4j-mode . gh/turn-on-hl-line-mode)
+  (log4j-mode . (lambda () (read-only-mode t) (view-mode t))))
 
-(use-package pet
+(use-package yaml-mode
+  :ensure t
+  :mode (("\\.yml$" . yaml-mode)
+         ("\\.yaml$" . yaml-mode)))
+
+(use-package restclient :ensure t :mode "\\.http")
+
+(use-package editorconfig
+  :ensure t
   :config
-  (add-hook 'python-base-mode-hook 'pet-mode -10))
+  (editorconfig-mode 1))
 
-(use-package blacken
+;;
+;;** Treesitter
+;;
+(setq treesit-language-source-alist
+      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+        (cmake "https://github.com/uyha/tree-sitter-cmake")
+        (c "https://github.com/tree-sitter/tree-sitter-c")
+        (csharp "https://github.com/tree-sitter/tree-sitter-c-sharp")
+        (clojure "https://github.com/sogaiu/tree-sitter-clojure")
+        (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+        (css "https://github.com/tree-sitter/tree-sitter-css")
+        (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+        (elixir "https://github.com/elixir-lang/tree-sitter-elixir")
+        (fennel "https://github.com/TravonteD/tree-sitter-fennel")
+        (go "https://github.com/tree-sitter/tree-sitter-go")
+        (haskell "https://github.com/tree-sitter/tree-sitter-haskell")
+        (hcl "https://github.com/MichaHoffmann/tree-sitter-hcl")
+        (html "https://github.com/tree-sitter/tree-sitter-html")
+        (java "https://github.com/tree-sitter/tree-sitter-java")
+        (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+        (json "https://github.com/tree-sitter/tree-sitter-json")
+        (make "https://github.com/alemuller/tree-sitter-make")
+        (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+        (ocaml "https://github.com/tree-sitter/tree-sitter-ocaml")
+        (python "https://github.com/tree-sitter/tree-sitter-python")
+        (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+        (rust "https://github.com/tree-sitter/tree-sitter-rust")
+        (toml "https://github.com/tree-sitter/tree-sitter-toml")
+        (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+        (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+        (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+;;
+;;** Ruby - barely ever use it so experiment with tree-sitter
+;;
+(use-package ruby-ts-mode
   :ensure t
-  :defer t
-  :custom
-  (blacken-allow-py36 t)
-  (blacken-skip-string-normalization t)
-  :hook (python-mode-hook . blacken-mode))
+  :mode ("\\.rb$"
+         "\\.rake$"
+         "\\.gemspec$"
+         "\\.ru$"
+         "\\.thor$"
+         "Rakefile$"
+         "Thorfile$"
+         "Gemfile$"
+         "Gapfile$"
+         "Vagrantfile$"))
 
 ;;
-;; Swift
+;;* Shells and Terminals
 ;;
-(use-package swift-mode
-  :ensure t
-  :mode (("\\.swift$" . swift-mode)))
 
 ;;
-;; CSS mode
+;;** Eshell
 ;;
-(use-package css-mode
-  :ensure rainbow-mode
-  :mode "\\.css"
+(use-package eshell
   :init
-  (progn
-    (add-hook 'css-mode-hook 'gh/prog-mode-hook)
-    (add-hook 'css-mode-hook 'rainbow-mode)))
+  (defalias 'x 'delete-window)
+  (defalias 'd 'dired)
+  (defalias 'ff 'find-file)
+  (defalias 'g 'magit-status)
 
+  :commands (eshell))
 
 ;;
-;; Org Mode
+;;** Remote shells
+;;
+(use-package tramp
+  :init
+  (set-default 'tramp-auto-save-directory (expand-file-name "~/temp")))
+
+;;
+;;* Eat terminal
+;;
+(use-package eat
+  :disabled t                             ; terminfo seems broken on macos
+  :ensure t)
+
+;;
+;;** Toggle access
+;;
+(defun gh/toggle-eshell (&optional arg)
+  "Call eshell to launch or reuse an eshell, unless we're in one and there are no args - then close."
+  (interactive "P")
+  (if arg
+      (eshell arg)
+    (if (string-match-p "\\*eshell.*" (buffer-name))
+	(quit-window)
+      (eshell))))
+
+(defun gh/toggle-shell (&optional arg)
+  "Call gptel to launch or reuse gptel session, unless we're in one and there are no args - then close."
+  (interactive "P")
+  (if current-prefix-arg
+      (call-interactively 'shell)
+    (if (string-match-p "\\*shell.*" (buffer-name))
+	(quit-window)
+      (call-interactively 'shell))))
+
+(defun gh/toggle-gptel (&optional arg)
+  "Call gptel to launch or reuse gptel session, unless we're in one and there are no args - then close."
+  (interactive "P")
+  (if-let ((buf (if current-prefix-arg
+		    (call-interactively 'gptel)
+		  (if gptel-mode
+		      (quit-window)
+		    (call-interactively 'gptel)))))
+      ;; Don't know why gptel window isn't automatically selected...
+      (select-window (get-buffer-window buf))))
+
+(bind-keys
+ ("<f9>" . gh/toggle-eshell)
+ ("S-<f9>" . gh/toggle-shell)
+ ("M-<f9>" . gh/toggle-gptel)
+ ("C-<f9>" . run-python))
+
+;;
+;;* Org Mode
 ;;
 
 ;; HACK: `org-directory', `org-default-notes-file', `gh/refile-file' are
 ;; different on my different systems - ensure they're set in
 ;; `gh/system-config'
 (use-package org
-  :init
-  (add-hook 'auto-save-hook 'org-save-all-org-buffers)
-  (add-hook 'org-mode-hook 'turn-on-visual-line-mode)
+  :ensure ob-restclient
 
-  (setq org-adapt-indentation nil)
-  (setq org-list-description-max-indent 5)
-  (setq org-hide-emphasis-markers t)
+  :hook ((org-mode . turn-on-visual-line-mode)
+         (auto-save . org-save-all-org-buffers))
 
-  (setq org-startup-indented t)
-  (setq org-cycle-separator-lines 0)
-  
-  (setq org-insert-heading-respect-content t)
-  (setq org-return-follows-link t)
+  :custom
 
-  (setq org-special-ctrl-a/e t)
-  (setq org-special-ctrl-k t)
-  (setq org-use-speed-commands t)
+  (org-adapt-indentation nil)
+  (org-hide-emphasis-markers t)
+  (org-startup-indented t)
+  (org-cycle-separator-lines 0)
+  (org-insert-heading-respect-content t)
+  (org-return-follows-link t)
+  (org-special-ctrl-a/e t)
+  (org-special-ctrl-k t)
+  (org-use-speed-commands t)
+  (org-catch-invisible-edits 'show-and-error)
 
-  (setq org-todo-keywords
-        (quote ((sequence "NEXT(n)" "TODO(t)" "PROJECT(p)" "|" "DONE(d)")
-                (sequence "WAITING(w@/!)" "HOLD(h@/!)" "SOMEDAY(s@/!)" "DEFERRED(f@/!)" "|" "CANCELLED(c@/!)"))))
+  (org-todo-keywords '((sequence "NEXT(n)"
+                                 "TODO(t)"
+                                 "PROJECT(p)"
+                                 "|" "DONE(d)")
+                       (sequence "WAITING(w@/!)"
+                                 "HOLD(h@/!)"
+                                 "SOMEDAY(s@/!)"
+                                 "DEFERRED(f@/!)"
+                                 "|" "CANCELLED(c@/!)")))
 
-  (setq org-catch-invisible-edits 'show-and-error)
-  ;; Clock settings
+  (org-tags-exclude-from-inheritance '("PROJECT"))
+  (org-stuck-projects '("+TODO=\"PROJECT\"" ("NEXT") nil "\\<IGNORE\\>"))
 
-  (setq org-clock-into-drawer t)
-  (setq org-clock-continuously t)
-  (setq org-clock-in-resume t)
-  (setq org-clock-persist t)
-  (setq org-clock-persist-query-resume nil)
-  (setq org-clock-out-remove-zero-time-clocks t)
-  (setq org-clock-report-include-clocking-task t)
-  (setq org-clock-auto-clock-resolution 'when-no-clock-is-running)
-  
-  (setq org-drawers '("PROPERTIES" "LOGBOOK" "CLOCK" "RESULTS"))
+  ;; Agenda
+  (org-agenda-prefix-format '((agenda . " %i %-12:c%?-12t% s")
+                              ;; Indent todo items by level to show nesting
+                              (todo . " %i %-12:c%l")
+                              (tags . " %i %-12:c")
+                              (search . " %i %-12:c")))
+  (org-agenda-span 'day)
+  (org-agenda-window-setup 'current-window)
+  (org-agenda-restore-windows-after-quit t)
+  (org-agenda-compact-blocks t)
+  (org-agenda-custom-commands
+   '(("-" "Grand Unified Agenda"
+      ((agenda ""
+               ((org-agenda-ndays 1)
+                (org-agenda-overriding-header "Today")))
+       (tags "FLAGGED"
+             ((org-agenda-overriding-header "Flagged")
+              (org-show-context-detail 'lineage)))
+       (tags "refile|tidy"
+             ((org-agenda-overriding-header "To Refile / Tidy")))
+       (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
+                  ((org-agenda-overriding-header "Unscheduled High Priority")))
+       (org-agenda-list-stuck-projects)))))
 
-  ;; exclude certain tags from inheritance
-  (setq org-tags-exclude-from-inheritance '("PROJECT"))
-  (setq org-stuck-projects '("+TODO=\"PROJECT\"" ("NEXT") nil "\\<IGNORE\\>"))
-  
-  ;; Agenda settings
+  ;; clock
+  (org-clock-into-drawer t)
+  (org-clock-continuously t)
+  (org-clock-in-resume t)
+  (org-clock-persist t)
+  (org-clock-persist-query-resume nil)
+  (org-clock-out-remove-zero-time-clocks t)
+  (org-clock-report-include-clocking-task t)
+  (org-clock-auto-clock-resolution 'when-no-clock-is-running)
 
-  (setq org-agenda-prefix-format '((agenda . " %i %-12:c%?-12t% s")
-                                   ;; Indent todo items by level to show nesting
-                                   (todo . " %i %-12:c%l")
-                                   (tags . " %i %-12:c")
-                                   (search . " %i %-12:c")))
-
-  ;; Just one day in the agenda please
-  (setq org-agenda-span 'day)
-
-  ;; Modal effect, full window but restore windows on q
-  (setq org-agenda-window-setup 'current-window)
-  (setq org-agenda-restore-windows-after-quit t)
-
-  (setq org-agenda-compact-blocks t)
-  (setq org-agenda-custom-commands
-        '(("-" "Grand Unified Agenda"
-           ((agenda ""
-                    ((org-agenda-ndays 1)
-                     (org-agenda-overriding-header "Today")))
-            (tags "FLAGGED"
-                  ((org-agenda-overriding-header "Flagged")
-                   (org-show-context-detail 'lineage)))
-            (tags "refile|tidy"
-                  ((org-agenda-overriding-header "To Refile / Tidy")))
-            (tags-todo "PRIORITY=\"A\"-SCHEDULED={.+}"
-                       ((org-agenda-overriding-header "Unscheduled High Priority")))
-	    (org-agenda-list-stuck-projects)))))
-
-  ;; Capture and refile settings
-  (setq org-capture-templates
-        '(("s" "start day" entry (function org-journal-find-location)
-	   (file "templates/template-day.org")
-	   :clock-in t
-	   :unnarrowed t)
-
-	  ("t" "todo" entry (file gh/refile-file)
-	   "* TODO %?\n")
-
-	  ("r" "respond" entry (file gh/refile-file)
-	   "* NEXT Respond to %? \nSCHEDULED: %t\n%U\n%a\n"
-	   :clock-in t
-	   :clock-resume t
-	   :immediate-finish t)
-
-	  ("n" "note" entry (file gh/refile-file)
-	   "* %? :NOTE:\n%U\n\n"
-	   :clock-in t
-	   :clock-resume t)
-
-	  ("i" "interruption" entry (file gh/refile-file)
-	   "* %? :INTERRUPTION:\n\n\n"
-	   :clock-resume t
-	   :clock-in t)
-
-	  ("m" "meeting" entry (file gh/refile-file)
-	   "* MEETING %? :MEETING:\n%U"
-	   :clock-in t
-	   :clock-resume t)))
-
-  (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
-  (setq org-refile-allow-creating-parent-nodes (quote confirm))
+  ;; Refile
+  (org-refile-targets '((org-agenda-files :maxlevel . 3)))
+  (org-refile-allow-creating-parent-nodes 'confirm)
 
   ;; Archival
-  (setq org-archive-location "archive/%s_archive::datetree/")
+  (org-archive-location "archive/%s_archive::datetree/")
 
-  ;; Org babel
-  (org-babel-do-load-languages
-   (quote org-babel-load-languages)
-   (quote ((emacs-lisp . t)
-           (js . t)
-           (clojure . t)
-           (ruby . t)
-           (python . t)
-           (shell . t)
-           (dot . t))))
+  (org-capture-templates
+   '(("s" "start day" entry (function org-journal-find-location)
+      (file "templates/template-day.org")
+      :clock-in t
+      :unnarrowed t)
 
+     ("t" "todo" entry (file gh/refile-file)
+      "* TODO %?\n")
 
-  :config
-  ;; by this point host specific .el should have run
-  (require 'org-crypt)
+     ("r" "respond" entry (file gh/refile-file)
+      "* NEXT Respond to %? \nSCHEDULED: %t\n%U\n%a\n"
+      :clock-in t
+      :clock-resume t
+      :immediate-finish t)
 
-  (epa-file-enable)
-  (org-crypt-use-before-save-magic)
-  (setq org-tags-exclude-from-inheritance (quote ("crypt")))
-  )
+     ("n" "note" entry (file gh/refile-file)
+      "* %? :NOTE:\n%U\n\n"
+      :clock-in t
+      :clock-resume t)
 
-(use-package ob-restclient
-  :ensure t)
+     ("i" "interruption" entry (file gh/refile-file)
+      "* %? :INTERRUPTION:\n\n\n"
+      :clock-resume t
+      :clock-in t)
 
-(use-package org-babel
-  :no-require
-  :after ob-restclient
-  :config
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((emacs-lisp . t)
-     (js . t)
-     (clojure . t)
-     (ruby . t)
-     (python . t)
-     (shell . t)
-     (dot . t)
-     (restclient . t)))
-  (setq org-confirm-babel-evaluate nil
-        org-src-fontify-natively t
-        org-src-tab-acts-natively t
-	org-edit-src-content-indentation 0
-	org-babel-clojure-backend 'cider))
+     ("m" "meeting" entry (file gh/refile-file)
+      "* MEETING %? :MEETING:\n%U"
+      :clock-in t
+      :clock-resume t)))
 
-;; Global key bindings for org stuff
-(bind-key "C-c l" 'org-store-link)
-(bind-key "C-c a" 'org-agenda)
-(bind-key "<f12>" 'org-agenda)
-(bind-key "C-c c" 'org-capture)
+  (org-confirm-babel-evaluate nil)
+  (org-src-fontify-natively t)
+  (org-src-tab-acts-natively t)
+  (org-edit-src-content-indentation 0)
+  (org-babel-clojure-backend 'cider)
 
-(defun journal-file-insert (time)
-  "Insert new journal file contents for a journal file for TIME."
-  (with-temp-buffer
-    (insert "#+TITLE: ")
-    (insert (format-time-string "%A %x" time))
-    (insert "\n#+STARTUP: showall\n* ")
-    (insert (format-time-string "%A %d" time))
-    (insert " Journal")
-    (buffer-string)))
+  :bind (("C-c l" . org-store-link)
+         ("C-c a" . org-agenda)
+         ("<f12>" . org-agenda)
+         ("C-c c" . org-capture))
 
-(defun org-journal-find-location ()
-  "Function to locate today's journal for capture template."
-  (org-journal-new-entry t))
-
-;;
-;; org-journal to manage daily org files
-;;
-(use-package org-journal
-  :ensure t
   :init
-  (setq org-journal-dir (concat org-directory "/journal/"))
-  (setq org-journal-file-format "%Y%m%d.org")
-  (setq org-journal-date-prefix " ")
-  (setq org-journal-date-format 'journal-file-insert)
-  (setq org-journal-enable-agenda-integration t)
-  (setq org-journal-carryover-items ""))
+  (org-babel-do-load-languages 'org-babel-load-languages
+                               '((emacs-lisp . t)
+                                 (clojure . t)
+                                 (python . t)
+                                 (shell . t)
+                                 (dot . t)
+                                 (restclient . t))))
 
 
-(defun get-journal-file-today ()
-  "Return filename for today's journal entry."
-  (let ((daily-name (format-time-string "%Y%m%d")))
-    (expand-file-name (concat org-journal-dir daily-name))))
-
-(defun journal-file-today ()
-  "Create and load a journal file based on today's date."
-  (interactive)
-  (find-file (get-journal-file-today)))
-
-(global-set-key (kbd "C-c f j") 'journal-file-today)
 
 ;;
-;; Check for modifications to open files.
+;;* Appearance
 ;;
-(require 'autorevert)
-(global-auto-revert-mode t)
 
 ;;
-;; Horizontal line hightlighting in list modes
-;;
-(dolist (mode '(dired ibuffer package-menu process-menu org-agenda))
-  (add-hook (intern (concat (symbol-name mode) "-mode-hook"))
-            'gh/turn-on-hl-line-mode))
-
-;;
-;; windows reg files are UTF-16 little endian - please read them properly.
-;;
-(modify-coding-system-alist 'file "\\.reg\\'" 'utf-16-le)
-
-;;
-;; Set favourite of what fonts are available
+;;** Fonts
 ;;
 (require 'dash)
 (defun set-font-from (fonts)
@@ -822,8 +912,18 @@
 (set-font-from '("Hack" "Hack Nerd Font Mono" "FiraCode Nerd Font Mono" "Consolas"))
 
 ;;
-;; Theme
+;;** Themes
 ;;
+(use-package solarized-theme :ensure t :defer t)
+(use-package tao-theme :ensure t :defer t)
+(use-package material-theme :ensure t :defer t)
+(use-package color-theme-sanityinc-tomorrow :ensure t :defer t)
+(use-package nimbus-theme :ensure t :defer t)
+(use-package zenburn-theme :ensure t :defer t)
+(use-package twilight-bright-theme :ensure t :defer t)
+(use-package base16-theme :ensure t :defer t)
+(use-package plan9-theme :ensure t :defer t)
+
 (defun gh/clear-themes ()
   (interactive)
   (mapcar 'disable-theme custom-enabled-themes))
@@ -872,330 +972,9 @@
 
 (gh/enable-theme 'nimbus)
 
-;;
-;; CIDER / Clojure / ClojureScript / clj-refactor
-;;
-(use-package cider
-  :ensure t
-  :ensure seq
-  :ensure clojure-mode
-  :ensure clj-refactor
-  :mode (("\\.clj\\[scx\\]?$" . clojure-mode)
-         ("\\.boot$" . clojure-mode))
-  :init
-  (progn
-    (setq cider-auto-select-error-buffer t
-          cider-repl-use-clojure-font-lock t
-          nrepl-hide-special-buffers t
-	        cljr-favor-prefix-notation t
-	        cider-print-quota (* 1024 10)
-	        lispy-thread-last-macro "->>")
-    (add-hook 'clojure-mode-hook
-              (lambda ()
-                (define-clojure-indent
-                  (ANY 2)
-                  (DELETE 2)
-                  (GET 2)
-                  (HEAD 2)
-                  (POST 2)
-                  (PUT 2)
-                  (with 2)
-                  (match 1)
-                  (domonad 1)
-                  (context 2)
-                  (for-all 1)
-                  (defui '(1 nil nil (1)))
-                  (defroutes 'defun))))
-    (add-hook 'clojure-mode-hook (lambda ()
-                                   (eldoc-mode 1)
-                                   (clj-refactor-mode 1)
-                                   (cljr-add-keybindings-with-prefix "C-c r")))
-    (add-hook 'cider-repl-mode-hook #'subword-mode)
-    (add-hook 'cider-mode-hook
-          (lambda ()
-            (local-set-key (kbd "C-S-x") #'rebl-eval-defun-at-point)
-            (local-set-key (kbd "C-x C-r") #'rebl-eval-last-sexp))))
-  ;; :config
-  ;; (use-package eval-sexp-fu :ensure t)
-  ;; (use-package cider-eval-sexp-fu :ensure t)
-  )
-
-(use-package lisp-mode
-  :config
-  (add-hook 'lisp-mode-hook
-            (lambda ()
-              (setq tab-width 2
-	                  indent-tabs-mode nil)
-              (put '$define! 'lisp-indent-function 1)
-              (put '$vau 'lisp-indent-function 'defun)
-              (put '$lambda 'lisp-indent-function 'defun)
-              (put '$provide! 'lisp-indent-function 1)
-              (put '$let 'lisp-indent-function 1)
-              (put '$let* 'lisp-indent-function 1)
-              (put '$letrec 'lisp-indent-function 1)
-              (put '$letrec* 'lisp-indent-function 1)
-              (put '$let-redirect 'lisp-indent-function 1)
-              (put '$let-safe 'lisp-indent-function 1))))
-
-(defun clerk-show ()
-  (interactive)
-  (save-buffer)
-  (let
-      ((filename
-        (buffer-file-name)))
-    (when filename
-      (cider-interactive-eval
-       (concat "(nextjournal.clerk/show! \"" filename "\")")))))
 
 ;;
-;; REST client
-;;
-(use-package restclient
-  :ensure t
-  :commands (restclient-mode)
-  :mode "\\.http")
-
-;;
-;; Ruby - barely ever use it so experiment with tree-sitter
-;;
-(use-package ruby-ts-mode
-  :ensure t
-  :mode ("\\.rb$"
-         "\\.rake$"
-         "\\.gemspec$"
-         "\\.ru$"
-         "\\.thor$"
-         "Rakefile$"
-         "Thorfile$"
-         "Gemfile$"
-         "Gapfile$"
-         "Vagrantfile$"))
-
-;;
-;; Java mode
-;;
-(use-package java-mode
-  :mode "\\.java$"
-  :init
-  (add-hook 'java-mode-hook 'gh/prog-mode-hook)
-  (add-hook 'java-mode-hook (lambda ()
-                              (setq tab-width 2)
-                              (subword-mode t))))
-
-(use-package log4j-mode
-  :ensure t
-  :mode "\\.log$"
-  :init
-  (add-hook 'log4j-mode-hook 'gh/prog-mode-hook)
-  (add-hook 'log4j-mode-hook 'gh/turn-on-hl-line-mode)
-  (add-hook 'log4j-mode-hook (lambda ()
-                               (read-only-mode t)
-                               (view-mode t))))
-
-;;;
-;;; C++
-;;;
-(use-package cmake-mode
-  :ensure t
-  :mode "CMakeLists.txt")
-
-;;
-;; Erlang
-;;
-(use-package erlang
-  :ensure t
-  :mode "\\.erl$")
-
-;;
-;; Elixir
-;;
-(use-package elixir-mode
-  :ensure t
-  :defer t)
-
-(use-package alchemist
-  :ensure t
-  :defer t)
-
-;;
-;; Golang
-;;
-(use-package go-mode
-  :ensure t
-  :ensure go-autocomplete
-  :ensure go-projectile
-  :mode "\\.go"
-  :init
-  (add-hook 'before-save-hook 'gofmt-before-save))
-
-;;
-;; Racket
-;;
-(use-package racket-mode
-  :ensure t
-  :defer t)
-
-;;
-;; Terraform
-;;
-(use-package terraform-mode
-  :ensure t
-  :defer t)
-
-;;
-;; Docker
-;;
-(use-package docker
-  :ensure t
-  :ensure dockerfile-mode
-  :defer t)
-
-;;
-;; EShell
-;;
-(use-package eshell
-  :commands (eshell))
-
-(defalias 'x 'delete-window)
-(defalias 'd 'dired)
-(defalias 'ff 'find-file)
-(defalias 'g 'magit-status)
-
-;;
-;; Remote shells
-;;
-(use-package tramp
-  :init
-  (set-default 'tramp-auto-save-directory (expand-file-name "~/temp")))
-
-;;
-;; vterm
-;;
-(use-package vterm :defer t)
-
-;;
-;; Octave
-;;
-;; for some reason this is in octave-mod on my mac
-(autoload 'octave-mode "octave-mod" nil t)
-(use-package octave-mode
-  :mode ("\\.m$" . octave-mode))
-
-;;
-;; YAML mode
-(use-package yaml-mode
-  :ensure t
-  :mode (("\\.yml$" . yaml-mode)
-         ("\\.yaml$" . yaml-mode)))
-
-;;
-;; Julia
-;;
-(use-package julia-mode
-  :ensure t
-  :mode "\\.jl$")
-
-;;;
-;;; Scala mode
-;;;
-(use-package scala-mode
-  :ensure t
-  :mode "\\.scala$")
-
-;;;
-;;; Jsonnet mode
-;;;
-(use-package jsonnet-mode
-  :ensure t
-  :mode "\\..*jsonnet$")
-
-;;
-;; tree-sitter
-;;
-(setq treesit-language-source-alist
-   '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-     (cmake "https://github.com/uyha/tree-sitter-cmake")
-     (c "https://github.com/tree-sitter/tree-sitter-c")
-     (csharp "https://github.com/tree-sitter/tree-sitter-c-sharp")
-     (clojure "https://github.com/sogaiu/tree-sitter-clojure")
-     (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-     (css "https://github.com/tree-sitter/tree-sitter-css")
-     (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-     (elixir "https://github.com/elixir-lang/tree-sitter-elixir")
-     (fennel "https://github.com/TravonteD/tree-sitter-fennel")
-     (go "https://github.com/tree-sitter/tree-sitter-go")
-     (haskell "https://github.com/tree-sitter/tree-sitter-haskell")
-     (hcl "https://github.com/MichaHoffmann/tree-sitter-hcl")
-     (html "https://github.com/tree-sitter/tree-sitter-html")
-     (java "https://github.com/tree-sitter/tree-sitter-java")
-     (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-     (json "https://github.com/tree-sitter/tree-sitter-json")
-     (make "https://github.com/alemuller/tree-sitter-make")
-     (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-     (ocaml "https://github.com/tree-sitter/tree-sitter-ocaml")
-     (python "https://github.com/tree-sitter/tree-sitter-python")
-     (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
-     (rust "https://github.com/tree-sitter/tree-sitter-rust")
-     (toml "https://github.com/tree-sitter/tree-sitter-toml")
-     (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-     (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-     (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
-
-;;
-;; Narrow or widen DWIM
-;;
-(defun gh/narrow-or-widen-dwim (p)
-  "Widen if buffer is narrowed else narrow to appropriate region."
-  (interactive "P")
-  (declare (interactive-only))
-  (cond ((and (buffer-narrowed-p) (not p)) (widen))
-	((region-active-p) (narrow-to-region (region-beginning) (region-end)))
-	((derived-mode-p 'org-mode)
-
-	 (cond ((ignore-errors (org-edit-src-code) t) (delete-other-windows))
-	       ((ignore-errors (org-narrow-to-block) t))
-	       (t (org-narrow-to-subtree))))
-	(t (narrow-to-defun))))
-
-(global-set-key (kbd "<f7>") #'gh/narrow-or-widen-dwim)
-
-;;
-;; AI
-;;
-
-(defun gh/retrieve-openai-key ()
-  (gh/password-from-keychain "gptshell"))
-
-(defun gh/retrieve-anthropic-key ()
-  (gh/password-from-keychain "anthropic-api-key"))
-
-(use-package gptel
-  :ensure t
-  :config
-  (setq gptel-api-key 'gh/retrieve-openai-key)
-  (gptel-make-anthropic "Claude" :stream t :key 'gh/retrieve-anthropic-key)
-  (setq gptel-default-mode 'org-mode))
-
-;; -- until emacs 30 hits:
-(unless (package-installed-p 'vc-use-package)
-  (package-vc-install "https://github.com/slotThe/vc-use-package"))
-(require 'vc-use-package)
-
-(use-package editorconfig
-  :ensure t)
-
-(use-package copilot
-  :vc (:fetcher github :repo copilot-emacs/copilot.el)
-  :ensure t
-  :bind (("<TAB>" . copilot-accept-completion)
-	 ("C-c C-c" . copilot-accept-completion)
-	 ("C-c C-v" . copilot-accept-completion-by-word)
-	 ("C-c C-n" . copilot-next-completion)
-	 ("C-c C-p" . copilot-previous-completion)
-	 ("C-c C-d" . copilot-clear-overlay)))
-
-;;
-;; Toggle transparency
+;;** Transparency / Focus
 ;;
 (defvar gh/transparent nil)
 
@@ -1220,68 +999,23 @@
   (interactive)
   (set-frame-parameter nil 'undecorated-round (not (frame-parameter nil 'undecorated-round))))
 
-(require 'epg)
-(setq epg-pinentry-mode 'loopback)
-
-;;
-;; Experimental dispatch functions for access by an experimental
-;; Alfred workflow I'm working on. Any functions prefixed `alfred/x`
-;; are available in Alfred as `e/x`.
-;;
-(defun alfred/repl (text)
-  "Send TEXT to a current CIDER repl."
-  (cider--switch-to-repl-buffer (cadar (cider-sessions)))
-  (cider-insert-in-repl text t))
-
-
-;; Helpers for shell toggling, e.g. for short shell sessions that are
-;; easy to pop up and then hide.
-
-
-(defun gh/toggle-eshell (&optional arg)
-  "Call eshell to launch or reuse an eshell, unless we're in one and there are no args - then close."
+(defun gh/narrow-or-widen-dwim (p)
+  "Widen if buffer is narrowed else narrow to appropriate region."
   (interactive "P")
-  (if arg
-      (eshell arg)
-    (if (string-match-p "\\*eshell.*" (buffer-name))
-	(quit-window)
-      (eshell))))
+  (declare (interactive-only))
+  (cond ((and (buffer-narrowed-p) (not p)) (widen))
+	((region-active-p) (narrow-to-region (region-beginning) (region-end)))
+	((derived-mode-p 'org-mode)
 
-(defun gh/toggle-shell (&optional arg)
-  "Call gptel to launch or reuse gptel session, unless we're in one and there are no args - then close."
-  (interactive "P")
-  (if current-prefix-arg
-      (call-interactively 'shell)
-    (if (string-match-p "\\*shell.*" (buffer-name))
-	(quit-window)
-      (call-interactively 'shell))))
+	 (cond ((ignore-errors (org-edit-src-code) t) (delete-other-windows))
+	       ((ignore-errors (org-narrow-to-block) t))
+	       (t (org-narrow-to-subtree))))
+	(t (narrow-to-defun))))
 
-(defun gh/toggle-gptel (&optional arg)
-  "Call gptel to launch or reuse gptel session, unless we're in one and there are no args - then close."
-  (interactive "P")
-  (if-let ((buf (if current-prefix-arg
-		    (call-interactively 'gptel)
-		  (if gptel-mode
-		      (quit-window)
-		    (call-interactively 'gptel)))))
-      ;; Don't know why gptel window isn't automatically selected...
-      (select-window (get-buffer-window buf))))
-;;
-;; Other key and keychord bindings
-;;
 (bind-keys
- ("C-o" . query-replace)
- ([(control next)] . scroll-other-window)
- ([(control prior)] . scroll-other-window-down)
- ("<f8>" . toggle-truncate-lines)
- ("S-<f8>" . display-line-numbers-mode)
- ("<f9>" . gh/toggle-eshell)
- ("S-<f9>" . gh/toggle-shell)
- ("M-<f9>" . gh/toggle-gptel)
- ("C-<f9>" . run-python)
- ("s-u" . gh/toggle-transparency)	; as per iterm
- ("C-+" . global-text-scale-adjust)
- ("C--" . global-text-scale-adjust))
+ ("s-u" . gh/toggle-transparency)
+ ("<f7>" . gh/narrow-or-widen-dwim))
+
 
 (use-package key-chord
   :ensure t
@@ -1305,3 +1039,16 @@
 ;; Enable server / emacsclient
 ;;
 (server-start)
+
+
+
+
+;;
+;; Experimental dispatch functions for access by an experimental
+;; Alfred workflow I'm working on. Any functions prefixed `alfred/x`
+;; are available in Alfred as `e/x`.
+;;
+(defun alfred/repl (text)
+  "Send TEXT to a current CIDER repl."
+  (cider--switch-to-repl-buffer (cadar (cider-sessions)))
+  (cider-insert-in-repl text t))
