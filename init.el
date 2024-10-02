@@ -2,10 +2,7 @@
 
 ;; -*- lexical-binding: t -*-
 
-;; TODO: tree-sitter based tsx mode
 ;; TODO: fix rust save and format issues
-;; TODO: suppress smartparens et al for treesitter modes?
-;; TODO: try corfu
 
 ;;
 ;; use-package available by deafult since 29 and archives initialised
@@ -71,7 +68,8 @@
         backup-directory-alist '(("." . "~/.emacs.d/backups"))
 	confirm-kill-processes nil
         indicate-empty-lines t
-        window-sides-slots '(0 0 1 1))
+        window-sides-slots '(0 0 1 1)
+        tab-always-indent 'complete)
 
   (pixel-scroll-precision-mode 1)
   (blink-cursor-mode 0)
@@ -197,10 +195,10 @@
 
 (use-package orderless
   :ensure t
-  :init
-  (setq completion-styles '(orderless basic)
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles partial-completion)))))
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
 
 (use-package consult
   :ensure t
@@ -242,27 +240,13 @@
 ;;* Completion
 ;;
 
-;; company mode wherever - unless and until it gets slow
-(use-package company
+(use-package corfu
   :ensure t
-  :hook (prog-mode . company-mode)
-  :defer 10
-  :diminish company-mode
-  :init
-  (setq
-   company-tooltip-align-annotations t
-   company-idle-delay 0.05)
-  :config (global-company-mode))
-
-;; snippets
-(use-package yasnippet
-  :ensure t
-  :defer 30
-  :diminish yas-minor-mode
-  :commands yas-hippie-try-expand
   :config
-  (setq yas-wrap-around-region t)
-  (yas-global-mode 1))
+  (setq corfu-auto t
+        corfu-quit-no-match 'separator)
+  :init
+  (global-corfu-mode))
 
 ;;
 ;;* Projects
@@ -339,7 +323,8 @@
 (use-package copilot
   :vc (:fetcher github :repo copilot-emacs/copilot.el)
   :ensure t
-  :bind (("S-<TAB>" . copilot-accept-completion)
+  :hook (prog-mode . copilot-mode)
+  :bind (("C-<tab>" . copilot-accept-completion)
 	 ("C-c C-v" . copilot-accept-completion-by-word)
 	 ("C-c C-n" . copilot-next-completion)
 	 ("C-c C-p" . copilot-previous-completion)
