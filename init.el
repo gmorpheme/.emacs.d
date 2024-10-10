@@ -323,6 +323,8 @@
 (use-package copilot
   :vc (:fetcher github :repo copilot-emacs/copilot.el)
   :ensure t
+  :custom
+  (copilot-indent-offset-warning-disable 't)
   :hook (prog-mode . copilot-mode)
   :bind (("C-<tab>" . copilot-accept-completion)
 	 ("C-c C-v" . copilot-accept-completion-by-word)
@@ -339,7 +341,6 @@
 ;;
 
 (use-package prog-mode
-  :ensure ws-butler
   :preface
 
   (defun gh/local-comment-auto-fill ()
@@ -367,14 +368,16 @@
    (prog-mode . prettify-symbols-mode)
    (prog-mode . gh/add-watchwords)
    (prog-mode . gh/truncate-lines)
-   (prog-mode . ws-butler-mode)
    (prog-mode . turn-on-eldoc-mode))
 
   :init
   (use-package iedit
     :ensure t
-    :bind ("C-;" . iedit-mode)))
+    :bind ("C-;" . iedit-mode))
 
+  (use-package ws-butler
+    :ensure t
+    :hook ((prog-mode . ws-butler-mode))))
 
 (use-package smartparens
   :ensure t
