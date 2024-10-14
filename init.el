@@ -93,7 +93,9 @@
               'gh/turn-on-hl-line-mode))
 
   (setq display-buffer-alist
-        '(("\\*.*ompilation\\*"
+        '(("\\ye-.*\\*"
+           (display-buffer-full-frame))
+          ("\\*.*ompilation\\*"
            (display-buffer-reuse-window display-buffer-in-side-window)
            (side . right)
            (slot . 0)
@@ -1042,6 +1044,38 @@
 (server-start)
 
 
+;;
+;; Experimental popup invocations
+;;
+(defun yequake-eshell ()
+  (interactive)
+  (let ((buf (get-buffer-create "*ye-eshell*")))
+    (pop-to-buffer buf)
+    (unless (derived-mode-p 'eshell-mode)
+      (eshell-mode))
+    buf))
+
+(use-package yequake
+  :ensure t
+  :bind ("C-c C-g" . yequake-retoggle)
+  :config
+  (setq yequake-frames
+        '(("ye-eshell" .
+           ((width . 0.75)
+            (height . 0.5)
+            (top . 0.2)
+            (buffer-fns . (yequake-eshell))
+            (frame-parameters . ((undecorated . t)
+                                 (skip-taskbar . t)
+                                 (sticky . t)))))
+          ("ye-capture"
+           (buffer-fns . (yequake-org-capture))
+           (width . 0.75)
+           (height . 0.5)
+           (top . 0.2)
+           (frame-parameters . ((undecorated . t)
+                                (skip-taskbar . t)
+                                (sticky . t)))))))
 
 
 ;;
