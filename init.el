@@ -7,7 +7,6 @@
 ;; TODO: mixed-pitch
 ;; TODO: org-modern and org-appear
 ;; TODO: org-web-tools
-;; TODO: spacious padding
 ;; TODO: nov (ePubs)
 ;; TODO: steal the ews-olivetti function
 ;; TODO: ox-epub
@@ -131,6 +130,9 @@
          ("C-o" . query-replace)
          ("<f8>" . toggle-truncate-lines)
          ("S-<f8>" . display-line-numbers-mode)))
+
+
+
 
 ;;
 ;;* MacOS specifics
@@ -1001,6 +1003,11 @@
 ;;
 ;;** Transparency / Focus
 ;;
+(use-package spacious-padding
+  :ensure t
+  :custom
+  (line-spacing 3))
+
 (defvar gh/transparent nil)
 
 ;; nb. could use alpha-background as of 29.1 but the main use case is
@@ -1020,9 +1027,13 @@
       (setq gh/transparent t)
       (gh/set-alpha '(82 . 72)))))
 
+(defun gh/toggle-spacious-padding ()
+  (interactive)
+  (spacious-padding-mode 'toggle))
+
 (defun gh/toggle-frame-header ()
   (interactive)
-  (set-frame-parameter nil 'undecorated-round (not (frame-parameter nil 'undecorated-round))))
+  (set-frame-parameter nil 'undecorated (not (frame-parameter nil 'undecorated))))
 
 (defun gh/narrow-or-widen-dwim (p)
   "Widen if buffer is narrowed else narrow to appropriate region."
@@ -1039,6 +1050,8 @@
 
 (bind-keys
  ("s-u" . gh/toggle-transparency)
+ ("s-U" . gh/toggle-frame-header)
+ ("C-s-u" . gh/toggle-spacious-padding)
  ("<f7>" . gh/narrow-or-widen-dwim))
 
 
