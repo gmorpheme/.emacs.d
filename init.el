@@ -132,7 +132,13 @@
          ("S-<f8>" . display-line-numbers-mode)))
 
 
-
+;;
+;;* Mixed pitch for text and org
+;;
+(use-package mixed-pitch
+  :ensure t
+  :hook
+  (text-mode . mixed-pitch-mode))
 
 ;;
 ;;* MacOS specifics
@@ -791,11 +797,18 @@
 ;; `gh/system-config'
 (use-package org
   :ensure ob-restclient
+  :ensure org-modern
+  :ensure org-appear
 
   :hook ((org-mode . turn-on-visual-line-mode)
+         (org-mode . org-modern-mode)
+         (org-mode . org-appear-mode)
          (auto-save . org-save-all-org-buffers))
 
   :custom
+
+  (org-modern-keyword nil)
+  (org-auto-align-tags nil)             ; variable-pitch...
 
   (org-adapt-indentation nil)
   (org-hide-emphasis-markers t)
@@ -911,6 +924,7 @@
                                  (shell . t)
                                  (dot . t)
                                  (restclient . t))))
+
 
 
 
