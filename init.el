@@ -3,6 +3,14 @@
 ;; -*- lexical-binding: t -*-
 
 ;; TODO: fix rust save and format issues
+;; TODO: Wilfred/helpful
+;; TODO: mixed-pitch
+;; TODO: org-modern and org-appear
+;; TODO: org-web-tools
+;; TODO: spacious padding
+;; TODO: nov (ePubs)
+;; TODO: steal the ews-olivetti function
+;; TODO: ox-epub
 
 ;;
 ;; use-package available by deafult since 29 and archives initialised
@@ -201,6 +209,11 @@
   (completion-styles '(orderless basic))
   (completion-category-defaults nil)
   (completion-category-overrides '((file (styles partial-completion)))))
+
+(use-package marginalia
+  :ensure t
+  :init
+  (marginalia-mode))
 
 (use-package consult
   :ensure t
@@ -926,6 +939,13 @@
 (use-package twilight-bright-theme :ensure t :defer t)
 (use-package base16-theme :ensure t :defer t)
 (use-package plan9-theme :ensure t :defer t)
+(use-package modus-themes
+  :ensure t
+  :custom
+  (modus-themes-italic-constructs t)
+  (modus-themes-bold-constructs t)
+  (modus-themes-mixed-fonts t))
+
 
 (defun gh/clear-themes ()
   (interactive)
@@ -937,7 +957,8 @@
     (message (format "Switched to theme: %s" theme))
     (load-theme theme t)))
 
-(setq gh/dark-themes '(zenburn
+(setq gh/dark-themes '(modus-vivendi-tinted
+                       zenburn
 		       nimbus
 		       tao-yin
 		       base16-kimber
@@ -948,7 +969,8 @@
 		       base16-greenscreen
 		       material))
 
-(setq gh/light-themes '(tao-yang
+(setq gh/light-themes '(modus-operandi-tinted
+                        tao-yang
 			leuven
 			material-light
 			twilight-bright))
@@ -973,7 +995,7 @@
 (bind-key "<f6>" 'gh/cycle-dark-themes)
 (bind-key "S-<f6>" 'gh/cycle-light-themes)
 
-(gh/enable-theme 'nimbus)
+(gh/enable-theme 'modus-vivendi-tinted)
 
 
 ;;
