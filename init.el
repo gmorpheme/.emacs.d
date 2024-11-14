@@ -2,10 +2,6 @@
 
 ;; -*- lexical-binding: t -*-
 
-;; TODO: fix rust save and format issues
-;; TODO: Wilfred/helpful
-;; TODO: mixed-pitch
-;; TODO: org-modern and org-appear
 ;; TODO: org-web-tools
 ;; TODO: nov (ePubs)
 ;; TODO: steal the ews-olivetti function
@@ -102,7 +98,7 @@
   (setq display-buffer-alist
         '(("\\ye-.*\\*"
            (display-buffer-full-frame))
-          ("\\*.*ompilation\\*"
+          ("\\*.*ompilation\\*|\\*cargo-*\\*"
            (display-buffer-reuse-window display-buffer-in-side-window)
            (side . right)
            (slot . 0)
