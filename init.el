@@ -582,6 +582,9 @@
 (use-package racket-mode :ensure t :defer t)
 (use-package kotlin-mode :defer t)
 (use-package swift-mode :defer t)
+(use-package objc-mode :defer t
+  :mode (("\\.m\\'" . objc-mode)
+         ("\\.mm\\'" . objc-mode)))
 (use-package tuareg :defer t)           ; OCaml
 (use-package erlang :defer t)
 (use-package elixir :defer t)
@@ -702,7 +705,9 @@
 	 (json-ts-mode . eglot-ensure))
 
   :config
-  (gh/ensure-grammars-installed))
+  (gh/ensure-grammars-installed)
+  (setq typescript-ts-mode-indent-offset 2 tab-width 2))
+
 
 ;;
 ;;** Ruby - barely ever use it so experiment with tree-sitter
